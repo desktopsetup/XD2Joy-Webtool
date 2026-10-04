@@ -1,0 +1,4304 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web-Tool</title>
+<link rel="icon" href="xd.png" type="image/png">
+<style>
+
+  @font-face{font-family:"Noto Sans";font-style:normal;font-weight:100 900;
+    font-stretch:100%;font-display:swap;src:url("fonts/NotoSans-var-latin.woff2") format("woff2");
+    unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+  @font-face{font-family:"Noto Sans";font-style:normal;font-weight:100 900;
+    font-stretch:100%;font-display:swap;src:url("fonts/NotoSans-var-latin-ext.woff2") format("woff2");
+    unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
+
+  :root{
+    --bg:#42464d; --panel:#3a3e44; --panel2:#33363b; --ink:#eef0f2;
+    --dim:#a8aeb6; --line:#767c85; --hair:#5b616a; --sel:#7fd8ef;
+    --live:#ff8b7a; --ok:#8fe0b0; --code:#2c2f34;
+    --halfL:#7fd8ef; --halfR:#ff8b7a;
+
+    --slotline:#e9ecef;
+
+    --slothover:rgba(4,183,239,.45);
+
+    --hot:#04b7ef;
+
+    --press:#ffd23f;
+    --presshalo:rgba(255,210,63,.14);
+
+    --leadline:#8d939c;
+
+    --slotdiv:rgba(255,255,255,.22);
+
+    --trackoff:#c9ced6;
+  }
+  *{box-sizing:border-box}
+  html,body{background:var(--bg)}
+  body{color:var(--ink);margin:0;padding:22px 20px 60px;
+    font:15px/1.55 "Noto Sans",ui-sans-serif,system-ui,-apple-system,
+      "Segoe UI",Roboto,sans-serif;
+    -webkit-font-smoothing:antialiased}
+
+  .wrap{max-width:1180px;margin:0 auto;
+    min-height:calc(100vh - 82px);display:flex;flex-direction:column}
+
+  #tabMap,#tabCol,#tabAdv{flex:1;
+    display:flex;flex-direction:column;justify-content:safe center}
+
+  .devpanel{margin:20px auto 0;width:100%;max-width:1080px}
+
+  .devgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(330px,1fr));
+    gap:0 26px}
+  .devboard{min-width:0}
+  .devgrid .devboard+.devboard{padding-left:26px;
+    border-left:1px solid var(--hair)}
+  .devhead{font-size:14px;margin-bottom:7px}
+  .devnow{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;
+    font-size:12.5px;margin-bottom:10px;align-items:baseline}
+  .devnow .k{color:var(--dim)}
+  .devnow>span:nth-child(even){min-width:0;overflow-wrap:anywhere}
+  .devbad{color:#e0703a}
+
+  .devrows{border-top:1px solid var(--hair)}
+  .devrow{display:flex;align-items:center;gap:9px;padding:8px 8px;
+    border-bottom:1px solid var(--hair);cursor:pointer}
+  .devrow:hover{background:rgba(255,255,255,.05)}
+  .devrow:focus-visible{outline:1px solid var(--sel);outline-offset:-2px}
+
+  .devrow.pinned{background:rgba(4,183,239,.10);cursor:default}
+  .devrow.pinned:hover{background:rgba(4,183,239,.10)}
+  .devrow.pinned .nm b{color:var(--hot)}
+  .devcheck{color:var(--hot);font-size:15px;line-height:1;padding:0 7px}
+  .devrow .nm{flex:1;min-width:0}
+  .devrow .nm b{font-weight:500;font-size:13px}
+  .devrow .nm .sub2{color:var(--dim);font-size:11px;display:block;
+    overflow-wrap:anywhere}
+
+  .devrow .sig{color:var(--dim);font-size:11px;white-space:nowrap;
+    text-align:right}
+  .devtag{font-size:10.5px;border:1px solid var(--slotline);border-radius:4px;
+    padding:1px 5px;color:var(--dim);white-space:nowrap}
+
+  .devstate{display:flex;align-items:center;gap:8px;font-size:12.5px;
+    color:var(--dim);margin:-4px 0 10px}
+  .devstate.bad{display:block;color:#e0703a}
+
+  .devrow.chosen{background:rgba(4,183,239,.05)}
+  .devrow.busy{cursor:progress}
+  .devrow>.devspin{margin:0 8px}
+  .devrow .nm .sub2.devbad{color:#e0703a}
+
+  .devmore{border:0;padding:8px 2px 0;color:var(--sel);font-size:12.5px}
+  .devmore:hover:not(:disabled){border:0;background:transparent;color:#fff}
+  .moderow{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .moderow label{color:var(--dim);font-size:13px}
+
+  .moderow input[type=range]{flex:1;min-width:140px;max-width:340px}
+
+  input[type=range]{-webkit-appearance:none;appearance:none;
+    --fill:0%;background:transparent;height:20px;cursor:pointer;margin:0}
+  input[type=range]:disabled{cursor:default;opacity:.5}
+  input[type=range]::-webkit-slider-runnable-track{height:4px;border-radius:2px;
+    background:linear-gradient(to right,var(--hot) 0 var(--fill),
+                               var(--trackoff) var(--fill) 100%)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;
+    appearance:none;width:18px;height:18px;border-radius:50%;border:0;
+    background:#fff;margin-top:-7px;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+  input[type=range]::-moz-range-track{height:4px;border-radius:2px;
+    background:var(--trackoff)}
+  input[type=range]::-moz-range-progress{height:4px;border-radius:2px;
+    background:var(--hot)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;
+    border:0;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.45)}
+
+  input[type=range]:focus{outline:none}
+  input[type=range]:focus-visible::-webkit-slider-thumb{
+    box-shadow:0 0 0 3px var(--slothover),0 1px 3px rgba(0,0,0,.45)}
+  input[type=range]:focus-visible::-moz-range-thumb{
+    box-shadow:0 0 0 3px var(--slothover),0 1px 3px rgba(0,0,0,.45)}
+  .moderow input[type=number]{font:inherit;font-size:13.5px;width:5.5em;
+    background:var(--panel2);color:var(--ink);border:1px solid var(--slotline);
+    border-radius:4px;padding:5px 8px}
+
+  button.hotkey{background:var(--panel2);min-width:16em;text-align:left;
+    padding:6px 10px}
+
+  .moderow.hotkeyrow + .moderow.hotkeyrow{margin-top:10px}
+
+  .profrow label{min-width:66px}
+  .profrow .pname{color:var(--dim);font-size:13px;flex:1;min-width:80px}
+  .profrow .pname.set{color:var(--ink)}
+  .profrow label.on{color:var(--ok)}
+  #modesPanel label.on{color:var(--ok)}
+
+  .slot.fromL .n svg [fill="#fff"]{fill:var(--halfL)}
+  .slot.fromL .n svg [stroke="#fff"]{stroke:var(--halfL)}
+  .slot.fromR .n svg [fill="#fff"]{fill:var(--halfR)}
+  .slot.fromR .n svg [stroke="#fff"]{stroke:var(--halfR)}
+
+  .slot.fromL .v2{color:var(--halfR)}
+
+  .devhead b.halfL{color:var(--halfL)}
+  .devhead b.halfR{color:var(--halfR)}
+  .slot.fromR .v2{color:var(--halfL)}
+  #mapGate{display:flex;flex-direction:column;align-items:center;
+    justify-content:center;gap:14px;padding:24px 16px 32px;text-align:center}
+
+  #mapGate img{width:100%;max-width:min(1100px,95vw);height:auto;
+    border-radius:12px}
+  #mapGateMsg{margin:0;color:var(--dim);font-size:14px;max-width:34em}
+  #modesPanel{position:relative}
+  #modeErr{position:absolute;left:0;right:0;bottom:3px;margin:0;
+    text-align:center;line-height:1.2}
+  button.hotkey.arm,button.hotkey.arm:hover{border-color:var(--hot);color:var(--hot)}
+
+  .devsearch{display:inline-flex;align-items:center;gap:8px}
+
+  .devsearch:disabled{opacity:.72}
+  .devspin{width:12px;height:12px;flex:0 0 auto;border-radius:50%;
+    border:2px solid rgba(255,255,255,.22);border-top-color:var(--hot);
+    animation:devspin .7s linear infinite}
+  @keyframes devspin{to{transform:rotate(360deg)}}
+
+  @media (prefers-reduced-motion:reduce){
+    .devspin{animation:none;border-top-color:var(--hot);opacity:.7}
+  }
+  .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+
+  .top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+    padding-bottom:12px;border-bottom:1px solid var(--hair)}
+  h1{font-size:21px;font-weight:500;margin:0;letter-spacing:.01em}
+  .top .sp{flex:1}
+  .tabs{display:flex;gap:2px}
+
+  .tab{background:transparent;border:0;border-bottom:2px solid transparent;
+    color:var(--dim);font:inherit;font-size:13.5px;padding:5px 12px 4px;
+    border-radius:0;cursor:pointer}
+
+  .tab:hover{color:var(--ink)}
+  .tab.on,.tab.on:hover{color:var(--hot);border-bottom-color:var(--hot)}
+
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;
+    padding:12px 0;border-bottom:1px solid var(--hair);margin-bottom:18px}
+  button{font:inherit;font-size:13.5px;background:transparent;color:var(--ink);
+    border:1px solid var(--slotline);border-radius:4px;padding:6px 14px;
+    cursor:pointer}
+
+  button:hover:not(:disabled){border-color:#fff;background:var(--slothover)}
+  button:disabled{opacity:.38;cursor:not-allowed}
+  button.xbtn{border:none;background:transparent;color:var(--dim);
+    width:16px;height:16px;padding:0;line-height:15px;text-align:center;
+    border-radius:5px;font-size:12px}
+  button.xbtn:hover:not(:disabled){background:var(--live);color:#fff;
+    border:none}
+  button.xbtn:disabled{background:transparent}
+  .axes button.xbtn{margin-left:9px}
+
+  button.go{background:var(--sel);border-color:var(--sel);color:#12242a;
+    font-weight:600}
+
+  button.go:hover:not(:disabled){background:var(--sel);border-color:#fff}
+  select{font:inherit;font-size:13.5px;background:var(--panel);color:var(--ink);
+    border:1px solid var(--slotline);border-radius:4px;padding:6px 10px}
+
+  .pill{font-size:12px;color:var(--dim)}
+  .pill.on{color:var(--ok)}
+  .pill.live{color:var(--live)}
+
+  .maprow{display:flex;align-items:flex-start;gap:20px;flex-wrap:wrap;
+    justify-content:center}
+  .maprow .mapstage{flex:0 0 auto}
+
+  .maprow .mapdiv{flex:0 0 1px;align-self:stretch;
+    background:rgba(255,255,255,.18)}
+
+  @media (max-width:1080px){ .maprow .mapdiv{display:none} }
+  .maprow .mapaxes{flex:1 1 300px;max-width:400px;min-width:280px;
+
+    margin-top:0;padding:13px 2px}
+  .maprow .mapaxes h2{font-size:13px}
+  .maprow .mapaxes .sub{font-size:12px;margin-bottom:10px}
+  .maprow .mapaxes .axes td{padding:5px 6px;font-size:12.5px}
+
+  .stage{display:grid;
+    grid-template-columns:minmax(0,206px) 272px minmax(0,206px);gap:16px;
+    justify-content:center;
+    align-items:start;margin:0 auto;max-width:1000px;position:relative}
+  .stage .cen{grid-column:2;display:flex;justify-content:center}
+  .stage img{width:272px;height:475px;object-fit:contain;
+    filter:drop-shadow(0 6px 22px rgba(0,0,0,.45))}
+
+  .colL,.colR{position:relative;height:475px}
+  .colL .slot{left:0}
+  .colR .slot{right:0}
+  svg.leads{position:absolute;inset:0;width:100%;height:100%;
+    pointer-events:none;overflow:visible;z-index:3}
+
+  svg.leads line{stroke:var(--leadline);stroke-width:1.4}
+  svg.leads circle{fill:var(--leadline)}
+  svg.leads line.set,svg.leads circle.set{stroke:var(--leadline);fill:var(--leadline)}
+  svg.leads line.hot,svg.leads circle.hot{stroke:var(--press);fill:var(--press)}
+
+  .slot{position:absolute;width:162px;box-sizing:border-box;
+    display:flex;align-items:center;gap:9px;
+    border:2px solid var(--slotline);
+    border-radius:8px;background:transparent;padding:6px 9px;cursor:pointer;
+    transition:border-color .12s,background .12s}
+  .slot:hover{border-color:#fff;background:var(--slothover)}
+
+  .slot.listening:hover{background:rgba(74,58,56,.85)}
+
+  .slot .n{flex:0 0 auto;font-size:10px;letter-spacing:.05em;
+    text-transform:uppercase;color:var(--dim);line-height:1.25;
+    padding-right:9px;border-right:1px solid var(--slotdiv)}
+
+  .slot .n svg{height:28px;width:28px;display:block}
+
+  .slot .v{flex:1 1 auto;min-width:0;font-size:13px;line-height:1.3;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .slot .v.none{color:var(--dim)}
+
+  .slot .v2{color:var(--dim);font-size:11px}
+  .slot.set{border-color:var(--slotline)}
+
+  .slot.live{border-color:var(--press);background:var(--presshalo)}
+  .slot.live .n{color:var(--press);border-right-color:var(--press)}
+  .slot.live .v{color:var(--press)}
+  .slot.live .n svg,.slot.live .n svg *{fill:var(--press)}
+  .slot.live .n svg [fill="#fff"]{fill:var(--press)}
+  .slot.live .n svg [stroke="#fff"]{stroke:var(--press)}
+
+  .slot .x{position:absolute;top:50%;transform:translateY(-50%);right:4px;
+    width:16px;height:16px;
+    line-height:15px;text-align:center;border-radius:5px;font-size:12px;
+    color:var(--dim);display:none}
+
+  .slot.set .v{padding-right:15px}
+  .slot.set .x{display:block}
+  .slot .x:hover{background:var(--live);color:#fff}
+  .slot.set .v{color:var(--ink)}
+  .slot.listening{border-color:var(--live);background:rgba(74,58,56,.85);
+    animation:pulse 1.05s ease-in-out infinite}
+  .slot.listening .v{color:var(--live)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.55}}
+
+  .panel{background:transparent;border:0;border-radius:0;
+    border-top:1px solid var(--line);padding:15px 2px 18px;margin-bottom:0}
+  .panel h2{font-size:14px;font-weight:600;margin:0 0 3px}
+  .panel .sub{color:var(--dim);font-size:12.5px;margin:0 0 13px}
+
+  .panel h2+:not(.sub){margin-top:13px}
+
+  .panel .sub.spacer{margin:0 0 13px}
+  .panel .sub.spacer::before{content:"\00a0"}
+
+  .btnrow{display:flex;gap:9px;margin-bottom:11px;flex-wrap:wrap}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start}
+  @media (max-width:900px){.grid2{grid-template-columns:1fr}
+    .stage{height:auto;display:flex;flex-direction:column;gap:8px}
+    .stage img{position:static;transform:none;margin:0 auto 10px}
+    .colL,.colR{height:auto!important;display:flex;flex-direction:column}
+
+    .slot{position:relative!important;top:auto!important;width:100%;
+      margin-bottom:6px}
+    svg.leads{display:none}}
+
+  table{width:100%;border-collapse:collapse}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.05em;
+    color:var(--dim);padding:6px 8px;border-bottom:1px solid var(--hair);
+    font-weight:600}
+  td{padding:6px 8px;border-bottom:1px solid var(--hair);font-size:13.5px}
+  tr:last-child td{border-bottom:0}
+  .hex{font-family:ui-monospace,Consolas,monospace;font-size:12.5px}
+  .b{display:inline-block;min-width:22px;text-align:center;border-radius:3px;
+    padding:1px 3px;font-family:ui-monospace,Consolas,monospace;font-size:12px}
+  .b.hot{background:var(--live);color:#2a1512;font-weight:700}
+  .c-com{color:#6A9955}
+  .c-str{color:#CE9178}
+  .c-pre{color:#C586C0}
+  .c-num{color:#B5CEA8}
+  .c-kw {color:#569CD6}
+  .c-ctl{color:#C586C0}
+  .c-typ{color:#4EC9B0}
+  .c-mac{color:#4FC1FF}
+  .c-fn {color:#DCDCAA}
+  .c-id {color:#9CDCFE}
+
+  pre{background:var(--code);border:1px solid var(--slotline);border-radius:4px;
+    padding:12px;overflow:auto;font-size:12.5px;margin:0;max-height:330px;
+    color:#dfe3e8}
+  .hint{color:var(--dim);font-size:12.5px;margin:10px 0 0}
+
+  .mapstage .hint{max-width:716px;margin:6px auto 0;min-height:2.6em}
+  .mapstage .hint.bad{color:var(--live)}
+
+  .sub.bad{color:var(--live)}
+  #connErr{margin:8px 0 0;font-size:12.5px}
+  #connErr:empty,#profErr:empty{display:none}
+  .empty{color:var(--dim);font-size:13px;padding:10px 2px}
+
+  .cardbg{background:#c8c9cb;border-radius:16px;padding:20px 18px 24px;
+    margin-top:4px}
+  #jcArt{display:flex;justify-content:center}
+  .jcv{height:400px;width:auto;filter:drop-shadow(0 5px 16px rgba(0,0,0,.3))}
+  .sw{width:26px;height:26px;border-radius:4px;border:1px solid var(--slotline);
+    padding:0;background:none;cursor:pointer;vertical-align:middle}
+  input[type=text].hexin{font-family:ui-monospace,Consolas,monospace;
+    font-size:13px;background:var(--panel2);color:var(--ink);
+    border:1px solid var(--slotline);border-radius:4px;padding:5px 8px;width:96px;
+    text-transform:uppercase}
+  input[type=color]{width:34px;height:28px;padding:0;
+    border:1px solid var(--slotline);border-radius:4px;
+    background:transparent;cursor:pointer;
+    -webkit-appearance:none;appearance:none}
+
+  input[type=color]::-webkit-color-swatch-wrapper{padding:0}
+  input[type=color]::-webkit-color-swatch{border:0;border-radius:3px}
+  input[type=color]::-moz-color-swatch{border:0;border-radius:3px}
+  .off{color:var(--dim);font-size:11.5px;font-family:ui-monospace,Consolas,monospace}
+  .axes td:first-child{width:150px;color:var(--dim);font-size:12.5px}
+
+  .axes .axk{color:#fff}
+
+  .axes .axico svg{height:24px;width:24px;display:block}
+
+  .axes .axlab{display:flex;align-items:center;gap:8px}
+  .axes .axico{flex:0 0 auto}
+
+  .axes tr.live .axk{color:var(--press)}
+  .axes tr.live .axico svg,.axes tr.live .axico svg *{fill:var(--press)}
+  .axes tr.live .axico svg [fill="#fff"]{fill:var(--press)}
+  .axes tr.live .axico svg [stroke="#fff"]{stroke:var(--press)}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <div class="top">
+    <h1>XD Remapper</h1>
+    <span class="pill" id="pConn">not connected</span>
+    <div class="sp"></div>
+    <div class="tabs">
+      <button class="tab on" data-tab="map">Mapping</button>
+      <button class="tab" data-tab="col">Colors</button>
+      <button class="tab" data-tab="adv">Compile</button>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="go" id="bConn">Connect board</button>
+    <button id="bDisc" disabled>Disconnect</button>
+    <label style="color:var(--dim);font-size:13px">Emulating
+      <select id="selSide">
+        <option value="L">Joy-Con 2 (L)</option>
+        <option value="R">Joy-Con 2 (R)</option>
+      </select>
+    </label>
+    <div class="sp" style="flex:1"></div>
+    <button id="bSave">Save preset</button>
+    <button id="bLoad">Load preset</button>
+    <input type="file" id="fLoad" accept=".json" style="display:none">
+    <button id="bReset">Reset mapping</button>
+  </div>
+  <p class="sub bad" id="connErr"></p>
+
+  <div id="tabMap">
+    <div id="mapGate">
+      <img id="mapGateImg" src="NoConnection.png" alt="No board connected">
+      <p id="mapGateMsg">Connect a board to start</p>
+    </div>
+
+    <div id="mapReady" style="display:none">
+      <div class="maprow">
+        <div class="mapstage">
+          <div class="stage" id="stage">
+            <svg class="leads" id="leads"></svg>
+            <div class="colL" id="colL"></div>
+            <div class="cen"><img id="jcImg" src="ns2blue.png" alt="Joy-Con"></div>
+            <div class="colR" id="colR"></div>
+          </div>
+          <div class="hint" id="stageHint" style="text-align:center"></div>
+        </div>
+
+        <div class="mapdiv"></div>
+
+        <div class="panel mapaxes">
+          <h2 id="axesTitle">Mouse Mode Config</h2>
+          <table class="axes"><tbody id="rowsAxis"></tbody></table>
+          <h2 style="margin-top:18px">Grip Buttons</h2>
+          <div class="sub">Reconnect on the console for grip buttons to get detected.</div>
+          <table class="axes"><tbody id="rowsGrip"></tbody></table>
+        </div>
+      </div>
+
+      <div class="panel devpanel">
+        <h2>Bluetooth devices</h2>
+        <div id="devList"></div>
+      </div>
+
+      <div class="panel devpanel" id="profPanel">
+        <h2>Profiles</h2>
+
+        <div class="moderow hotkeyrow profrow">
+          <label id="profLab1">Profile 1</label>
+          <span class="pname" id="profName1">empty</span>
+          <button id="bProfKey1" class="hotkey">Click to set a shortcut</button>
+          <button id="bProfFile1">Load JSON...</button>
+          <button id="bProfUse1">Switch</button>
+          <button id="bProfClear1" class="xbtn" aria-label="Clear this profile">&times;</button>
+        </div>
+
+        <div class="moderow hotkeyrow profrow">
+          <label id="profLab2">Profile 2</label>
+          <span class="pname" id="profName2">empty</span>
+          <button id="bProfKey2" class="hotkey">Click to set a shortcut</button>
+          <button id="bProfFile2">Load JSON...</button>
+          <button id="bProfUse2">Switch</button>
+          <button id="bProfClear2" class="xbtn" aria-label="Clear this profile">&times;</button>
+        </div>
+
+        <div class="moderow hotkeyrow profrow">
+          <label id="profLab3">Profile 3</label>
+          <span class="pname" id="profName3">empty</span>
+          <button id="bProfKey3" class="hotkey">Click to set a shortcut</button>
+          <button id="bProfFile3">Load JSON...</button>
+          <button id="bProfUse3">Switch</button>
+          <button id="bProfClear3" class="xbtn" aria-label="Clear this profile">&times;</button>
+        </div>
+
+        <div class="moderow hotkeyrow profrow">
+          <label id="profLab4">Profile 4</label>
+          <span class="pname" id="profName4">empty</span>
+          <button id="bProfKey4" class="hotkey">Click to set a shortcut</button>
+          <button id="bProfFile4">Load JSON...</button>
+          <button id="bProfUse4">Switch</button>
+          <button id="bProfClear4" class="xbtn" aria-label="Clear this profile">&times;</button>
+        </div>
+        <input type="file" id="fProf" accept=".json" style="display:none">
+        <p class="sub bad" id="profErr"></p>
+      </div>
+
+      <div class="panel devpanel" id="modesPanel">
+        <h2>Modes</h2>
+        <div class="moderow hotkeyrow">
+          <label id="modeLab1">Keyboard mode</label>
+          <button id="bModeKey1" class="hotkey">Click to set a shortcut</button>
+          <button id="bModeClear1" class="xbtn" aria-label="Clear the keyboard mode shortcut">&times;</button>
+        </div>
+
+        <div class="moderow hotkeyrow">
+          <label id="modeLab2">Right Thumbstick mode</label>
+          <button id="bModeKey2" class="hotkey">Click to set a shortcut</button>
+          <button id="bModeClear2" class="xbtn" aria-label="Clear the right thumbstick mode shortcut">&times;</button>
+        </div>
+        <p class="sub bad" id="modeErr"></p>
+      </div>
+
+      <div class="panel devpanel" id="syncPanel">
+        <h2>Pairing</h2>
+        <div class="sub">Unpairs the currently paired devices on the console.</div>
+        <div class="moderow hotkeyrow">
+          <label id="syncLab">Unpair from console.</label>
+          <button id="bSyncKey" class="hotkey">Click to set a key</button>
+          <button id="bSyncClear" class="xbtn" aria-label="Remove the pairing key">&times;</button>
+        </div>
+        <p class="sub bad" id="syncWarn"></p>
+        <p class="sub bad" id="syncErr"></p>
+      </div>
+
+      <div class="panel devpanel">
+        <h2>Right Thumbstick sensitivity</h2>
+        <div class="sub">Adjusting the dead zone and motion speed to try and fix the visual snapping.</div>
+        <div class="moderow">
+          <label for="rngSens" style="min-width:118px">Sensitivity</label>
+          <input type="range" id="rngSens" min="1" max="10" step="1">
+          <input type="number" id="numSens" min="1" max="10" step="1">
+          <button id="bSensDefault">Default</button>
+        </div>
+        <div class="moderow" style="margin-top:10px">
+          <label for="rngDz" style="min-width:118px">Dead zone</label>
+          <input type="range" id="rngDz" min="0" max="40" step="1">
+          <input type="number" id="numDz" min="0" max="40" step="1">
+          <button id="bDzDefault">Default</button>
+        </div>
+        <div class="moderow" style="margin-top:10px">
+          <label for="rngVg" style="min-width:118px">Motion speed</label>
+          <input type="range" id="rngVg" min="1" max="20" step="1">
+          <input type="number" id="numVg" min="1" max="20" step="1">
+          <button id="bVgDefault">Default</button>
+        </div>
+      </div>
+
+      <div class="panel devpanel">
+        <h2>Mouse sensitivity</h2>
+        <div class="moderow">
+          <label for="rngMSens">Sensitivity</label>
+          <input type="range" id="rngMSens" min="10" max="1000" step="5">
+          <input type="number" id="numMSens" min="10" max="1000" step="5">
+          <button id="bMSensDefault">Default</button>
+        </div>
+        <div class="moderow" style="margin-top:10px">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="mAccel">
+            <span>Smart acceleration</span></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabCol" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="panel">
+          <h2>Joy-Con icon</h2>
+          <div class="cardbg">
+            <div id="jcArt">
+            <svg class="jcv" id="jcvL" viewBox="0 0 38.38 90.63"
+                 xmlns="http://www.w3.org/2000/svg">
+              <polygon class="cRail" stroke-miterlimit="10" points="32 84.54 37.88 84.54 37.88 6.29 31.76 6.29 32 84.54"/>
+              <path class="cBody" stroke-miterlimit="10" d="M363.25,178.37h0V137.6c0-5.82,3.63-13.37,8.05-18.31a17,17,0,0,1,2.92-2.58,16.7,16.7,0,0,1,9.41-2.82l5.56,0,5.31,0,.25,89.57-8.74.05h-1.84a15.48,15.48,0,0,1-5.94-1.16c-4.17-1.75-7.5-3.91-11-9.46a28.89,28.89,0,0,1-2.8-5.67,20.94,20.94,0,0,1-1.22-7.24Z" transform="translate(-362.75 -113.31)"/>
+              <circle class="cStick cRing" stroke-miterlimit="10" cx="17.49" cy="29.32" r="6.5"/>
+              <circle class="cBtn" cx="17.49" cy="61.94" r="3.5"/>
+              <circle class="cBtn" cx="17.99" cy="47.44" r="3.5"/>
+              <circle class="cBtn" cx="24.64" cy="55.07" r="3.5"/>
+              <circle class="cBtn" cx="10.14" cy="54.57" r="3.5"/>
+              <rect class="cBtn" x="17.39" y="9.34" width="10.44" height="3.21"/>
+            </svg>
+
+<svg class="jcv" id="jcvR" viewBox="0 0 38.38 90.63"
+                 xmlns="http://www.w3.org/2000/svg" style="display:none">
+              <polygon class="cRail" stroke-miterlimit="10" points="6.38 84.54 0.5 84.54 0.5 6.29 6.62 6.29 6.38 84.54"/>
+              <path class="cBody" stroke-miterlimit="10" d="M451.5,178.27h0V137.5c0-5.82-3.62-13.37-8.05-18.31a17,17,0,0,0-2.92-2.58,16.66,16.66,0,0,0-9.4-2.82l-5.57,0-5.3,0L420,203.29l8.75.05h1.84a15.25,15.25,0,0,0,5.93-1.16c4.17-1.75,7.5-3.91,11-9.46a29.46,29.46,0,0,0,2.81-5.66,21.25,21.25,0,0,0,1.21-7.24Z" transform="translate(-413.62 -113.21)"/>
+              <circle class="cStick cRing" stroke-miterlimit="10" cx="21.38" cy="54.79" r="6.5"/>
+              <circle class="cBtn" cx="21.38" cy="36.79" r="3.5"/>
+              <circle class="cBtn" cx="20.88" cy="22.29" r="3.5"/>
+              <circle class="cBtn" cx="14.22" cy="29.92" r="3.5"/>
+              <circle class="cBtn" cx="28.72" cy="29.42" r="3.5"/>
+              <polygon class="cBtn" points="19.95 9.07 19.95 12.29 16.45 12.29 16.45 15.89 13.24 15.89 13.24 12.29 9.51 12.29 9.51 9.07 13.24 9.07 13.24 5.46 16.45 5.46 16.45 9.07 19.95 9.07"/>
+            </svg>
+
+          </div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="panel">
+          <h2>Colors</h2>
+          <p class="sub spacer" aria-hidden="true"></p>
+          <table><tbody id="rowsCol"></tbody></table>
+          <div style="display:flex;gap:9px;margin-top:14px;flex-wrap:wrap">
+            <button id="bStock">Stock Joy-Con</button>
+            <button id="bCurrent">Current firmware</button>
+            <button id="bRandom">Random</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabAdv" style="display:none">
+    <div class="panel">
+      <h2>Compile to board</h2>
+      <div class="btnrow">
+        <button id="bCfgApply" disabled>Apply to board</button>
+        <button id="bCfgDefault" disabled>Restore firmware defaults</button>
+      </div>
+      <pre class="out" id="cfgOut">Connect a board.</pre>
+    </div>
+    <div class="grid2">
+      <div>
+        <div class="panel">
+          <h2>Live reports</h2>
+          <table><thead><tr><th>Handle</th><th>Len</th><th>Latest bytes</th>
+            </tr></thead><tbody id="rowsRaw"></tbody></table>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>Changes</h2>
+          <div class="sub">Mapping changes</div>
+          <div class="btnrow">
+            <button id="bGen">Regenerate</button>
+            <button id="bCopy">Copy</button>
+            <span class="pill" id="pCopied" style="display:none">copied</span>
+          </div>
+          <pre class="mono" id="out">// nothing mapped yet</pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+var $=function(i){return document.getElementById(i);};
+
+function fail(msg){
+  var d=document.createElement("div");
+  d.style.cssText="position:fixed;left:0;right:0;top:0;z-index:99;"+
+    "background:#7d2b22;color:#fff;padding:10px 16px;font:13px/1.5 "+
+    "ui-monospace,Consolas,monospace;white-space:pre-wrap";
+  d.textContent="Script error: the page will not respond until this is "+
+    "fixed:\n"+msg;
+  document.body.insertBefore(d,document.body.firstChild);
+}
+window.addEventListener("error",function(e){
+  if(!e.filename||e.filename.split("#")[0]!==location.href.split("#")[0]) return;
+  fail(e.message+"  (line "+e.lineno+")");
+});
+
+var ICONS={
+ GL:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="46.0 46.0 420.0 420.0"><path d="M331.634,156.534l-99.07,3.653c-26.378.996-49.764,9.306-67.628,24.032-16.253,13.397-27.609,32.042-31.975,52.479-.197.915-.366,1.834-.533,2.754l-.082.436c-.061.306-.119.612-.167.9-.195,1.157-.373,2.381-.553,3.809-.022.154-.043.307-.058.434-.136,1.132-.252,2.318-.365,3.738-.021.221-.041.442-.052.602-.074,1.027-.118,2.056-.157,3.089l-.016.329c-.017.327-.032.654-.041,1.011-.014.591-.012,1.183-.01,1.774l.002.409-.002.445c-.002.591-.004,1.183.011,1.803.008.328.023.655.04.982l.016.332c.039,1.028.083,2.058.153,3.028.015.219.034.438.057.662.112,1.416.229,2.603.36,3.705.018.146.037.29.06.445.174,1.394.355,2.646.552,3.811.053.314.112.627.174.939l.09.477c.163.901.329,1.803.517,2.67,4.37,20.457,15.727,39.103,31.979,52.499,17.864,14.727,41.25,23.036,67.637,24.033l98.618,3.645.443.008c27.262,0,49.44-19.823,49.44-44.188v-110.557c0-24.365-22.179-44.188-49.44-44.188ZM212.094,273.092c5.504,5.233,13.033,7.848,22.586,7.848,3.821,0,7.37-.273,10.646-.819v-18.833h-11.464v-15.967h29.614v47.219c-9.372,3.548-19.426,5.322-30.16,5.322-10.099,0-18.812-1.798-26.135-5.391-7.324-3.593-12.943-8.755-16.854-15.489-3.913-6.731-5.868-14.739-5.868-24.019,0-9.734,2.068-18.333,6.209-25.793,4.139-7.459,9.963-13.238,17.469-17.332,7.506-4.094,16.172-6.141,25.997-6.141,5.641,0,10.986.638,16.035,1.911,5.05,1.275,9.53,3.094,13.443,5.459l-4.777,16.376c-3.548-2.184-7.506-3.889-11.873-5.118-4.366-1.228-8.645-1.842-12.828-1.842-6.005,0-11.306,1.296-15.898,3.889-4.596,2.593-8.144,6.233-10.645,10.918-2.504,4.687-3.753,10.122-3.753,16.308,0,9.099,2.75,16.264,8.256,21.494ZM335.269,295.76h-56.896v-79.52h18.368v63.392h38.527v16.128Z" fill="#fff"/></svg>',
+ GR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="46.0 46.0 420.0 420.0"><path d="M295.97,236.057h-16.239v21.728h16.8c2.165,0,4.032-1.025,5.6-3.08,1.568-2.053,2.353-4.685,2.353-7.896,0-3.285-.896-5.897-2.688-7.84-1.792-1.941-3.734-2.912-5.824-2.912Z" fill="#fff"/><path d="M381.072,255.565c.003-.595.004-1.189-.011-1.795-.008-.328-.023-.655-.04-.982l-.016-.333c-.039-1.029-.083-2.058-.153-3.023-.015-.222-.034-.443-.057-.667-.111-1.408-.227-2.591-.374-3.82l-.042-.303c-.175-1.403-.357-2.664-.556-3.835-.051-.307-.109-.614-.17-.919l-.082-.436c-.167-.92-.336-1.839-.528-2.733-4.37-20.458-15.727-39.103-31.979-52.5-17.864-14.727-41.25-23.037-67.637-24.032l-98.618-3.645-.443-.008c-27.262,0-49.44,19.823-49.44,44.188v110.557c0,24.365,22.179,44.188,49.44,44.188h.222l98.85-3.653c26.378-.996,49.763-9.306,67.627-24.032,16.253-13.396,27.609-32.042,31.973-52.469.194-.897.36-1.799.523-2.7l.09-.477c.062-.312.121-.625.171-.924.196-1.166.376-2.401.558-3.847l.056-.406c.135-1.133.25-2.316.362-3.729.021-.219.041-.438.052-.6.074-1.027.118-2.057.157-3.089l.016-.328c.017-.327.032-.654.04-.993.015-.595.014-1.189.011-1.785l-.002-.417.002-.453ZM199.787,276.781c5.504,5.233,13.033,7.848,22.586,7.848,3.821,0,7.37-.273,10.646-.819v-18.833h-11.464v-15.967h29.614v47.219c-9.372,3.548-19.426,5.322-30.16,5.322-10.099,0-18.812-1.798-26.135-5.391-7.324-3.593-12.943-8.755-16.854-15.489-3.913-6.731-5.868-14.739-5.868-24.019,0-9.734,2.068-18.333,6.209-25.793,4.139-7.459,9.963-13.238,17.469-17.332,7.506-4.094,16.172-6.141,25.997-6.141,5.641,0,10.986.638,16.035,1.911,5.05,1.275,9.53,3.094,13.443,5.459l-4.777,16.376c-3.548-2.184-7.506-3.889-11.873-5.118-4.366-1.228-8.645-1.842-12.828-1.842-6.005,0-11.306,1.296-15.898,3.889-4.596,2.593-8.144,6.233-10.645,10.918-2.504,4.687-3.753,10.122-3.753,16.308,0,9.099,2.75,16.264,8.256,21.494ZM306.947,299.449l-15.232-25.648h-11.983v25.648h-18.368v-79.52h35.84c3.732,0,7.186.784,10.36,2.352,3.172,1.568,5.916,3.623,8.231,6.16,2.313,2.539,4.125,5.415,5.433,8.624,1.305,3.211,1.96,6.459,1.96,9.744,0,2.464-.3,4.835-.896,7.112-.599,2.279-1.456,4.424-2.576,6.44s-2.483,3.827-4.088,5.432-3.416,2.968-5.432,4.088l17.472,29.568h-20.72Z" fill="#fff"/></svg>',
+
+ A:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><polygon points="235.883 262.853 278.614 262.853 257.342 214.919 235.883 262.853" fill="#fff"/><path d="M256,103.514c-84.081,0-152.486,68.405-152.486,152.486s68.405,152.486,152.486,152.486,152.486-68.405,152.486-152.486-68.405-152.486-152.486-152.486ZM304.068,320.211l-14.72-33.17h-64.292l-16.396,36.624-25.302.427,63.572-144.335h20.921l61.553,140.953-25.336-.498Z" fill="#fff"/></svg>',
+ AW:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M81.379,307.889l-9.096.85-56.446-13.278,64.398-8.433,6.869.908c-16.506,1.751-28.296,4.629-30.441,8.395-2.322,4.075,7.105,8.206,24.716,11.558Z" fill="#fff"/><path d="M177.513,326.662l-5.284,3.108,81.504,21.421,82.17-21.421-5.95-3.108c-20.75,6.653-47.291,10.647-76.22,10.647-28.928,0-55.469-3.994-76.22-10.647Z" fill="#fff"/><g><polygon points="97.421 299.162 52.47 299.162 52.47 293.842 104.421 293.842 97.421 299.162" fill="#fff"/><polygon points="459.53 302.052 415.58 302.052 407.58 296.732 459.53 296.732 459.53 302.052" fill="#fff"/></g><polygon points="262.952 340.384 244.291 340.384 241.959 321.33 264.508 321.33 262.952 340.384" fill="#fff"/><path d="M433.906,289.606l9.053-1.225,56.946,10.937-63.995,11.084-6.9-.624c16.42-2.431,28.081-5.793,30.069-9.644,2.151-4.168-7.438-7.906-25.172-10.529Z" fill="#fff"/><path d="M115.69,259.907c0,.083-.002.166-.002.251v1.313s.003,34.813.003,34.813c0,7.31,5.961,13.257,13.287,13.257h254.047c7.327,0,13.287-5.947,13.287-13.257v-29.201c0-9.527-1.74-18.731-5.171-27.356-9.646-24.254-29.475-37.062-57.363-37.062h-.25c-1.444-.044-2.509-.022-3.117,0h-148.584c-1.774-.142-3.504-.209-5.205-.209-38.876.003-58.795,35.798-60.87,56.153h.017c-.043.409-.068.828-.077,1.257M210.172,288.337c-6.035,0-10.926-4.892-10.926-10.927s4.892-10.926,10.926-10.926,10.927,4.892,10.927,10.926-4.892,10.927-10.927,10.927ZM299.593,232.188c13.151,0,23.811,10.661,23.811,23.811s-10.661,23.812-23.811,23.812-23.812-10.661-23.812-23.812,10.661-23.811,23.812-23.811ZM230.671,244.943c6.035,0,10.926,4.892,10.926,10.926s-4.892,10.926-10.926,10.926-10.926-4.892-10.926-10.926,4.892-10.926,10.926-10.926ZM210.172,223.661c6.035,0,10.927,4.892,10.927,10.926s-4.892,10.927-10.927,10.927-10.926-4.892-10.926-10.927,4.892-10.926,10.926-10.926ZM189.674,244.943c6.035,0,10.926,4.892,10.926,10.926s-4.892,10.926-10.926,10.926-10.926-4.892-10.926-10.926,4.892-10.926,10.926-10.926Z" fill="#fff"/></svg>',
+ AX:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M81.379,307.889l-9.096.85-56.446-13.278,64.398-8.433,6.869.908c-16.506,1.751-28.296,4.629-30.441,8.395-2.322,4.075,7.105,8.206,24.716,11.558Z" fill="#fff"/><path d="M177.513,326.662l-5.284,3.108,81.504,21.421,82.17-21.421-5.95-3.108c-20.75,6.653-47.291,10.647-76.22,10.647-28.928,0-55.469-3.994-76.22-10.647Z" fill="#fff"/><g><polygon points="97.421 299.162 52.47 299.162 52.47 293.842 104.421 293.842 97.421 299.162" fill="#fff"/><polygon points="459.53 302.052 415.58 302.052 407.58 296.732 459.53 296.732 459.53 302.052" fill="#fff"/></g><polygon points="262.952 340.384 244.291 340.384 241.959 321.33 264.508 321.33 262.952 340.384" fill="#fff"/><path d="M433.906,289.606l9.053-1.225,56.946,10.937-63.995,11.084-6.9-.624c16.42-2.431,28.081-5.793,30.069-9.644,2.151-4.168-7.438-7.906-25.172-10.529Z" fill="#fff"/><path d="M115.69,259.907c0,.083-.002.166-.002.251v1.313s.003,34.813.003,34.813c0,7.31,5.961,13.257,13.287,13.257h254.047c7.327,0,13.287-5.947,13.287-13.257v-29.201c0-9.527-1.74-18.731-5.171-27.356-9.646-24.254-29.475-37.062-57.363-37.062h-.25c-1.444-.044-2.509-.022-3.117,0h-148.584c-1.774-.142-3.504-.209-5.205-.209-38.876.003-58.795,35.798-60.87,56.153h.017c-.043.409-.068.828-.077,1.257M210.172,288.337c-6.035,0-10.926-4.892-10.926-10.927s4.892-10.926,10.926-10.926,10.927,4.892,10.927,10.926-4.892,10.927-10.927,10.927ZM299.593,232.188c13.151,0,23.811,10.661,23.811,23.811s-10.661,23.812-23.811,23.812-23.812-10.661-23.812-23.812,10.661-23.811,23.812-23.811ZM230.671,244.943c6.035,0,10.926,4.892,10.926,10.926s-4.892,10.926-10.926,10.926-10.926-4.892-10.926-10.926,4.892-10.926,10.926-10.926ZM210.172,223.661c6.035,0,10.927,4.892,10.927,10.926s-4.892,10.927-10.927,10.927-10.926-4.892-10.926-10.927,4.892-10.926,10.926-10.926ZM189.674,244.943c6.035,0,10.926,4.892,10.926,10.926s-4.892,10.926-10.926,10.926-10.926-4.892-10.926-10.926,4.892-10.926,10.926-10.926Z" fill="#fff"/></svg>',
+ AY:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M81.379,307.889l-9.096.85-56.446-13.278,64.398-8.433,6.869.908c-16.506,1.751-28.296,4.629-30.441,8.395-2.322,4.075,7.105,8.206,24.716,11.558Z" fill="#fff"/><path d="M177.513,326.662l-5.284,3.108,81.504,21.421,82.17-21.421-5.95-3.108c-20.75,6.653-47.291,10.647-76.22,10.647-28.928,0-55.469-3.994-76.22-10.647Z" fill="#fff"/><g><polygon points="97.421 299.162 52.47 299.162 52.47 293.842 104.421 293.842 97.421 299.162" fill="#fff"/><polygon points="459.53 302.052 415.58 302.052 407.58 296.732 459.53 296.732 459.53 302.052" fill="#fff"/></g><polygon points="262.952 340.384 244.291 340.384 241.959 321.33 264.508 321.33 262.952 340.384" fill="#fff"/><path d="M433.906,289.606l9.053-1.225,56.946,10.937-63.995,11.084-6.9-.624c16.42-2.431,28.081-5.793,30.069-9.644,2.151-4.168-7.438-7.906-25.172-10.529Z" fill="#fff"/><path d="M115.69,259.907c0,.083-.002.166-.002.251v1.313s.003,34.813.003,34.813c0,7.31,5.961,13.257,13.287,13.257h254.047c7.327,0,13.287-5.947,13.287-13.257v-29.201c0-9.527-1.74-18.731-5.171-27.356-9.646-24.254-29.475-37.062-57.363-37.062h-.25c-1.444-.044-2.509-.022-3.117,0h-148.584c-1.774-.142-3.504-.209-5.205-.209-38.876.003-58.795,35.798-60.87,56.153h.017c-.043.409-.068.828-.077,1.257M210.172,288.337c-6.035,0-10.926-4.892-10.926-10.927s4.892-10.926,10.926-10.926,10.927,4.892,10.927,10.926-4.892,10.927-10.927,10.927ZM299.593,232.188c13.151,0,23.811,10.661,23.811,23.811s-10.661,23.812-23.811,23.812-23.812-10.661-23.812-23.812,10.661-23.811,23.812-23.811ZM230.671,244.943c6.035,0,10.926,4.892,10.926,10.926s-4.892,10.926-10.926,10.926-10.926-4.892-10.926-10.926,4.892-10.926,10.926-10.926ZM210.172,223.661c6.035,0,10.927,4.892,10.927,10.926s-4.892,10.927-10.927,10.927-10.926-4.892-10.926-10.927,4.892-10.926,10.926-10.926ZM189.674,244.943c6.035,0,10.926,4.892,10.926,10.926s-4.892,10.926-10.926,10.926-10.926-4.892-10.926-10.926,4.892-10.926,10.926-10.926Z" fill="#fff"/></svg>',
+ B:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M269.054,267.621h-35.294v40.375h37.799c3.314-.734,14.832-3.009,14.832-20.187,0-15.676-17.337-20.187-17.337-20.187Z" fill="#fff"/><path d="M280.43,225.611c-.019-14.289-8.831-17.822-8.831-17.822h-37.839v35.644h33.457s13.231-3.567,13.213-17.822Z" fill="#fff"/><path d="M256,103.514c-84.081,0-152.486,68.405-152.486,152.486s68.405,152.486,152.486,152.486,152.486-68.405,152.486-152.486-68.405-152.486-152.486-152.486ZM274.22,332.074l-.8.11h-63.654v-148.582h58.37c10.139,0,19.839,4.605,25.946,12.764,5.146,6.875,9.889,16.265,9.889,27.524,0,7.444-5.352,23.133-11.293,28.636,10.119,6.61,18.076,20.913,17.694,37.828-.723,31.959-23.964,40.061-36.152,41.72Z" fill="#fff"/></svg>',
+ C:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M361.919,107.369h-211.839c-23.551,0-42.711,19.16-42.711,42.712v211.838c0,23.552,19.16,42.712,42.711,42.712h211.839c23.551,0,42.711-19.16,42.711-42.712v-211.838c0-23.552-19.16-42.712-42.711-42.712ZM276.9,317.119c23.553,0,39.752-12.514,39.752-12.514l19.629,39.258s-22.573,18.649-66.496,18.649c-57.172,0-109.683-46.622-109.683-104.529s52.262-105.268,109.683-105.268c43.922,0,66.496,18.649,66.496,18.649l-19.629,39.262s-16.199-12.514-39.752-12.514c-46.377,0-66.741,32.388-66.741,59.381,0,27.233,20.364,59.626,66.741,59.626Z" fill="#fff"/></svg>',
+ CAP:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256,177.135c-42.638,0-77.327,34.689-77.327,77.327s34.689,77.327,77.327,77.327,77.327-34.689,77.327-77.327-34.689-77.327-77.327-77.327Z" fill="#fff"/><path d="M361.919,107.369h-211.839c-23.551,0-42.711,19.16-42.711,42.712v211.838c0,23.552,19.16,42.712,42.711,42.712h211.839c23.551,0,42.711-19.16,42.711-42.712v-211.838c0-23.552-19.16-42.712-42.711-42.712ZM256,357.425c-56.774,0-102.964-46.19-102.964-102.964s46.19-102.964,102.964-102.964,102.964,46.19,102.964,102.964-46.19,102.964-102.964,102.964Z" fill="#fff"/></svg>',
+ DOWN:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle cx="130.811" cy="251.672" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><circle cx="381.189" cy="251.672" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M322.356,380.897c0,36.589-29.767,66.355-66.355,66.355s-66.355-29.767-66.355-66.355,29.767-66.356,66.355-66.356,66.355,29.768,66.355,66.356ZM209.645,380.897c0,25.561,20.795,46.355,46.355,46.355s46.355-20.795,46.355-46.355-20.795-46.356-46.355-46.356-46.355,20.796-46.355,46.356Z" fill="#fff"/><circle cx="256" cy="121.103" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M110.11,253.596l34.007,20.851c1.702,1.043,3.889-.181,3.889-2.177v-41.702c0-1.996-2.187-3.221-3.889-2.177l-34.007,20.851c-1.625.997-1.625,3.358,0,4.355Z" fill="#fff"/><path d="M404.359,249.242l-34.007-20.851c-1.702-1.043-3.889.181-3.889,2.177v41.702c0,1.996,2.187,3.221,3.889,2.177l34.007-20.851c1.625-.997,1.625-3.358,0-4.355Z" fill="#fff"/><path d="M199.644,380.897c0,31.124,25.231,56.356,56.356,56.356s56.356-25.231,56.356-56.356-25.231-56.356-56.356-56.356-56.356,25.231-56.356,56.356ZM257.235,367.373h20.851c1.996,0,3.221,2.187,2.177,3.889l-20.851,34.007c-.997,1.625-3.358,1.625-4.354,0l-20.851-34.007c-1.043-1.702.181-3.889,2.177-3.889h20.851Z" fill="#fff"/><path d="M255.058,98.915l-20.851,34.007c-1.043,1.702.181,3.889,2.177,3.889h41.702c1.996,0,3.221-2.187,2.177-3.889l-20.851-34.007c-.997-1.625-3.358-1.625-4.355,0Z" fill="#fff"/></svg>',
+ HOME:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M201.916,227.113v84.262h105.598v-84.262l-52.8-46.369-52.799,46.369ZM282.609,292.802h-53.474v-48.53h53.474v48.53Z" fill="#fff"/><path d="M256,408.486c84.081,0,152.487-68.405,152.487-152.486s-68.405-152.487-152.487-152.487-152.486,68.405-152.486,152.487,68.405,152.486,152.486,152.486ZM329.12,242.692v90.288h-148.809v-90.288h-28.876l103.28-90.703,103.281,90.703h-28.876Z" fill="#fff"/></svg>',
+ L:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M166.732,159.15c-70.364,0-127.61,57.246-127.61,127.61v66.091h433.756v-193.701H166.732ZM294.019,301.285h-70.033v-97.881h22.609v78.03h47.424v19.852Z" fill="#fff"/></svg>',
+ LEFT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle cx="260.328" cy="130.811" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><circle cx="260.328" cy="381.189" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M131.103,322.356c-36.589,0-66.355-29.767-66.355-66.355s29.767-66.355,66.355-66.355,66.356,29.767,66.356,66.355-29.768,66.355-66.356,66.355ZM131.103,209.645c-25.561,0-46.355,20.795-46.355,46.355s20.795,46.355,46.355,46.355,46.356-20.795,46.356-46.355-20.796-46.355-46.356-46.355Z" fill="#fff"/><circle cx="390.897" cy="256" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M258.404,110.11l-20.851,34.007c-1.043,1.702.181,3.889,2.177,3.889h41.702c1.996,0,3.221-2.187,2.177-3.889l-20.851-34.007c-.997-1.625-3.358-1.625-4.355,0Z" fill="#fff"/><path d="M262.758,404.359l20.851-34.007c1.043-1.702-.181-3.889-2.177-3.889h-41.702c-1.996,0-3.221,2.187-2.177,3.889l20.851,34.007c.997,1.625,3.358,1.625,4.355,0Z" fill="#fff"/><path d="M131.103,199.644c-31.124,0-56.356,25.231-56.356,56.356s25.231,56.356,56.356,56.356,56.356-25.231,56.356-56.356-25.231-56.356-56.356-56.356ZM144.627,257.235v20.851c0,1.996-2.187,3.221-3.889,2.177l-34.007-20.851c-1.625-.997-1.625-3.358,0-4.354l34.007-20.851c1.702-1.043,3.889.181,3.889,2.177v20.851Z" fill="#fff"/><path d="M413.085,255.058l-34.007-20.851c-1.702-1.043-3.889.181-3.889,2.177v41.702c0,1.996,2.187,3.221,3.889,2.177l34.007-20.851c1.625-.997,1.625-3.358,0-4.355Z" fill="#fff"/></svg>',
+ LS:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><polygon points="338.132 98.667 173.869 98.667 255.666 167.197 338.132 98.667" fill="#fff"/><path d="M415.836,181.872H94.163c-26.43,0-47.932,21.502-47.932,47.931v12.326c0,26.429,21.502,47.931,47.932,47.931h66.014v97.734c0,19.597,15.942,35.54,35.539,35.54h120.568c19.597,0,35.54-15.943,35.54-35.54v-97.734h64.012c26.43,0,47.932-21.502,47.932-47.931v-12.326c0-26.429-21.502-47.931-47.932-47.931ZM295.212,359.058h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
+ MINUS:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256,103.514c-84.081,0-152.486,68.405-152.486,152.486s68.405,152.487,152.486,152.487,152.486-68.405,152.486-152.487-68.405-152.486-152.486-152.486ZM341.666,274.415h-165.657v-36.83h165.657v36.83Z" fill="#fff"/></svg>',
+ PLUS:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256,408.486c84.081,0,152.486-68.405,152.486-152.486s-68.405-152.487-152.486-152.487-152.486,68.405-152.486,152.487,68.405,152.486,152.486,152.486ZM275.428,272.588v82.111h-33.176v-82.111h-82.111v-33.176h82.111v-82.112h33.176v82.112h82.111v33.176h-82.111Z" fill="#fff"/></svg>',
+ R:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M345.268,159.15H39.122v193.7h433.756v-66.09c0-70.364-57.245-127.61-127.609-127.61ZM278.005,300.826l-18.749-31.57h-14.751v31.57h-22.609v-97.881h44.115c4.595,0,8.845.965,12.752,2.895,3.905,1.93,7.283,4.459,10.133,7.583,2.848,3.125,5.077,6.665,6.687,10.615,1.607,3.953,2.413,7.951,2.413,11.994,0,3.033-.369,5.952-1.104,8.754-.736,2.805-1.792,5.446-3.171,7.927-1.378,2.481-3.057,4.711-5.031,6.687-1.978,1.977-4.205,3.653-6.687,5.031l21.506,36.396h-25.504Z" fill="#fff"/><path d="M264.494,222.796h-19.989v26.745h20.679c2.665,0,4.963-1.262,6.894-3.791,1.93-2.527,2.895-5.767,2.895-9.719,0-4.043-1.103-7.259-3.309-9.65-2.206-2.389-4.597-3.584-7.169-3.584Z" fill="#fff"/></svg>',
+ RIGHT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle cx="251.672" cy="381.189" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><circle cx="251.672" cy="130.811" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M380.897,189.644c36.589,0,66.355,29.767,66.355,66.355s-29.767,66.355-66.355,66.355-66.356-29.767-66.356-66.355,29.768-66.355,66.356-66.355ZM380.897,302.355c25.561,0,46.355-20.795,46.355-46.355s-20.795-46.355-46.355-46.355-46.356,20.795-46.356,46.355,20.796,46.355,46.356,46.355Z" fill="#fff"/><circle cx="121.103" cy="256" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M253.596,401.89l20.851-34.007c1.043-1.702-.181-3.889-2.177-3.889h-41.702c-1.996,0-3.221,2.187-2.177,3.889l20.851,34.007c.997,1.625,3.358,1.625,4.355,0Z" fill="#fff"/><path d="M249.242,107.641l-20.851,34.007c-1.043,1.702.181,3.889,2.177,3.889h41.702c1.996,0,3.221-2.187,2.177-3.889l-20.851-34.007c-.997-1.625-3.358-1.625-4.355,0Z" fill="#fff"/><path d="M380.897,312.356c31.124,0,56.356-25.231,56.356-56.356s-25.231-56.356-56.356-56.356-56.356,25.231-56.356,56.356,25.231,56.356,56.356,56.356ZM367.373,254.765v-20.851c0-1.996,2.187-3.221,3.889-2.177l34.007,20.851c1.625.997,1.625,3.358,0,4.354l-34.007,20.851c-1.702,1.043-3.889-.181-3.889-2.177v-20.851Z" fill="#fff"/><path d="M98.915,256.942l34.007,20.851c1.702,1.043,3.889-.181,3.889-2.177v-41.702c0-1.996-2.187-3.221-3.889-2.177l-34.007,20.851c-1.625.997-1.625,3.358,0,4.355Z" fill="#fff"/></svg>',
+ RS:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><polygon points="173.869 98.667 255.666 167.197 338.131 98.667 173.869 98.667" fill="#fff"/><g><path d="M262.568,271.636h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M415.836,181.871H94.163c-26.43,0-47.932,21.502-47.932,47.932v12.326c0,26.429,21.502,47.931,47.932,47.931h66.014v97.734c0,19.597,15.942,35.539,35.539,35.539h120.568c19.597,0,35.54-15.942,35.54-35.539v-97.734h64.012c26.43,0,47.932-21.502,47.932-47.931v-12.326c0-26.43-21.502-47.932-47.932-47.932ZM277.718,359.135l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
+ SL:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M120.88,159.15c-29.911,0-54.246,24.334-54.246,54.246v85.209c0,29.911,24.335,54.246,54.246,54.246h324.486v-193.701H120.88ZM254.915,287.8c-1.892,3.488-4.426,6.344-7.533,8.486-3.14,2.163-6.797,3.754-10.871,4.729-4.129.988-8.441,1.489-12.819,1.489-3.364,0-6.864-.263-10.402-.78-3.543-.519-7.045-1.285-10.408-2.277-3.369-.992-6.678-2.196-9.835-3.582-2.85-1.247-5.54-2.693-8.009-4.304l8.513-16.908c.546.411,1.355.969,2.579,1.746,1.967,1.254,4.433,2.521,7.326,3.767,2.882,1.243,6.142,2.367,9.688,3.341,3.58.986,7.263,1.486,10.943,1.486,8.274,0,12.47-2.688,12.47-7.987,0-2.022-.675-3.724-2.006-5.057-1.227-1.225-2.922-2.335-5.039-3.302-2.059-.939-4.523-1.822-7.325-2.623-2.765-.79-5.773-1.667-9.021-2.633-4.231-1.296-7.953-2.718-11.054-4.227-3.055-1.482-5.605-3.217-7.581-5.154-1.955-1.912-3.429-4.142-4.381-6.63-.962-2.509-1.45-5.493-1.45-8.871,0-4.745.897-8.989,2.667-12.613,1.774-3.631,4.213-6.734,7.25-9.224,3.054-2.501,6.646-4.414,10.676-5.687,4.057-1.281,8.412-1.931,12.948-1.931,3.165,0,6.34.304,9.434.905,3.106.605,6.125,1.392,8.971,2.34,2.849.951,5.535,2.042,7.984,3.245,2.148,1.057,4.172,2.124,6.026,3.179l-8.459,15.979c-.444-.317-1.064-.726-1.944-1.265-1.619-.988-3.653-2.028-6.049-3.093-2.404-1.069-5.066-2.017-7.914-2.817-2.889-.812-5.818-1.224-8.708-1.224-10.415,0-12.602,4.774-12.602,8.778,0,1.808.494,3.348,1.47,4.577.92,1.163,2.272,2.208,4.019,3.103,1.673.861,3.797,1.661,6.312,2.379,2.453.702,5.341,1.502,8.583,2.377,4.425,1.216,8.47,2.557,12.017,3.983,3.484,1.402,6.474,3.164,8.885,5.236,2.376,2.045,4.24,4.565,5.538,7.491,1.299,2.936,1.957,6.525,1.957,10.669,0,5.083-.957,9.424-2.845,12.904ZM326.962,302.449h-56.896v-79.52h18.368v63.392h38.527v16.128Z" fill="#fff"/></svg>',
+ SR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M299.97,239.057h-16.239v21.728h16.8c2.165,0,4.032-1.025,5.6-3.08,1.568-2.053,2.353-4.685,2.353-7.896,0-3.285-.896-5.897-2.688-7.84-1.792-1.941-3.734-2.912-5.824-2.912Z" fill="#fff"/><path d="M391.121,159.15H66.634v193.701h324.487c29.911,0,54.245-24.335,54.245-54.246v-85.209c0-29.911-24.334-54.246-54.245-54.246ZM250.211,287.8c-1.892,3.488-4.426,6.344-7.533,8.486-3.14,2.163-6.797,3.754-10.871,4.729-4.129.988-8.441,1.489-12.819,1.489-3.364,0-6.864-.263-10.402-.78-3.543-.519-7.045-1.285-10.408-2.277-3.369-.992-6.678-2.196-9.835-3.582-2.85-1.247-5.54-2.693-8.009-4.304l8.513-16.908c.546.411,1.355.969,2.579,1.746,1.967,1.254,4.433,2.521,7.326,3.767,2.882,1.243,6.142,2.367,9.688,3.341,3.58.986,7.263,1.486,10.943,1.486,8.274,0,12.47-2.688,12.47-7.987,0-2.022-.675-3.724-2.006-5.057-1.227-1.225-2.922-2.335-5.039-3.302-2.059-.939-4.523-1.822-7.325-2.623-2.765-.79-5.773-1.667-9.021-2.633-4.231-1.296-7.953-2.718-11.054-4.227-3.055-1.482-5.605-3.217-7.581-5.154-1.955-1.912-3.429-4.142-4.381-6.63-.962-2.509-1.45-5.493-1.45-8.871,0-4.745.897-8.989,2.667-12.613,1.774-3.631,4.213-6.734,7.25-9.224,3.054-2.501,6.646-4.414,10.676-5.687,4.057-1.281,8.412-1.931,12.948-1.931,3.165,0,6.34.304,9.434.905,3.106.605,6.125,1.392,8.971,2.34,2.849.951,5.535,2.042,7.984,3.245,2.148,1.057,4.172,2.124,6.026,3.179l-8.459,15.979c-.444-.317-1.064-.726-1.944-1.265-1.619-.988-3.653-2.028-6.049-3.093-2.404-1.069-5.066-2.017-7.914-2.817-2.889-.812-5.818-1.224-8.708-1.224-10.415,0-12.602,4.774-12.602,8.778,0,1.808.494,3.348,1.47,4.577.92,1.163,2.272,2.208,4.019,3.103,1.673.861,3.797,1.661,6.312,2.379,2.453.702,5.341,1.502,8.583,2.377,4.425,1.216,8.47,2.557,12.017,3.983,3.484,1.402,6.474,3.164,8.885,5.236,2.376,2.045,4.24,4.565,5.538,7.491,1.299,2.936,1.957,6.525,1.957,10.669,0,5.083-.957,9.424-2.845,12.904ZM310.947,302.449l-15.232-25.648h-11.983v25.648h-18.368v-79.52h35.84c3.732,0,7.186.784,10.36,2.352,3.172,1.568,5.916,3.623,8.231,6.16,2.313,2.539,4.125,5.415,5.433,8.624,1.305,3.211,1.96,6.459,1.96,9.744,0,2.464-.3,4.835-.896,7.112-.599,2.279-1.456,4.424-2.576,6.44s-2.483,3.827-4.088,5.432-3.416,2.968-5.432,4.088l17.472,29.568h-20.72Z" fill="#fff"/></svg>',
+ STICK_DOWN:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M147.886,428.309l-7.428,9.942,114.574,68.53,115.51-68.53-8.364-9.942c-29.17,21.284-66.48,34.062-107.146,34.062-40.666,0-77.976-12.778-107.146-34.062Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM300.448,308.359h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
+ STICK_LEFT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M86.83,145.942l-9.942-7.428L8.358,253.088l68.53,115.51,9.942-8.364c-21.284-29.17-34.062-66.48-34.062-107.146,0-40.666,12.778-77.976,34.062-107.146Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM300.448,308.359h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
+ STICK_RIGHT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M428.202,363.614l9.942,7.428,68.53-114.574-68.53-115.51-9.942,8.364c21.284,29.17,34.062,66.48,34.062,107.146,0,40.666-12.778,77.976-34.062,107.146Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM300.448,308.359h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
+ STICK_UP:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M363.114,85.829l7.428-9.942L255.968,7.357l-115.51,68.53,8.364,9.942c29.17-21.284,66.48-34.062,107.146-34.062s77.976,12.778,107.146,34.062Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM300.448,308.359h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
+ SX:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M86.83,145.942l-9.942-7.428L8.358,253.088l68.53,115.51,9.942-8.364c-21.284-29.17-34.062-66.48-34.062-107.146,0-40.666,12.778-77.976,34.062-107.146Z" fill="#fff"/><path d="M428.202,363.614l9.942,7.428,68.53-114.574-68.53-115.51-9.942,8.364c21.284,29.17,34.062,66.48,34.062,107.146,0,40.666-12.778,77.976-34.062,107.146Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><g><path d="M262.568,221.05h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM277.718,308.549l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
+ SY:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M363.114,85.829l7.428-9.942L255.968,7.357l-115.51,68.53,8.364,9.942c29.17-21.284,66.48-34.062,107.146-34.062s77.976,12.778,107.146,34.062Z" fill="#fff"/><path d="M147.886,428.309l-7.428,9.942,114.574,68.53,115.51-68.53-8.364-9.942c-29.17,21.284-66.48,34.062-107.146,34.062-40.666,0-77.976-12.778-107.146-34.062Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><g><path d="M262.568,221.05h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM277.718,308.549l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
+ UP:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle cx="381.189" cy="260.328" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><circle cx="130.811" cy="260.328" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M189.644,131.103c0-36.589,29.767-66.355,66.355-66.355s66.355,29.767,66.355,66.355-29.767,66.356-66.355,66.356-66.355-29.768-66.355-66.356ZM302.355,131.103c0-25.561-20.795-46.355-46.355-46.355s-46.355,20.795-46.355,46.355,20.795,46.356,46.355,46.356,46.355-20.796,46.355-46.356Z" fill="#fff"/><circle cx="256" cy="390.897" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M401.89,258.404l-34.007-20.851c-1.702-1.043-3.889.181-3.889,2.177v41.702c0,1.996,2.187,3.221,3.889,2.177l34.007-20.851c1.625-.997,1.625-3.358,0-4.355Z" fill="#fff"/><path d="M107.641,262.758l34.007,20.851c1.702,1.043,3.889-.181,3.889-2.177v-41.702c0-1.996-2.187-3.221-3.889-2.177l-34.007,20.851c-1.625.997-1.625,3.358,0,4.355Z" fill="#fff"/><path d="M312.356,131.103c0-31.124-25.231-56.356-56.356-56.356s-56.356,25.231-56.356,56.356,25.231,56.356,56.356,56.356,56.356-25.231,56.356-56.356ZM254.765,144.627h-20.851c-1.996,0-3.221-2.187-2.177-3.889l20.851-34.007c.997-1.625,3.358-1.625,4.354,0l20.851,34.007c1.043,1.702-.181,3.889-2.177,3.889h-20.851Z" fill="#fff"/><path d="M256.942,413.085l20.851-34.007c1.043-1.702-.181-3.889-2.177-3.889h-41.702c-1.996,0-3.221,2.187-2.177,3.889l20.851,34.007c.997,1.625,3.358,1.625,4.355,0Z" fill="#fff"/></svg>',
+ X:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256,103.514c-84.081,0-152.486,68.405-152.486,152.486s68.405,152.486,152.486,152.486,152.487-68.405,152.487-152.486-68.405-152.486-152.487-152.486ZM293.224,333.057l-36.343-58.2-36.343,58.2-26.383-.229,47.982-78.776-41.121-68.402,26.383-.229,29.482,47.826,29.482-47.826,26.383.229-41.121,68.402,47.982,78.776-26.383.229Z" fill="#fff"/></svg>',
+ Y:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256,103.514c-84.081,0-152.486,68.405-152.486,152.486s68.405,152.486,152.486,152.486,152.487-68.405,152.487-152.486-68.405-152.486-152.487-152.486ZM265.264,263.315v64.198h-23.994v-64.198l-53.547-74.892,30.021.065,35.523,49.803,35.52-49.803,30.021-.065-53.544,74.892Z" fill="#fff"/></svg>',
+ ZL:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M196.343,120.032c-74.854,0-135.753,60.899-135.753,135.753v127.623h390.821V120.032h-255.068ZM258.232,297.733h-75.309v-16.452l49.492-59.257h-47.619v-19.262h72.9v16.453l-47.084,59.257h47.619v19.262ZM329.077,297.733h-58.47v-81.72h18.876v65.146h39.594v16.574Z" fill="#fff"/></svg>',
+ ZR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M321.53,120.032H66.464v263.376h390.82v-127.623c0-74.854-60.898-135.753-135.754-135.753ZM254.695,297.733h-75.309v-16.452l49.492-59.257h-47.619v-19.262h72.9v16.453l-47.084,59.257h47.619v19.262ZM313.915,297.733l-15.653-26.357h-12.315v26.357h-18.876v-81.72h36.831c3.836,0,7.384.806,10.646,2.417,3.261,1.611,6.08,3.723,8.46,6.331,2.377,2.609,4.238,5.564,5.582,8.863,1.342,3.3,2.014,6.638,2.014,10.013,0,2.532-.307,4.969-.92,7.309-.615,2.341-1.497,4.546-2.647,6.618-1.151,2.071-2.552,3.933-4.201,5.582s-3.511,3.051-5.582,4.201l17.955,30.386h-21.293Z" fill="#fff"/><path d="M302.635,232.588h-16.688v22.329h17.265c2.225,0,4.144-1.054,5.755-3.165,1.611-2.11,2.417-4.814,2.417-8.115,0-3.375-.921-6.061-2.763-8.057-1.842-1.995-3.838-2.993-5.985-2.993Z" fill="#fff"/></svg>'
+};
+
+var SLOTS_L=[
+ {id:"ZL",     name:"ZL",          fn:"BTN_ZL",      a:[.529,.061], col:"l",r:0},
+ {id:"L",      name:"L",           fn:"BTN_L",       a:[.538,.123], col:"l",r:1},
+
+ {id:"LS",     name:"Stick press", fn:"BTN_LS",      a:[.538,.439], col:"l",r:2},
+ {id:"UP",     name:"D-pad Up",    fn:"BTN_UP",      a:[.538,.572], col:"l",r:3},
+ {id:"LEFT",   name:"D-pad Left",  fn:"BTN_LEFT",    a:[.450,.623], col:"l",r:4},
+ {id:"RIGHT",  name:"D-pad Right", fn:"BTN_RIGHT",   a:[.626,.623], col:"l",r:5},
+ {id:"DOWN",   name:"D-pad Down",  fn:"BTN_DOWN",    a:[.540,.680], col:"l",r:6},
+ {id:"MINUS",  name:"Minus",       fn:"BTN_MINUS",   a:[.659,.337], col:"r",r:0},
+ {id:"SL",     name:"SL",          fn:"BTN_SL",      a:[.753,.445], col:"r",r:1,rail:1},
+ {id:"CAP",    name:"Capture",     fn:"BTN_CAPTURE", a:[.619,.754], col:"r",r:2},
+ {id:"SR",     name:"SR",          fn:"BTN_SR",      a:[.753,.750], col:"r",r:3,rail:1}
+];
+
+var SLOTS_R=[
+ {id:"PLUS",   name:"Plus",        fn:"RBTN_PLUS",   a:[.426,.337], col:"l",r:0},
+ {id:"SR",     name:"SR",          fn:"RBTN_SR",     a:[.329,.445], col:"l",r:1,rail:1},
+ {id:"RS",     name:"Stick press", fn:"RBTN_RS",     a:[.544,.623], col:"l",r:2},
+ {id:"SL",     name:"SL",          fn:"RBTN_SL",     a:[.329,.800], col:"l",r:3,rail:1},
+ {id:"ZR",     name:"ZR",          fn:"RBTN_ZR",     a:[.553,.061], col:"r",r:0},
+ {id:"R",      name:"R",           fn:"RBTN_R",      a:[.559,.123], col:"r",r:1},
+ {id:"X",      name:"X",           fn:"RBTN_X",      a:[.547,.394], col:"r",r:2},
+ {id:"A",      name:"A",           fn:"RBTN_A",      a:[.638,.443], col:"r",r:3},
+ {id:"B",      name:"B",           fn:"RBTN_B",      a:[.547,.492], col:"r",r:4},
+ {id:"Y",      name:"Y",           fn:"RBTN_Y",      a:[.456,.443], col:"r",r:5},
+ {id:"HOME",   name:"Home",        fn:"RBTN_HOME",   a:[.465,.754], col:"r",r:6},
+ {id:"C",      name:"C (chat)",    fn:"RBTN_C",      a:[.465,.828], col:"r",r:7}
+];
+
+var SRCS=[
+ {v:"",            name:"Not set"},
+ {v:"mouse_wheel", name:"Scroll wheel"},
+ {v:"mouse_dx",    name:"Cursor X"},
+ {v:"mouse_dy",    name:"Cursor Y"}
+];
+
+var AXES_R=[
+ {id:"AX",  name:"Cursor X",     v:"mouse_dx",    live:"dx"},
+ {id:"AY",  name:"Cursor Y",     v:"mouse_dy",    live:"dy"},
+ {id:"AW",  name:"Scroll wheel", v:"mouse_wheel", live:"wheel"},
+ {id:"SX",  name:"Stick X",      v:"stick_x",     src:1},
+ {id:"SY",  name:"Stick Y",      v:"stick_y",     src:1}
+];
+  
+var AXES_L=[
+ {id:"STICK_UP",    name:"Stick Up",    slot:1},
+ {id:"STICK_DOWN",  name:"Stick Down",  slot:1},
+ {id:"STICK_LEFT",  name:"Stick Left",  slot:1},
+ {id:"STICK_RIGHT", name:"Stick Right", slot:1}
+];
+
+var AXES=AXES_R;
+function axesFor(){ return side()==="L" ? AXES_L : AXES_R; }
+
+function decodeMouse(d,len){
+  var x=0,y=0,w=0,packed=false;
+  if(len===7){
+    x=d[2]|((d[3]&0x0F)<<8);
+    y=(d[3]>>4)|(d[4]<<4);
+    if(x&0x800) x-=0x1000;
+    if(y&0x800) y-=0x1000;
+    w=(d[5]<<24>>24);
+    packed=true;
+  }else if(len>=6&&len<=8){
+    x=(d[1]|(d[2]<<8))<<16>>16;
+    y=(d[3]|(d[4]<<8))<<16>>16;
+    w=(d[5]<<24>>24);
+  }else if(len>=4&&len<6){
+    x=(d[1]<<24>>24); y=(d[2]<<24>>24); w=(d[3]<<24>>24);
+  }else{
+    return null;
+  }
+  return {dx:x,dy:y,wheel:w,packed:packed,btn:d[0]};
+}
+
+var liveMouse=null;
+
+var KEYS={0x04:"A",0x05:"B",0x06:"C",0x07:"D",0x08:"E",0x09:"F",0x0A:"G",
+ 0x0B:"H",0x0C:"I",0x0D:"J",0x0E:"K",0x0F:"L",0x10:"M",0x11:"N",0x12:"O",
+ 0x13:"P",0x14:"Q",0x15:"R",0x16:"S",0x17:"T",0x18:"U",0x19:"V",0x1A:"W",
+ 0x1B:"X",0x1C:"Y",0x1D:"Z",0x1E:"1",0x1F:"2",0x20:"3",0x21:"4",0x22:"5",
+ 0x23:"6",0x24:"7",0x25:"8",0x26:"9",0x27:"0",0x28:"Enter",0x29:"Esc",
+ 0x2A:"Backspace",0x2B:"Tab",0x2C:"Space",0x2D:"-",0x2E:"=",0x2F:"[",
+ 0x30:"]",0x31:"\\",0x33:";",0x34:"'",0x35:"`",0x36:",",0x37:".",0x38:"/",
+ 0x39:"Caps",0x3A:"F1",0x3B:"F2",0x3C:"F3",0x3D:"F4",0x3E:"F5",0x3F:"F6",
+ 0x40:"F7",0x41:"F8",0x42:"F9",0x43:"F10",0x44:"F11",0x45:"F12",
+ 0x49:"Insert",0x4A:"Home",0x4B:"PgUp",0x4C:"Delete",0x4D:"End",0x4E:"PgDn",
+ 0x4F:"Right",0x50:"Left",0x51:"Down",0x52:"Up"};
+var MODS=[[0x01,"L Ctrl"],[0x02,"L Shift"],[0x04,"L Alt"],[0x08,"L Win"],
+          [0x10,"R Ctrl"],[0x20,"R Shift"],[0x40,"R Alt"],[0x80,"R Win"]];
+
+var conns=[];
+function connFor(side){
+  for(var i=0;i<conns.length;i++) if(conns[i].side===side) return conns[i];
+  return null;
+}
+function haveBoard(side){ return !!connFor(side); }
+var reports={},nReports=0;
+var bind={};
+var listening=null;
+var listenBase=null;
+
+var listenSeen={};
+
+function side(){ return $("selSide").value; }
+
+var sidePicked=false;
+
+function halfOf(id){
+  return id==="GL" ? "L" : id==="GR" ? "R" : side();
+}
+
+function kbdKey(id){ return "L|"+(halfOf(id)==="R" ? "R:"+id : id); }
+
+function mouseKey(id){ return "R|"+(halfOf(id)==="L" ? "L:"+id : id); }
+
+function slotKbd(id){ return bind[kbdKey(id)]; }
+function slotMouse(id){ var k=mouseKey(id); return k?bind[k]:undefined; }
+function slotOwn(id){ return side()==="R" ? slotMouse(id) : slotKbd(id); }
+function slotOther(id){ return side()==="R" ? slotKbd(id) : slotMouse(id); }
+function slotBind(id){ return slotOwn(id)||slotOther(id); }
+
+function setBoardSide(s){
+  if(s!=="L"&&s!=="R") return;
+
+  if(haveBoard("L")&&haveBoard("R")){ paint(); generate(); return; }
+
+  if(!sidePicked && $("selSide").value!==s){
+    $("selSide").value=s;
+
+    colsSwitch(s);
+  }
+  paint(); applyColors(); generate();
+}
+function slots(){ return side()==="L" ? SLOTS_L : SLOTS_R; }
+
+var XD_IDS=[[0x2FE3,0x0005,"L"],[0x2FE3,0x0004,"R"]], opening=[], refused=[], userClosed=false, twoSaid=false;
+var TWO_XD="Two XD2Joys are plugged in. Unplug one.";
+function readFail(s){ return "Couldn't read the "+sideWord(s)+" board. Unplug it and plug it back in."; }
+var USE_USB=("usb" in navigator)&&(/Android/i.test(navigator.userAgent)||!("serial" in navigator)), usbWraps=new Map();
+
+function UsbSerialPort(dev){ this.dev=dev; this.readable=null; this.writable=null; }
+UsbSerialPort.prototype.getInfo=function(){
+  return {usbVendorId:this.dev.vendorId,usbProductId:this.dev.productId};
+};
+UsbSerialPort.prototype.open=async function(){
+  var d=this.dev,itfs,ctrl=null,data=null,alt,epIn=null,epOut=null,i,k,err;
+  if(d.opened){ err=new Error("The port is already open."); err.name="InvalidStateError"; throw err; }
+  await d.open();
+  if(!d.configuration) await d.selectConfiguration(1);
+  itfs=d.configuration.interfaces;
+  for(i=0;i<itfs.length;i++){
+    k=(itfs[i].alternate||itfs[i].alternates[0]).interfaceClass;
+    if(k===2&&!ctrl) ctrl=itfs[i];
+    if(k===10&&!data) data=itfs[i];
+  }
+  if(!ctrl||!data){ await d.close(); throw new Error("no serial port on this device"); }
+  await d.claimInterface(ctrl.interfaceNumber);
+  await d.claimInterface(data.interfaceNumber);
+  alt=data.alternate||data.alternates[0];
+  for(i=0;i<alt.endpoints.length;i++){
+    if(alt.endpoints[i].direction==="in") epIn=alt.endpoints[i]; else epOut=alt.endpoints[i];
+  }
+  await d.controlTransferOut({requestType:"class",recipient:"interface",request:0x20,value:0,index:ctrl.interfaceNumber},
+                             new Uint8Array([0x00,0xC2,0x01,0x00,0,0,8]));
+  await d.controlTransferOut({requestType:"class",recipient:"interface",request:0x22,value:0x03,index:ctrl.interfaceNumber});
+  this.readable=new ReadableStream({
+    pull:async function(ctl){
+      var r;
+      try{ r=await d.transferIn(epIn.endpointNumber,epIn.packetSize*8); }
+      catch(e){ try{ ctl.error(e); }catch(e2){} return; }
+      if(r.status==="stall"){ try{ await d.clearHalt("in",epIn.endpointNumber); }catch(e){} return; }
+      if(r.data&&r.data.byteLength){
+        try{ ctl.enqueue(new Uint8Array(r.data.buffer,r.data.byteOffset,r.data.byteLength)); }catch(e){}
+      }
+    }
+  });
+  this.writable=new WritableStream({
+    write:function(chunk){ return d.transferOut(epOut.endpointNumber,chunk); }
+  });
+};
+UsbSerialPort.prototype.close=async function(){
+  var d=this.dev;
+  this.readable=null; this.writable=null;
+  if(d.opened) await d.close();
+};
+UsbSerialPort.prototype.forget=function(){
+  return this.dev.forget ? this.dev.forget() : Promise.resolve();
+};
+
+function usbPort(dev){
+  var w=usbWraps.get(dev);
+  if(!w){ w=new UsbSerialPort(dev); usbWraps.set(dev,w); }
+  return w;
+}
+
+function hasPorts(){ return USE_USB||("serial" in navigator); }
+
+async function pickPort(){
+  if(USE_USB){
+    return usbPort(await navigator.usb.requestDevice({filters:XD_IDS.map(function(d){
+      return {vendorId:d[0],productId:d[1]};
+    })}));
+  }
+  return navigator.serial.requestPort({filters:XD_IDS.map(function(d){
+    return {usbVendorId:d[0],usbProductId:d[1]};
+  })});
+}
+
+async function grantedPorts(){
+  if(USE_USB) return (await navigator.usb.getDevices()).map(usbPort);
+  return navigator.serial.getPorts();
+}
+
+function connSay(msg){
+  $("connErr").textContent=msg||"";
+}
+
+async function connect(){
+  if(!hasPorts()){
+    alert("This browser can't reach USB devices. Use Chrome or Edge.");
+    return;
+  }
+  connSay("");
+  var p;
+  try{
+    p=await pickPort();
+  }catch(e){ return; }
+  userClosed=false;
+  if(refused.indexOf(p)>=0) refused.splice(refused.indexOf(p),1);
+  await openConn(p,false);
+  openGranted();
+}
+
+async function openConn(p,quiet){
+  var i,c,s=xdSide(p);
+  for(i=0;i<conns.length;i++){
+    if(conns[i].port===p){ if(!quiet) connSay("That board is already connected."); return false; }
+  }
+  if(opening.indexOf(p)>=0) return false;
+  if(s&&sideBusy(s)){
+    if(!quiet){ connSay("The "+sideWord(s)+" board is already connected."); twoSaid=true; }
+    return false;
+  }
+  opening.push(p);
+  try{
+    try{
+      await p.open({baudRate:115200});
+    }catch(e){
+      if(e.name!=="InvalidStateError"){ if(!quiet) connSay("Couldn't open the board. Close any other app using it."); return false; }
+      try{ await p.close(); await p.open({baudRate:115200}); }
+      catch(e2){ if(!quiet) connSay("Couldn't open the board. Unplug it and plug it back in."); return false; }
+    }
+  }finally{
+    opening.splice(opening.indexOf(p),1);
+  }
+  c={port:p,reader:null,keep:true,buf:"",side:null,pside:s};
+  conns.push(c); connSay("");
+  connNote(); c.loop=readLoop(c);
+  loadFromBoard(c);
+  return true;
+}
+
+function xdSide(p){
+  var info=(p&&p.getInfo)?p.getInfo():{},i;
+  for(i=0;i<XD_IDS.length;i++){
+    if(info.usbVendorId===XD_IDS[i][0]&&info.usbProductId===XD_IDS[i][1]) return XD_IDS[i][2];
+  }
+  return null;
+}
+
+function sideBusy(s){
+  var i;
+  for(i=0;i<conns.length;i++) if((conns[i].side||conns[i].pside)===s) return true;
+  for(i=0;i<opening.length;i++) if(xdSide(opening[i])===s) return true;
+  return false;
+}
+
+async function openGranted(){
+  if(!hasPorts()||userClosed) return;
+  var ps,i,s,by={L:[],R:[]};
+  try{ ps=await grantedPorts(); }catch(e){ return; }
+  for(i=0;i<ps.length;i++){
+    s=xdSide(ps[i]);
+    if(s&&refused.indexOf(ps[i])<0) by[s].push(ps[i]);
+  }
+  if(by.L.length>1||by.R.length>1){
+    if(!twoSaid) connSay(TWO_XD);
+    twoSaid=true;
+    return;
+  }
+  if($("connErr").textContent===TWO_XD) connSay("");
+  twoSaid=false;
+  for(s in by) if(by[s].length&&!sideBusy(s)) await openConn(by[s][0],true);
+}
+
+async function dropStranger(c){
+  connSay("That's not an XD2Joy board.");
+  refused.push(c.port);
+  await closeConn(c);
+  connDrop(c);
+  try{ if(c.port.forget) await c.port.forget(); }catch(e){}
+  openGranted();
+}
+
+async function readLoop(c){
+  var tries=0,at,dec,done,r,p,i;
+  while(c.keep&&c.port.readable){
+    at=Date.now();
+    dec=new TextDecoderStream();
+    done=c.port.readable.pipeTo(dec.writable).catch(function(){});
+    c.reader=dec.readable.getReader();
+    try{
+      while(c.keep){
+        r=await c.reader.read();
+        if(r.done) break;
+        c.buf+=r.value;
+        p=c.buf.split("\n"); c.buf=p.pop();
+
+        for(i=0;i<p.length;i++){
+          try{ onLine(p[i].replace(/\r$/,""),c); }
+          catch(e){}
+        }
+      }
+    }catch(e){}
+    try{c.reader.releaseLock();}catch(e){}
+    await done;
+    if(!c.keep||c.port instanceof UsbSerialPort) break;
+    if(Date.now()-at>5000) tries=0;
+    if(++tries>3) break;
+    c.buf="";
+  }
+
+  if(c.keep){
+    c.keep=false;
+    try{ await c.port.close(); }catch(e){}
+    connDrop(c);
+  }
+}
+
+function settle(p,ms){
+  return Promise.race([Promise.resolve(p).catch(function(){}),
+                       new Promise(function(r){ setTimeout(r,ms); })]);
+}
+
+async function closeConn(c){
+  c.keep=false;
+  try{ if(c.reader) await c.reader.cancel(); }catch(e){}
+  await settle(c.loop,2000);
+  await settle(c.txq,2000);
+  try{ if(c.port) await c.port.close(); }catch(e){}
+}
+
+function connDrop(c){
+  var i=conns.indexOf(c),k;
+  if(i<0) return;
+  conns.splice(i,1);
+  if(c.side&&!edited[c.side]){
+    for(k in bind) if(boardOf(k)===c.side) delete bind[k];
+    bindSrc[c.side]=null;
+    bindRecall(c.side);
+  }
+  if(!conns.length) sidePicked=false;
+  connNote(); paint(); generate();
+}
+
+async function disconnect(){
+  userClosed=true;
+  var list=conns.slice();
+  for(var i=0;i<list.length;i++){ await closeConn(list[i]); connDrop(list[i]); }
+  conns=[]; sidePicked=false;
+  connNote(); paint(); generate();
+}
+
+var mapGateAt=null;
+function mapGate(){
+  var g=$("mapGate"), r=$("mapReady"), ready=0, i;
+
+  if(!g||!r) return;
+  for(i=0;i<conns.length;i++) if(conns[i].side) ready++;
+  var want = ready ? "ready" : (conns.length ? "connecting" : "none");
+  if(want===mapGateAt) return;
+  mapGateAt=want;
+  g.style.display = (want==="ready") ? "none" : "";
+  r.style.display = (want==="ready") ? "" : "none";
+  if(want==="ready"){
+    if(typeof requestAnimationFrame==="function") requestAnimationFrame(paint);
+    return;
+  }
+  var img=$("mapGateImg"), msg=$("mapGateMsg");
+  if(img){
+    img.src = (want==="connecting") ? "Connecting.png" : "NoConnection.png";
+    img.alt = (want==="connecting") ? "Connecting" : "No board connected";
+  }
+  if(msg){
+    msg.textContent = (want==="connecting")
+      ? "Connected!"
+      : "Connect a board to start";
+  }
+}
+
+function connNote(){
+  var L=haveBoard("L"), R=haveBoard("R"), un=0,i;
+  for(i=0;i<conns.length;i++) if(!conns[i].side) un++;
+
+  $("pConn").textContent = (!conns.length) ? "not connected"
+    : (L&&R ? "Keyboard and mouse connected"
+            : [L?"Keyboard connected":null, R?"Mouse connected":null,
+               un?(un+" waiting"):null].filter(Boolean).join(", "));
+  $("pConn").className=conns.length?"pill on":"pill";
+  $("bConn").textContent=conns.length?"Connect another board":"Connect board";
+  $("bDisc").disabled=!conns.length;
+  var ready=0;
+  for(i=0;i<conns.length;i++) if(conns[i].side) ready++;
+  $("bCfgApply").disabled=!ready;
+  $("bCfgDefault").disabled=!ready;
+  devPaint();
+  mapGate();
+  showHalf();
+  paintMode();
+  if(!conns.length) $("cfgOut").textContent="Connect a board.";
+  else if(!ready) $("cfgOut").textContent="Connected.";
+}
+var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|HID|HIDLNK|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE) *\]/;
+var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] shortcut key |JC\] connect failed |HID\] (?:kbd|mouse)=)/;
+var TAG_RE=new RegExp(TAG_WIDE.source+"|"+TAG_BARE.source);
+
+function onLine(ln,c){
+  if(!ln) return;
+  c=c||{};
+
+  var cut=ln.slice(1).search(TAG_RE);
+  if(cut>=0){ onLine(ln.slice(0,cut+1),c); onLine(ln.slice(cut+1),c); return; }
+
+  var m=ln.match(/\[MAP\s*\]\s*(.*)$/);
+  if(m){ onMapLine(m[1].trim(),c); return; }
+
+  m=ln.match(/\[RAW\s*\]\s*h=0x([0-9A-Fa-f]+)\s+len=(\d+):\s*(.*)$/);
+  if(m){
+    ingest(parseInt(m[1],16),parseInt(m[2],10),
+      m[3].trim().split(/\s+/).filter(function(x){return x;})
+          .map(function(x){return parseInt(x,16);}), c.side||"?");
+    return;
+  }
+  m=ln.match(/\[PROF\s*\]\s*(.*)$/);
+  if(m){ onProfLine(m[1].trim(),c.side,c); return; }
+  m=ln.match(/\[SYNC\s*\]\s*shortcut key 0x([0-9A-Fa-f]{2}) mods 0x([0-9A-Fa-f]{2}) (on|off)/);
+  if(m){ onSyncLine(parseInt(m[1],16),parseInt(m[2],16),m[3]==="on",c); return; }
+  m=ln.match(/\[GRIP\s*\]\s*(off\b|byte 0x04)/);
+  if(m&&c.gripWait) c.gripWait();
+
+  m=ln.match(/\[CFG\s*\]\s*(.*)$/);
+  if(m){ onCfgLine(m[1].trim(),c); return; }
+  m=ln.match(/\[SCAN\s*\]\s*(.*)$/);
+  if(m){ onScanLine(m[1].trim(),c); return; }
+  m=ln.match(/\[PEER\s*\]\s*(.*)$/);
+  if(m){ onPeerLine(m[1].trim(),c); return; }
+  m=ln.match(/\[MODE\s*\]\s*(?:now\s+|already\s+)?([A-Z]+)\b/);
+  if(m){ onModeNow(m[1],c); return; }
+
+  if(c.port && /\[MOUSE\s*\].*(CONNECTED|DISCONNECTED)/.test(ln)){
+    setTimeout(function(){ devSend(c,"peer?",true); },400);
+  }
+
+  if(c.port && /^\[(MOUSE|HID|JC)\s*\]/.test(ln)) devEvent(ln,c);
+}
+
+function onCfgLine(rest,c){
+  if(c.cfgWait&&c.cfgWait.re.test(rest)) c.cfgWait.hit(rest);
+}
+
+var HOTKEY_MODS=[[0x01,"Ctrl"],[0x10,"Right Ctrl"],[0x04,"Alt"],[0x40,"Right Alt"],
+                 [0x02,"Shift"],[0x20,"Right Shift"],[0x08,"Win"],[0x80,"Right Win"]];
+
+var HOTKEY_MODBITS={ControlLeft:0x01,ShiftLeft:0x02,AltLeft:0x04,MetaLeft:0x08,
+  OSLeft:0x08,ControlRight:0x10,ShiftRight:0x20,AltRight:0x40,MetaRight:0x80,
+  OSRight:0x80};
+var HOTKEY_CODES=(function(){
+  var t={Enter:0x28,Escape:0x29,Backspace:0x2A,Tab:0x2B,Space:0x2C,Minus:0x2D,
+    Equal:0x2E,BracketLeft:0x2F,BracketRight:0x30,Backslash:0x31,IntlHash:0x32,
+    Semicolon:0x33,Quote:0x34,Backquote:0x35,Comma:0x36,Period:0x37,Slash:0x38,
+    CapsLock:0x39,PrintScreen:0x46,ScrollLock:0x47,Pause:0x48,Insert:0x49,
+    Home:0x4A,PageUp:0x4B,Delete:0x4C,End:0x4D,PageDown:0x4E,ArrowRight:0x4F,
+    ArrowLeft:0x50,ArrowDown:0x51,ArrowUp:0x52,NumLock:0x53,NumpadDivide:0x54,
+    NumpadMultiply:0x55,NumpadSubtract:0x56,NumpadAdd:0x57,NumpadEnter:0x58,
+    Numpad0:0x62,NumpadDecimal:0x63,IntlBackslash:0x64,ContextMenu:0x65,
+    NumpadEqual:0x67},i;
+  for(i=0;i<26;i++) t["Key"+String.fromCharCode(65+i)]=0x04+i;
+  for(i=1;i<=9;i++){ t["Digit"+i]=0x1D+i; t["Numpad"+i]=0x58+i; }
+  t.Digit0=0x27;
+  for(i=1;i<=24;i++) t["F"+i]=(i<=12)?0x39+i:0x5B+i;
+  return t;
+})();
+
+var HOTKEY_NAMES={0x32:"#",0x46:"PrtSc",0x47:"ScrLk",0x48:"Pause",
+  0x53:"NumLock",0x54:"Num /",0x55:"Num *",0x56:"Num -",0x57:"Num +",
+  0x58:"Num Enter",0x62:"Num 0",0x63:"Num .",0x64:"\\ (ISO)",0x65:"Menu",
+  0x67:"Num ="};
+
+var MODE_LIST=[[1,"Keyboard"],[2,"Right Thumbstick"]];
+var modeCuts={1:null,2:null};
+
+var PROFILES=4;
+var profState={act:0,by:{L:0,R:0},split:false,slot:[null,null,null,null],
+               slotBy:{L:[null,null,null,null],R:[null,null,null,null]}};
+
+function profSetSlot(n,side,rec){
+  var a,b;
+
+  if(side!=="L"&&side!=="R"){ profState.slot[n-1]=rec; return; }
+  profState.slotBy[side][n-1]=rec;
+  a=profState.slotBy.L[n-1]; b=profState.slotBy.R[n-1];
+  if(!a||!b){ profState.slot[n-1]=a||b; return; }
+  profState.slot[n-1]={filled:a.filled||b.filled,
+                       code:a.code?a.code:b.code, mods:a.code?a.mods:b.mods,
+                       name:a.name||b.name};
+}
+
+function profCut(n){
+  var p=profState.slot[n-1];
+  return (p&&p.code) ? {code:p.code,mods:p.mods,mode:n} : null;
+}
+
+var profSplitT=null;
+
+function profSetAct(n,side){
+  var L,R,differ;
+
+  if(side) profState.by[side]=n;
+  L=profState.by.L; R=profState.by.R;
+  differ=!!(L&&R&&L!==R);
+
+  if(!differ){
+    if(profSplitT){ clearTimeout(profSplitT); profSplitT=null; }
+    profState.split=false;
+  }else if(!profSplitT&&!profState.split){
+    profSplitT=setTimeout(function(){
+      profSplitT=null;
+      profState.split=true;
+      profState.act=0;
+      paintProf();
+    },3000);
+  }
+  profState.act=profState.split ? 0 : (n||L||R);
+  paintProf();
+}
+
+var modeListening=0;
+var cutTarget="mode";
+var modeHeldDone=0;
+
+var syncState={code:0,mods:0,on:false,known:false};
+var syncPending=null, syncFail="";
+
+var modeMods=0, modeBuilding=false, modeFrom="";
+
+var modeSwallowUp="";
+
+var STICK_SENS_DEFAULT=10, STICK_SENS_MIN=1;
+
+var STICK_SENS_MAX=10, STICK_SENS_SLIDER=10;
+var stickSens=STICK_SENS_DEFAULT;
+
+var sensEdited=false;
+
+var STICK_DZ_DEFAULT=29, STICK_DZ_MIN=0, STICK_DZ_MAX=40;
+var stickDz=STICK_DZ_DEFAULT, dzEdited=false;
+var STICK_VG_DEFAULT=5, STICK_VG_MIN=1, STICK_VG_MAX=20;
+var stickVg=STICK_VG_DEFAULT, vgEdited=false;
+
+var MOUSE_SENS_DEFAULT=420, MOUSE_SENS_MIN=10, MOUSE_SENS_MAX=1000;
+var mouseAccel=true;
+var mouseSens=MOUSE_SENS_DEFAULT;
+
+var msensEdited=false;
+
+var msensStored=null;
+
+var gripState={L:null,R:null};
+
+var userEdited=false;
+
+var edited={L:false,R:false};
+function markEdited(s){
+  if(s==="L"||s==="R") edited[s]=true;
+  userEdited=edited.L||edited.R;
+}
+
+var cleared={L:false,R:false}, bindSrc={L:null,R:null};
+
+var colEdited={L:false,R:false};
+function markColors(s){
+  if(s==="L"||s==="R") colEdited[s]=true;
+  markEdited(s);
+}
+
+function boardOf(k){
+  if(k.charAt(1)==="|") return k.charAt(0);
+  return isAxis(k) ? "R" : null;
+}
+
+var BIND_MEM="jc2.bind.";
+
+function bindRemember(sd){
+  var out={},k;
+
+  for(k in bind){
+    if(boardOf(k)!==sd||(bind[k]&&bind[k].mem)) continue;
+    out[k]=bind[k];
+  }
+  try{ localStorage.setItem(BIND_MEM+sd,JSON.stringify(out)); }catch(e){}
+}
+
+function bindRecall(sd){
+  var raw=null,o=null,k;
+
+  if(haveBoard(sd)||edited[sd]) return;
+  try{ raw=localStorage.getItem(BIND_MEM+sd); }catch(e){}
+  if(!raw) return;
+  try{ o=JSON.parse(raw); }catch(e){ return; }
+  if(!o||typeof o!=="object") return;
+  for(k in o){
+    if(boardOf(k)!==sd||bind[k]||!o[k]||typeof o[k]!=="object") continue;
+    o[k].mem=true;
+    bind[k]=o[k];
+  }
+}
+
+var cfgExtras={L:[],R:[]};
+
+function cfgLocked(c,fn){
+  c.cfgBusy=(c.cfgBusy||0)+1;
+  c.cfgq=(c.cfgq||Promise.resolve()).catch(function(){}).then(fn)
+    .finally(function(){ c.cfgBusy--; });
+  return c.cfgq;
+}
+
+function lineExpect(c,slot,ms){
+  return new Promise(function(res){
+    var t=setTimeout(function(){ c[slot]=null; res(false); },ms);
+    c[slot]=function(){ clearTimeout(t); c[slot]=null; res(true); };
+  });
+}
+
+function keyRec(code){
+  return {kind:"key",code:code,mask:0,byteIdx:1,handle:0,len:0,
+          text:(KEYS[code]||("key 0x"+hex2(code)))};
+}
+function modRec(bits){
+  return {kind:"mod",code:0,mask:bits,byteIdx:0,handle:0,len:0,
+          text:(bitNames(bits,MODS)||("modifier 0x"+hex2(bits)))};
+}
+function bitRec(bits){
+  return {kind:"bit",code:0,mask:bits,byteIdx:0,handle:0,len:0,
+          text:(bitNames(bits,MOUSEBTN)||("button bit 0x"+hex2(bits)))};
+}
+function wheelRec(dir){
+  return {kind:"wheel",code:dir,mask:0,byteIdx:-1,handle:0,len:0,
+          text:(dir===1?"Scroll up":dir===2?"Scroll down"
+                                           :("scroll 0x"+hex2(dir)))};
+}
+function srcRec(v){
+  for(var k in SRC_ID)
+    if(k && SRC_ID[k]===v)
+      return {kind:"src",src:k,text:SRC_NAME[v],byteIdx:-1,mask:0,code:0,
+              handle:0,len:0};
+  return null;
+}
+
+function pageFromBlob(bytes){
+  var c=cfgRead(bytes);
+  if(!c) return null;
+  var s=(c.side===0x67)?"L":(c.side===0x66)?"R":null;
+  if(!s) return null;
+  var out={side:s,bind:{},modes:{1:null,2:null},sens:c.sens,
+           msens:c.msens,maccel:c.maccel,dz:c.dz,vg:c.vg,col:c.col,extras:[]},i,e,ok;
+
+  function put(slot,rec){
+    if(!slot||out.bind[slot]) return false;
+    out.bind[slot]=rec;
+    return true;
+  }
+  function rname(m){ return RMASK_NAME[m] ? "R:"+RMASK_NAME[m] : null; }
+  function lname(m){ return LMASK_NAME[m] ? "L:"+LMASK_NAME[m] : null; }
+  for(i=0;i<c.btn.length;i++){
+    e=c.btn[i]; ok=false;
+    if(e.kind===K_KEY)          ok=put(LMASK_NAME[e.mask],keyRec(e.code));
+    else if(e.kind===K_MOD)     ok=put(LMASK_NAME[e.mask],modRec(e.code));
+    else if(e.kind===K_PEER)    ok=put(rname(e.mask),keyRec(e.code));
+    else if(e.kind===K_PEERMOD) ok=put(rname(e.mask),modRec(e.code));
+    else if(e.kind===K_STICK)   ok=put(STICK_NAME[e.mask],keyRec(e.code));
+    else if(e.kind===K_MOUSE)   ok=put(RMASK_NAME[e.mask],bitRec(e.code));
+    else if(e.kind===K_MPEER)   ok=put(lname(e.mask),bitRec(e.code));
+    else if(e.kind===K_WHEEL&&(e.code===1||e.code===2))
+      ok=put(RMASK_NAME[e.mask],wheelRec(e.code));
+    else if(e.kind===K_WPEER&&(e.code===1||e.code===2))
+      ok=put(lname(e.mask),wheelRec(e.code));
+    else if(e.kind===K_MODE){
+      var md=(e.mask>>8)&0xFF;
+      if(out.modes[md]===null) out.modes[md]={code:e.code,mods:e.mask&0xFF,mode:md};
+      ok=true;
+    }else if(e.kind===K_SET&&e.code===SET_STICK_GAIN) ok=true;
+    else if(e.kind===K_SET&&e.code===SET_MOUSE_GAIN) ok=true;
+    else if(e.kind===K_SET&&e.code===SET_ACCEL) ok=true;
+    else if(e.kind===K_SET&&e.code===SET_STICK_DZ) ok=true;
+    else if(e.kind===K_SET&&e.code===SET_STICK_VG) ok=true;
+    if(!ok) out.extras.push({code:e.code,kind:e.kind,mask:e.mask});
+  }
+  if(s==="R"){
+    var ax=srcRec(c.sx), ay=srcRec(c.sy);
+    if(ax) out.bind.SX=ax;
+    if(ay) out.bind.SY=ay;
+  }
+  return out;
+}
+
+function boardColors(s,col){
+  fwCols[s]=col;
+  if(!colEdited[s]){
+    colsBy[s]=col;
+    if(colsSide===s&&JSON.stringify(colors()).toUpperCase()!==
+       JSON.stringify(col).toUpperCase()) setPreset(col);
+  }
+  showHalf();
+}
+
+function loadBoardIntoPage(p,keepCols){
+  var own=p.side+"|",k;
+  for(k in bind) if(boardOf(k)===p.side) delete bind[k];
+  for(k in p.bind) bind[isAxis(k)?k:(own+k)]=p.bind[k];
+  cfgExtras[p.side]=p.extras;
+  if(p.side==="L"){ modeCuts[1]=p.modes[1]; modeCuts[2]=p.modes[2]; paintMode(); }
+  if(p.side==="R"){
+    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false;
+    if(p.sens!==null){ stickSens=p.sens; paintSens(); }
+    msensStored=p.msens;
+    if(p.msens!==null) mouseSens=p.msens;
+    mouseAccel=!!p.maccel;
+    paintMSens();
+    if(p.dz!==null) stickDz=Math.min(Math.round(p.dz/10),STICK_DZ_MAX);
+    if(p.vg!==null) stickVg=Math.min(p.vg,STICK_VG_MAX);
+    paintStickMore();
+  }
+  edited[p.side]=false;
+  userEdited=edited.L||edited.R;
+  bindSrc[p.side]="board"; cleared[p.side]=false;
+  if(!keepCols) colEdited[p.side]=false;
+  if(p.col) boardColors(p.side,p.col);
+  bindRemember(p.side);
+  bindRecall(p.side==="L"?"R":"L");
+  paint(); generate();
+}
+
+function loadFromBoard(c){
+  if(c.loading||!c.keep) return;
+  c.loading=true;
+  cfgLocked(c,async function(){
+    var p=pageFromBlob(await cfgAsk(c));
+    if(!p) throw new Error("its config did not read back");
+    if(!c.side){ c.side=p.side; connNote(); }
+    if(!edited[p.side]) loadBoardIntoPage(p);
+    else if(!bindSrc[p.side]){ loadBoardIntoPage(p,true); markEdited(p.side); }
+    else cfgExtras[p.side]=p.extras;
+    if($("connErr").textContent===readFail(c.side)) connSay("");
+    c.loaded=true; c.loadTries=0; devSend(c,"mode?");
+  }).catch(function(e){
+    if(!c.keep) return;
+    c.loadTries=(c.loadTries||0)+1;
+    if(!c.side){
+      if(c.loadTries>=2){ dropStranger(c); return; }
+    }
+    if(c.loadTries<5) setTimeout(function(){ loadFromBoard(c); },1500);
+    else connSay(readFail(c.side));
+  }).then(function(){ c.loading=false; });
+}
+
+function mapReady(){
+  return conns.every(function(c){ return c.loaded; });
+}
+var HINT_LOADING="Still loading, try again in a second.";
+
+function onProfLine(rest,side,c){
+  var m;
+  if((m=rest.match(/^active\s+(\d+)\s+of\s+\d+/))){
+    profSetAct(parseInt(m[1],10),side);
+    return;
+  }
+  if((m=rest.match(/^now on\s+(\d+)/))){
+    profSetAct(parseInt(m[1],10),side);
+    profSyncSoon();
+    return;
+  }
+  if((m=rest.match(/^(\d+)\s+(saved|empty)\s+key\s+0x([0-9A-Fa-f]{2})\s+mods\s+0x([0-9A-Fa-f]{2})\s*(.*)$/))){
+    var n=parseInt(m[1],10);
+    if(n>=1&&n<=PROFILES){
+      profSetSlot(n,side,{filled:(m[2]==="saved"),code:parseInt(m[3],16),
+                          mods:parseInt(m[4],16),name:m[5].trim()});
+      paintProf();
+    }
+    if(n===PROFILES&&c&&c.profWait) c.profWait();
+  }
+}
+
+function onMapLine(rest,c){
+  var m,sd;
+  c=c||{};
+  if((m=rest.match(/^side=([LR])\s+tag=(\S+)/))){
+    c.mapSide=m[1];
+
+    if(c.port!==undefined||c.buf!==undefined){ c.side=m[1]; connNote(); }
+    return;
+  }
+  sd=c.mapSide;
+  if(!sd) return;
+
+  if(rest==="end"){
+    if(!c.loaded) setBoardSide(sd);
+
+    if(c.port&&!c.loaded) loadFromBoard(c);
+    c.mapSide=null;
+    return;
+  }
+
+  if((m=rest.match(/^mode\s+([0-9A-Fa-f]{2})\s+([0-9A-Fa-f]{2})\s+(\S+)$/))){
+    if(!userEdited&&!modeBusy&&!modeLater){
+      var mm=(m[3]==="KEYBOARD")?1:(m[3]==="STICK")?2:0;
+      if(mm) modeCuts[mm]={code:parseInt(m[1],16),mods:parseInt(m[2],16),
+                           mode:mm};
+      paintMode();
+    }
+    return;
+  }
+
+  if((m=rest.match(/^sens\s+(\d+)$/))){
+    var sv2=parseInt(m[1],10);
+    if(sd==="R"&&!sensEdited&&sv2>=STICK_SENS_MIN){
+      stickSens=Math.min(sv2,STICK_SENS_MAX); paintSens();
+    }
+    return;
+  }
+
+  if((m=rest.match(/^prof\s+act\s+(\d+)$/))){
+    profSetAct(parseInt(m[1],10),sd);
+    return;
+  }
+  if((m=rest.match(/^prof\s+([1-9])\s+([01])\s+([0-9A-Fa-f]{2})\s+([0-9A-Fa-f]{2})\s?(.*)$/))){
+    var pn=parseInt(m[1],10);
+    if(pn>=1&&pn<=PROFILES){
+      profSetSlot(pn,sd,{filled:(m[2]==="1"),code:parseInt(m[3],16),
+                         mods:parseInt(m[4],16),name:m[5].trim()});
+      paintProf();
+    }
+    return;
+  }
+
+  if((m=rest.match(/^grip\s+([01])$/))){
+    gripState[sd]=(m[1]==="1");
+    renderGrip();
+    return;
+  }
+
+  if((m=rest.match(/^msens\s+(\d+)$/))){
+    var mv2=parseInt(m[1],10);
+    if(sd==="R"){
+
+      if(!msensEdited&&mv2>=MOUSE_SENS_MIN&&mv2<=MOUSE_SENS_MAX&&
+         (msensStored===null||msensStored===mv2)){
+        mouseSens=mv2;
+      }
+      paintMSens();
+    }
+    return;
+  }
+  if((m=rest.match(/^stickdz\s+(\d+)$/))){
+    var dz2=Math.round(parseInt(m[1],10)/10);
+    if(sd==="R"&&!dzEdited&&dz2>=STICK_DZ_MIN){
+      stickDz=Math.min(dz2,STICK_DZ_MAX); paintStickMore();
+    }
+    return;
+  }
+  if((m=rest.match(/^stickvg\s+(\d+)$/))){
+    var vg2=parseInt(m[1],10);
+    if(sd==="R"&&!vgEdited&&vg2>=STICK_VG_MIN){
+      stickVg=Math.min(vg2,STICK_VG_MAX); paintStickMore();
+    }
+    return;
+  }
+  if((m=rest.match(/^colors\s+([0-9A-Fa-f]{6})\s+([0-9A-Fa-f]{6})\s+([0-9A-Fa-f]{6})\s+([0-9A-Fa-f]{6})/))){
+    boardColors(sd,{body:"#"+m[1].toUpperCase(),
+                    btn:"#"+m[2].toUpperCase(),
+                    rail:"#"+m[3].toUpperCase(),
+                    stick:"#"+m[4].toUpperCase()});
+    return;
+  }
+  if((m=rest.match(/^sync\s+([0-9A-Fa-f]{2})\s+mods\s+([0-9A-Fa-f]{2})\s+(on|off)/))){
+    onSyncLine(parseInt(m[1],16),parseInt(m[2],16),m[3]==="on",null);
+    return;
+  }
+}
+
+function ingest(handle,len,bytes,src){
+  var k=(src||"?")+":"+handle+":"+len, r=reports[k];
+  if(!r){ r={handle:handle,len:len,src:src||"?",latest:bytes.slice(),
+             changed:bytes.map(function(){return false;}),n:0}; reports[k]=r; }
+  for(var i=0;i<bytes.length&&i<r.latest.length;i++)
+    if(bytes[i]!==r.latest[i]) r.changed[i]=true;
+  r.latest=bytes.slice(); r.n++; nReports++;
+
+  if(r.src==="R"){
+    var dm=decodeMouse(bytes,len);
+    if(dm){ liveMouse=dm; wheelNotch(dm.wheel); showLive(); }
+  }
+  if(listening) tryCapture(k,r);
+
+  if(modeListening&&r.src==="L") tryModeCapture(r);
+  showHeld();
+  renderRaw();
+}
+
+function modeRowName(m){
+  for(var i=0;i<MODE_LIST.length;i++) if(MODE_LIST[i][0]===m) return MODE_LIST[i][1];
+  return "mode "+m;
+}
+function hotkeyName(code){
+  if(KEYS[code]) return KEYS[code];
+  if(HOTKEY_NAMES[code]) return HOTKEY_NAMES[code];
+  if(code>=0x59&&code<=0x61) return "Num "+(code-0x58);
+  if(code>=0x68&&code<=0x73) return "F"+(code-0x5B);
+  return "key 0x"+hex2(code);
+}
+
+function modeComboText(code,mods){
+  var parts=[],i;
+  for(i=0;i<HOTKEY_MODS.length;i++)
+    if(mods&HOTKEY_MODS[i][0]) parts.push(HOTKEY_MODS[i][1]);
+  if(code) parts.push(hotkeyName(code));
+  return parts.join(" + ");
+}
+
+function modeClash(m,cut){
+  var i,j,ra,rb,a,b;
+  for(i=0;i<MODE_LIST.length;i++){
+    for(j=i+1;j<MODE_LIST.length;j++){
+      ra=MODE_LIST[i][0]; rb=MODE_LIST[j][0];
+      if(ra!==m&&rb!==m) continue;
+      a=(ra===m)?cut:modeCuts[ra]; b=(rb===m)?cut:modeCuts[rb];
+      if(!a||!b||a.code!==b.code||(a.mods&b.mods)!==a.mods) continue;
+      return true;
+    }
+  }
+  return false;
+}
+
+function cutHits(a,b){
+  return !!(a&&b&&a.code===b.code&&(a.mods&b.mods)===a.mods);
+}
+
+function cutClash(kind,n,cut){
+  var i,o;
+  if(kind==="sync"){
+    for(i=1;i<=PROFILES;i++){
+      o=profCut(i);
+      if(cutHits(cut,o)||cutHits(o,cut)) return true;
+    }
+    for(i=0;i<MODE_LIST.length;i++){
+      o=modeCuts[MODE_LIST[i][0]];
+      if(cutHits(cut,o)||cutHits(o,cut)) return true;
+    }
+    return false;
+  }
+  o=syncCut();
+  if(cutHits(cut,o)||cutHits(o,cut)) return true;
+  if(kind==="mode"){
+    if(modeClash(n,cut)) return true;
+  }else{
+    for(i=1;i<=PROFILES;i++){
+      if(i===n) continue;
+      o=profCut(i);
+      if(i<n ? cutHits(o,cut) : cutHits(cut,o)) return true;
+    }
+  }
+  for(i=0;i<(kind==="mode"?PROFILES:MODE_LIST.length);i++){
+    o=(kind==="mode") ? profCut(i+1) : modeCuts[MODE_LIST[i][0]];
+    if(cutHits(cut,o)||cutHits(o,cut)) return true;
+  }
+  return false;
+}
+
+var modeBusy=0, modeLater=false, modeFail="";
+
+async function modeApplyNow(){
+  var c=syncLeft(),want=[],i,mc,old;
+  for(i=0;i<MODE_LIST.length;i++){
+    mc=modeCuts[MODE_LIST[i][0]];
+    if(mc) want.push({code:mc.code,kind:K_MODE,mask:((mc.mode&0xFF)<<8)|(mc.mods&0xFF)});
+  }
+  if(!c||!c.loaded){ markEdited("L"); return; }
+  modeBusy++;
+  try{
+    await cfgLocked(c,async function(){
+      var raw=await cfgAsk(c),cur=cfgRead(raw),list=[],b,dv,p,back,same,j;
+      if(!cur||cur.side!==0x67) throw new Error("no config");
+      for(j=0;j<cur.btn.length;j++) if(cur.btn[j].kind!==K_MODE) list.push(cur.btn[j]);
+      list=list.concat(want);
+      if(list.length>CFG_BTNS) throw whyErr("Too many binds: "+list.length+", the most is "+CFG_BTNS+".");
+      b=raw.slice(0,CFG_SIZE); dv=new DataView(b.buffer);
+      b.fill(0,CFG_BTN,CFG_BTN+CFG_BTNS*4);
+      b[11]=list.length;
+      for(j=0;j<list.length;j++){
+        b[CFG_BTN+j*4]=list[j].code; b[CFG_BTN+1+j*4]=list[j].kind;
+        dv.setUint16(CFG_BTN+2+j*4,list[j].mask,true);
+      }
+      p=cfgExpect(c,/^(write ok|write rejected|write FAILED|stored record rejected)/);
+      await serialSend(c,"cfg "+hexOf(b));
+      if(!/^write ok/.test(await p)) throw new Error("refused");
+      back=await cfgAsk(c); same=(back.length===b.length);
+      for(j=0;same&&j<back.length;j++) if(back[j]!==b[j]) same=false;
+      if(!same) throw new Error("read-back differs");
+    });
+    old=modeFail; modeFail="";
+    if(old&&$("modeErr").textContent===old) $("modeErr").textContent="";
+  }catch(e){
+    markEdited("L");
+    modeFail=e.why||"Couldn't save that shortcut. Set it again.";
+    $("modeErr").textContent=modeFail;
+  }
+  modeBusy--;
+}
+
+function modeCommit(code,mods,fromBoard){
+  var m=modeListening,cut;
+  if(!m) return false;
+  cut={code:code,mods:(cutTarget==="sync")?0:(mods&0xFF),mode:m};
+
+  if(cutClash(cutTarget,m,cut)){
+    modeErr(cutTarget==="sync"?"That key is part of another shortcut.":"That shortcut is already in use.");
+    return false;
+  }
+  modeErr("");
+  modeMods=cut.mods; modeBuilding=false; modeFrom="";
+
+  if(cutTarget==="sync"){ syncSetKey(cut); paintMode(); return true; }
+  if(cutTarget==="prof"){ profSetKey(m,cut); paintMode(); return true; }
+
+  modeCuts[m]=cut;
+  if(fromBoard) modeLater=true; else modeApplyNow();
+  paintMode(); generate();
+  return true;
+}
+
+function modeStopListening(){
+  modeListening=0; modeMods=0; modeBuilding=false; modeFrom=""; modeErr("");
+  modeHeldDone=0;
+  if(modeLater){ modeLater=false; modeApplyNow(); }
+}
+
+function tryModeCapture(r){
+  if(r.len!==7&&r.len!==8) return;
+  var off=(r.len===8)?2:1,i,c,mods=r.latest[0]||0,key=0;
+
+  for(i=0;i<6&&!key;i++) if(r.latest[off+i]>=0x04) key=r.latest[off+i];
+
+  if(modeHeldDone&&key===modeHeldDone) return;
+  if(modeHeldDone&&!key){
+    if(mods) return;
+    modeHeldDone=0;
+    modeMods=0; modeBuilding=false; modeFrom="";
+    if(modeLater){ modeLater=false; modeApplyNow(); }
+    paintMode();
+    return;
+  }
+  for(i=0;i<6;i++){
+    c=r.latest[off+i];
+    if(!(c>=0x04)) continue;
+    if(c===0x29&&!mods&&!modeBuilding){ modeStopListening(); paintMode(); return; }
+
+    if(modeCommit(c,mods||modeMods,true)) modeHeldDone=c;
+    return;
+  }
+  if(mods&&cutTarget!=="sync"){
+    if(!modeBuilding||modeFrom!=="board"){ modeBuilding=true; modeFrom="board"; modeErr(""); }
+    modeMods=mods; paintMode();
+  }else if(modeBuilding&&modeFrom==="board"){
+    modeMods=0; modeBuilding=false; modeFrom="";
+    paintMode();
+  }
+}
+
+function modeKeyDown(e){
+  if(!modeListening) return;
+  if(e.preventDefault) e.preventDefault();
+  if(e.stopPropagation) e.stopPropagation();
+  var bit=HOTKEY_MODBITS[e.code],code;
+  if(bit){
+    if(cutTarget==="sync") return;
+    if(!modeBuilding||modeFrom!=="pc"){ modeMods=bit; modeBuilding=true; modeFrom="pc"; modeErr(""); }
+    else modeMods|=bit;
+    paintMode(); return;
+  }
+  if(e.repeat) return;
+
+  if(e.code==="Escape"&&!modeBuilding&&!e.ctrlKey&&!e.altKey&&!e.shiftKey&&!e.metaKey){
+    modeStopListening(); paintMode(); return;
+  }
+  code=HOTKEY_CODES[e.code];
+  if(!code){
+    modeErr(cutTarget==="sync"?"That key can't be the pairing key.":"That key can't be a shortcut.");
+    return;
+  }
+  modeSwallowUp=e.code;
+  modeCommit(code,modeMods|modeHeldBefore(e));
+}
+
+function modeHeldBefore(e){
+  var m=0;
+  if(e.ctrlKey&&!(modeMods&0x11)) m|=0x01;
+  if(e.shiftKey&&!(modeMods&0x22)) m|=0x02;
+  if(e.altKey&&!(modeMods&0x44)) m|=0x04;
+  if(e.metaKey&&!(modeMods&0x88)) m|=0x08;
+  return m;
+}
+
+function modeKeyUp(e){
+  if(modeSwallowUp&&e.code===modeSwallowUp){
+    modeSwallowUp="";
+    if(e.preventDefault) e.preventDefault();
+    if(e.stopPropagation) e.stopPropagation();
+    return;
+  }
+  if(!modeListening) return;
+  if(e.preventDefault) e.preventDefault();
+  if(e.stopPropagation) e.stopPropagation();
+  var bit=HOTKEY_MODBITS[e.code];
+
+  if(bit&&modeBuilding&&modeFrom==="pc"){
+    modeMods&=~bit;
+    if(!modeMods){ modeBuilding=false; modeFrom=""; }
+    paintMode();
+  }
+}
+
+function modeErr(msg){
+  var a=$("modeErr");
+  if(cutTarget==="sync"){
+    if(a) a.textContent=modeFail;
+    a=$("syncErr");
+    if(a) a.textContent=msg||"";
+    return;
+  }
+  if(cutTarget==="prof"){
+    if(a) a.textContent=modeFail;
+    profSay(msg);
+    return;
+  }
+  if(a) a.textContent=msg||modeFail;
+}
+
+var modeBy={L:0,R:0};
+
+function onModeNow(name,c){
+  var v=(name==="KEYBOARD")?1:(name==="STICK")?2:0,k;
+  if(!c.side) return;
+  modeBy[c.side]=v;
+  if(v===1){
+    for(k in reports) if(reports[k].src===c.side) delete reports[k];
+    showHeld(); renderRaw();
+  }
+  paintMode();
+}
+
+function paintModeRow(m){
+  var b=$("bModeKey"+m),cut=modeCuts[m],
+      listening=(cutTarget==="mode"&&modeListening===m),
+      live=!!syncLeft();
+  if(!b) return;
+  b.disabled=!live;
+  b.classList.toggle("arm",listening);
+  if(listening&&modeBuilding){
+    b.textContent=modeMods?modeComboText(0,modeMods)+" + ...":"Press a shortcut...";
+  }else if(listening){
+    b.textContent=cut?modeComboText(cut.code,cut.mods):"Press a shortcut...";
+  }else{
+    b.textContent=cut?modeComboText(cut.code,cut.mods):"Click to set a shortcut";
+  }
+  if($("bModeClear"+m)) $("bModeClear"+m).disabled=!cut||!live;
+  var lab=$("modeLab"+m);
+  if(lab) lab.className=(modeBy.L===m||modeBy.R===m)?"on":"";
+}
+
+function paintMode(){
+  for(var i=0;i<MODE_LIST.length;i++) paintModeRow(MODE_LIST[i][0]);
+  paintProf();
+  paintSync();
+}
+
+function paintProfRow(n){
+  var p=profState.slot[n-1], cut=profCut(n),
+      listening=(cutTarget==="prof"&&modeListening===n),
+      on=(conns.length>0), b=$("bProfKey"+n), nm=$("profName"+n),
+      lab=$("profLab"+n), f=$("bProfFile"+n), u=$("bProfUse"+n),
+      cl=$("bProfClear"+n);
+
+  if(nm){
+    nm.textContent=(p&&p.name) ? p.name : (p&&p.filled ? "saved" : "empty");
+    nm.className="pname"+((p&&p.filled)?" set":"");
+  }
+  if(lab) lab.className=(profState.act===n&&p&&p.filled)?"on":"";
+  if(b){
+    b.classList.toggle("arm",listening);
+    if(listening&&modeBuilding){
+      b.textContent=modeMods?modeComboText(0,modeMods)+" + ...":"Press a shortcut...";
+    }else if(listening){
+      b.textContent=cut?modeComboText(cut.code,cut.mods):"Press a shortcut...";
+    }else{
+      b.textContent=cut?modeComboText(cut.code,cut.mods):"Click to set a shortcut";
+    }
+    b.disabled=!on;
+  }
+  if(f) f.disabled=!on;
+  if(u) u.disabled=!on||!(p&&p.filled)||profState.act===n;
+  if(cl) cl.disabled=!on||!(p&&(p.filled||p.code||p.name));
+}
+
+function paintProf(){
+  for(var n=1;n<=PROFILES;n++) paintProfRow(n);
+}
+
+function syncCut(){
+  if(syncPending) return syncPending.code?{code:syncPending.code,mods:syncPending.mods}:null;
+  return (syncState.known&&syncState.on&&syncState.code)
+    ? {code:syncState.code,mods:syncState.mods} : null;
+}
+
+function syncLeft(){
+  for(var i=0;i<conns.length;i++) if(conns[i].side==="L") return conns[i];
+  return null;
+}
+
+function syncKeyMapped(code){
+  var list,i,e;
+  try{ list=cfgList(0x67).list; }catch(x){ return false; }
+  for(i=0;i<list.length;i++){
+    e=list[i];
+    if((e.kind===K_KEY||e.kind===K_PEER||e.kind===K_STICK)&&e.code===code) return true;
+  }
+  return false;
+}
+
+function syncWarning(){
+  var c=syncCut(),i,o,names=[];
+  if(!c) return "";
+  for(i=1;i<=PROFILES;i++){
+    o=profCut(i);
+    if(cutHits(c,o)||cutHits(o,c)) names.push("the Profile "+i+" shortcut");
+  }
+  for(i=0;i<MODE_LIST.length;i++){
+    o=modeCuts[MODE_LIST[i][0]];
+    if(cutHits(c,o)||cutHits(o,c)) names.push("the "+MODE_LIST[i][1]+" mode shortcut");
+  }
+  if(syncKeyMapped(c.code)) names.push("mapped to a button");
+  return names.length
+    ? modeComboText(c.code,c.mods)+" is also "+names.join(" and ")+
+      ". Holding it for 2 seconds will also unpair."
+    : "";
+}
+
+function paintSync(){
+  var b=$("bSyncKey"),x=$("bSyncClear"),
+      w=$("syncWarn"),er=$("syncErr"),
+      listening=(cutTarget==="sync"&&modeListening===1),
+      live=!!syncLeft(),
+      sc=syncCut(),
+      set=!!sc,
+      cut=set?modeComboText(sc.code,sc.mods):"";
+  if(b){
+    b.classList.toggle("arm",listening);
+    if(listening) b.textContent=cut||"Press a key...";
+    else b.textContent=cut||"Click to set a key";
+    b.disabled=!live;
+  }
+  if(x) x.disabled=!live||!set;
+  if(w) w.textContent=syncWarning();
+  if(er&&!listening) er.textContent=syncFail;
+}
+
+function onSyncLine(code,mods,on,c){
+  if(!c||c.side==="L"||!syncState.known)
+    syncState={code:code,mods:mods,on:on,known:true};
+  paintSync();
+  if(c&&c.syncWait) c.syncWait();
+}
+
+function syncSay(msg){
+  syncFail=msg||"";
+  paintSync();
+}
+
+function syncSendOne(c,text){
+  return cfgLocked(c,async function(){
+    var ack=lineExpect(c,"syncWait",2000);
+    await serialSend(c,text);
+    return await ack;
+  });
+}
+
+async function syncSend(text){
+  var i,n=0;
+  for(i=0;i<conns.length;i++){
+    if(!conns[i].side) continue;
+    await syncSendOne(conns[i],text);
+    n++;
+  }
+  return n;
+}
+
+async function syncSetKey(cut){
+  syncPending=null; syncFail="";
+  syncState.code=cut.code; syncState.mods=cut.mods;
+  paintSync();
+  try{
+    if(!await syncSend("sync key 0x"+hex2(cut.code)+" 0x"+hex2(cut.mods))){
+      syncSay("Connect a board first.");
+      return;
+    }
+    if(!syncState.on) await syncSend("sync on");
+  }catch(e){ syncSay("Couldn't set the pairing key."); }
+}
+
+function paintRange(el){
+  if(!el||!el.style||!el.style.setProperty) return;
+  var lo=parseFloat(el.min), hi=parseFloat(el.max), v=parseFloat(el.value);
+  if(isNaN(lo)) lo=0;
+  if(isNaN(hi)) hi=100;
+  if(isNaN(v)||!(hi>lo)) return;
+  el.style.setProperty("--fill",
+    Math.max(0,Math.min(100,(v-lo)*100/(hi-lo)))+"%");
+}
+
+function paintSens(){
+  var v=Math.round(stickSens);
+  $("rngSens").value=Math.min(v,STICK_SENS_SLIDER);
+  paintRange($("rngSens"));
+
+  if(document.activeElement!==$("numSens")) $("numSens").value=v;
+  $("bSensDefault").disabled=(v===STICK_SENS_DEFAULT);
+}
+
+function paintStickMore(){
+  var d=Math.round(stickDz), g=Math.round(stickVg);
+  $("rngDz").value=d;
+  paintRange($("rngDz"));
+  if(document.activeElement!==$("numDz")) $("numDz").value=d;
+  $("bDzDefault").disabled=(d===STICK_DZ_DEFAULT);
+  $("rngVg").value=g;
+  paintRange($("rngVg"));
+  if(document.activeElement!==$("numVg")) $("numVg").value=g;
+  $("bVgDefault").disabled=(g===STICK_VG_DEFAULT);
+}
+
+function paintMSens(){
+  var v=Math.round(mouseSens);
+  $("rngMSens").value=v;
+  paintRange($("rngMSens"));
+
+  if(document.activeElement!==$("numMSens")) $("numMSens").value=v;
+  $("bMSensDefault").disabled=(v===MOUSE_SENS_DEFAULT);
+  if($("mAccel")) $("mAccel").checked=!!mouseAccel;
+}
+
+function reportsForFeedback(){
+  var kr=null,mr=null,k;
+  for(k in reports){
+    var r=reports[k];
+    if(!kr && r.src==="L" && (r.len===7||r.len===8)) kr=r;
+    if(!mr && r.src==="R" && decodeMouse(r.latest,r.len)) mr=r;
+  }
+  return {kbd:kr,mouse:mr};
+}
+
+var WHEEL_LIT_MS=90, wheelLit={1:0,2:0}, wheelLitT=null;
+function wheelNotch(w){
+  if(!w) return;
+  wheelLit[w>0?1:2]=Date.now()+WHEEL_LIT_MS;
+  if(wheelLitT) clearTimeout(wheelLitT);
+  wheelLitT=setTimeout(function(){ wheelLitT=null; showHeld(); },WHEEL_LIT_MS+10);
+}
+
+function bindHeld(rec,rp){
+  if(!rec) return false;
+  if(rec.kind==="wheel") return Date.now()<wheelLit[rec.code];
+  if(rec.kind==="bit")
+    return !!(rp.mouse && (rp.mouse.latest[rec.byteIdx||0]&rec.mask));
+  if(!rp.kbd) return false;
+  if(rec.kind==="mod") return !!(rp.kbd.latest[0]&rec.mask);
+  if(rec.kind==="key"){
+    var off=(rp.kbd.len===8)?2:1,i;
+    for(i=off;i<rp.kbd.latest.length;i++)
+      if(rp.kbd.latest[i]===rec.code) return true;
+  }
+  return false;
+}
+
+function heldSlotId(k){
+  if(k.indexOf("R|L:")===0) return side()==="L" ? k.slice(4) : null;
+  if(k.indexOf("L|R:")===0) return side()==="R" ? k.slice(4) : null;
+  if(k.indexOf("R|")===0)   return side()==="R" ? k.slice(2) : null;
+  if(k.indexOf("L|")===0)   return side()==="L" ? k.slice(2) : null;
+  return null;
+}
+
+var heldNow="";
+function showHeld(){
+  var rp=reportsForFeedback(),on=[],k,id;
+  for(k in bind){
+    if(!bindHeld(bind[k],rp)) continue;
+    id=heldSlotId(k);
+    if(id) on.push(id);
+  }
+  var sig=on.sort().join(",");
+
+  if(sig===heldNow) return;
+  heldNow=sig;
+  var els=document.querySelectorAll("#stage .slot"),i;
+  for(i=0;i<els.length;i++)
+    els[i].classList.toggle("live",
+      on.indexOf(els[i].getAttribute("data-slot"))>=0);
+
+  var ax=axesFor(),td;
+  for(i=0;i<ax.length;i++){
+    if(!ax[i].slot) continue;
+    td=document.getElementById("axr-"+ax[i].id);
+    if(td) td.classList.toggle("live",on.indexOf(ax[i].id)>=0);
+  }
+  for(i=0;i<GRIP_ROWS.length;i++){
+    td=document.getElementById("axr-"+GRIP_ROWS[i].id);
+    if(td) td.classList.toggle("live",on.indexOf(GRIP_ROWS[i].id)>=0);
+  }
+}
+
+function beginListen(slotId){
+  if(!conns.length) return;
+  if(side()==="R" && !haveBoard("R") && !haveBoard("L")) return;
+  if(!mapReady()){ hintBad(HINT_LOADING); return; }
+  listening=slotId;
+
+  listenBase={};
+  listenSeen={};
+  for(var k in reports) listenBase[k]=reports[k].latest.slice();
+  hintSticky=false;
+  clearPendingMod(); captureHold=false;
+  paint();
+}
+function cancelListen(){
+  listening=null; listenBase=null; clearPendingMod(); captureHold=false;
+  hintSticky=false; paint();
+}
+
+var hintSticky=false;
+function hintNote(msg,cls){
+  var el=$("stageHint");
+  el.textContent=msg;
+  el.className=cls;
+  hintSticky=true;
+}
+
+function hintBad(msg){ hintNote(msg,"hint bad"); }
+
+var HINT_NO_KEYCODE="That key sent no usable code. For F1-F12, hold Fn.";
+var HINT_KEY_ALONE="Press the key on its own. For F1-F12, hold Fn.";
+
+var captureHold=false;
+
+function isAxis(id){
+  for(var i=0;i<AXES.length;i++) if(AXES[i].id===id) return true;
+  return false;
+}
+
+var MOUSEBTN=[[0x01,"Left click"],[0x02,"Right click"],[0x04,"Middle click"],
+              [0x08,"Side button 1"],[0x10,"Side button 2"],
+              [0x20,"Button 6"],[0x40,"Button 7"],[0x80,"Button 8"]];
+
+function bitNames(mask,table){
+  var out=[],i;
+  for(i=0;i<table.length;i++) if(mask&table[i][0]) out.push(table[i][1]);
+  return out.join(" + ");
+}
+function popcount(v){ var n=0; while(v){ n+=v&1; v>>=1; } return n; }
+
+function captureKey(key,r){
+  var off=(r.len===8)?2:1, held=[], i, mods=r.latest[0]||0;
+  for(i=off;i<r.latest.length;i++) if(r.latest[i]>=0x04) held.push(r.latest[i]);
+  var before=listenSeen[key]||{keys:[],mods:0};
+  listenSeen[key]={keys:held.slice(),mods:mods};
+  if(!held.length&&!mods){ captureHold=false; return; }
+  if(captureHold) return;
+  if(!held.length){
+    var nm=mods&~before.mods, bits=nm||mods;
+    pendingMod={rec:{handle:r.handle,len:r.len,byteIdx:0,mask:bits,code:0,
+                     kind:"mod",text:bitNames(bits,MODS)||("modifier 0x"+hex2(bits))},
+                src:r.src};
+    if(!pendingModTimer)
+      pendingModTimer=setTimeout(function(){
+        pendingModTimer=null;
+        var p=pendingMod; pendingMod=null;
+        if(listening&&p) commitCapture(p.rec,p.src);
+      },350);
+    return;
+  }
+  clearPendingMod();
+  if(mods){
+    hintBad(HINT_KEY_ALONE);
+    captureHold=true;
+    return;
+  }
+
+  var code=held[0];
+  for(i=0;i<held.length;i++) if(before.keys.indexOf(held[i])<0){ code=held[i]; break; }
+  commitCapture({handle:r.handle,len:r.len,byteIdx:off,mask:0,code:code,kind:"key",
+                 text:KEYS[code]||("key 0x"+hex2(code))},r.src);
+}
+
+function captureButton(key,r,dm){
+  var btn=dm.btn&0xFF, prev=(listenSeen[key]&&listenSeen[key].btn)||0;
+  listenSeen[key]={btn:btn};
+  if(!btn){
+    if(dm.wheel){
+      commitCapture({handle:r.handle,len:r.len,byteIdx:-1,mask:0,
+                     code:(dm.wheel>0?1:2),kind:"wheel",
+                     text:(dm.wheel>0?"Scroll up":"Scroll down")},r.src);
+      return;
+    }
+    captureHold=false; return;
+  }
+  if(captureHold) return;
+
+  var fresh=btn&~prev, pick=fresh||btn, bit=pick&(-pick);
+  commitCapture({handle:r.handle,len:r.len,byteIdx:0,mask:bit,code:0,kind:"bit",
+                 text:bitNames(bit,MOUSEBTN)||("button bit 0x"+hex2(bit))},r.src);
+}
+
+function tryCapture(key,r){
+  if(r.src!=="L"&&r.src!=="R") return;
+  if(r.src==="L"){
+    if(r.len===7||r.len===8){ captureKey(key,r); return; }
+
+    var any=false;
+    for(var ai=0;ai<r.latest.length;ai++) if(r.latest[ai]){ any=true; break; }
+    if(!any){ captureHold=false; return; }
+    if(captureHold) return;
+    hintBad(HINT_NO_KEYCODE);
+    captureHold=true;
+    return;
+  }
+  var dm=decodeMouse(r.latest,r.len);
+  if(dm){ captureButton(key,r,dm); return; }
+  var base=listenBase[key];
+  if(!base){ listenBase[key]=r.latest.slice(); return; }
+  var diffs=[],i;
+  for(i=0;i<r.latest.length&&i<base.length;i++){
+    var x=r.latest[i]^base[i];
+    if(x) diffs.push({i:i,mask:x,val:r.latest[i],was:base[i]});
+  }
+  if(!diffs.length){
+    captureHold=false;
+    return;
+  }
+  if(captureHold) return;
+
+  var rec=null;
+  for(i=0;i<diffs.length&&!rec;i++){
+    var d=diffs[i];
+    if(popcount(d.mask)>2) continue;
+    if(!(d.val&d.mask)) continue;
+    rec={handle:r.handle,len:r.len,byteIdx:d.i,mask:d.mask,code:0,kind:"bit",
+         text:bitNames(d.mask,MOUSEBTN)||
+              ("button bit 0x"+hex2(d.mask)+" (byte "+d.i+")")};
+  }
+  if(rec) commitCapture(rec,r.src);
+}
+
+var pendingMod=null, pendingModTimer=null;
+function clearPendingMod(){
+  if(pendingModTimer){ clearTimeout(pendingModTimer); pendingModTimer=null; }
+  pendingMod=null;
+}
+
+function commitCapture(rec,src){
+  var key=(src==="R") ? (mouseKey(listening)||("R|"+listening))
+                      : kbdKey(listening);
+
+  if(!cfgEntry(key.slice(2),rec)){
+    hintBad(STICK_MASK[listening]!==undefined ? "For the stick, use a regular key like W."
+                                              : "That input can't be used here.");
+    clearPendingMod(); captureHold=true;
+    return;
+  }
+  dropSameInput(key,rec);
+  bind[key]=rec;
+  listening=null; listenBase=null; clearPendingMod(); captureHold=false;
+  hintSticky=false;
+
+  markEdited(boardOf(key));
+  paint(); generate();
+}
+
+function dropSameInput(key,rec){
+  var board=key.charAt(0),k,o;
+  for(k in bind){
+    if(k===key||k.charAt(0)!==board) continue;
+    o=bind[k];
+    if(!o||o.kind!==rec.kind) continue;
+    if((rec.kind==="key"||rec.kind==="wheel")
+         ? o.code===rec.code : o.mask===rec.mask) delete bind[k];
+  }
+}
+
+function hex2(v){ return (v&255).toString(16).toUpperCase().padStart(2,"0"); }
+function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
+  return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+
+function paint(){
+  $("jcImg").src = side()==="L" ? "ns2blue.png" : "ns2red.png";
+  var cl=$("colL"), cr=$("colR");
+  cl.innerHTML=""; cr.innerHTML="";
+
+  var list=slots(),i;
+  for(i=0;i<list.length;i++) build(list[i], list[i].col==="l" ? cl : cr);
+
+  if(!hintSticky){
+    $("stageHint").className="hint";
+    $("stageHint").textContent = listening
+      ? "Waiting..."
+      : "";
+  }
+  showHalf();
+  renderAxes();
+  renderGrip();
+  relayout();
+
+  heldNow="";
+  showHeld();
+}
+
+function relayout(){ layoutSlots(); drawLeads(); }
+
+var lastPointer="";
+document.addEventListener("pointerdown",function(e){ lastPointer=e.pointerType||""; },true);
+
+function build(s,parent){
+  var own=slotOwn(s.id), other=slotOther(s.id), b=own||other;
+
+  var both=!!(own&&other);
+  var el=document.createElement("div");
+
+  var fromB=own?(side()==="R"?"R":"L")
+              :(other?(side()==="R"?"L":"R"):"");
+  el.className="slot"+(b?" set":"")+((b&&b.mem)?" mem":"")+
+    (fromB?" from"+fromB:"")+(listening===s.id?" listening":"");
+  el.setAttribute("data-slot",s.id);
+
+  el.title=b?(both?own.text+" + "+other.text:b.text):"";
+  var ico=ICONS[s.id];
+  el.innerHTML='<div class="n">'+(ico||esc(s.name))+'</div>'+
+    '<div class="v'+(b?"":" none")+'">'+
+    (listening===s.id ? "Press now…"
+      : (b?esc(b.text)+(both?' <span class="v2">+ '+esc(other.text)+'</span>':"")
+          :"Not set"))+
+    '</div><div class="x">&times;</div>';
+  el.addEventListener("click",function(ev){
+    if(ev.target.className==="x"){ ev.stopPropagation(); clearSlot(s.id); return; }
+    if(listening===s.id) cancelListen(); else beginListen(s.id);
+  });
+
+  el.addEventListener("contextmenu",function(ev){
+    if(!slotBind(s.id)||lastPointer==="touch"||ev.pointerType==="touch") return;
+    ev.preventDefault(); clearSlot(s.id);
+  });
+  parent.appendChild(el);
+}
+
+function clearSlot(id){
+  var keys=isAxis(id)?[id]:[mouseKey(id),kbdKey(id)],gone=0,mem=0,i;
+  for(i=0;i<keys.length;i++){
+    if(!keys[i]||!bind[keys[i]]) continue;
+    if(bind[keys[i]].mem) mem++; else gone++;
+  }
+  if(!gone){
+    if(mem) hintBad("Connect the other board to clear this.");
+    return;
+  }
+  if(!mapReady()){ hintBad(HINT_LOADING); return; }
+  if(listening===id){ listening=null; listenBase=null; }
+  for(i=0;i<keys.length;i++){
+    if(!keys[i]||!bind[keys[i]]||bind[keys[i]].mem) continue;
+    markEdited(boardOf(keys[i]));
+    if(boardOf(keys[i])) cleared[boardOf(keys[i])]=true;
+    delete bind[keys[i]];
+  }
+  paint(); generate();
+}
+
+function slotById(id){
+  var list=slots();
+  for(var i=0;i<list.length;i++) if(list[i].id===id) return list[i];
+  return null;
+}
+
+var SLOT_GAP=7;
+function layoutSlots(){
+  var img=$("jcImg");
+  var colH=(img&&img.clientHeight)||475;
+  ["colL","colR"].forEach(function(cid){
+    var col=$(cid); if(!col) return;
+    col.style.height=colH+"px";
+    var recs=[].slice.call(col.children).map(function(el){
+      var sl=slotById(el.getAttribute("data-slot"));
+      var h=el.offsetHeight||42;
+      return {el:el,h:h,r:(sl?sl.r:0),want:(sl?sl.a[1]:0.5)*colH-h/2};
+    });
+    if(!recs.length) return;
+
+    recs.sort(function(a,b){
+      var d=a.want-b.want;
+      return Math.abs(d)<6 ? a.r-b.r : d;
+    });
+
+    var groups=[],i,j;
+    for(i=0;i<recs.length;i++){
+      groups.push({items:[recs[i]],h:recs[i].h,want:recs[i].want});
+      while(groups.length>1){
+        var a=groups[groups.length-2], b=groups[groups.length-1];
+        if(a.want+a.h+SLOT_GAP<=b.want) break;
+        var off=a.h+SLOT_GAP;
+        var na=a.items.length, nb=b.items.length;
+        a.want=(a.want*na+(b.want-off)*nb)/(na+nb);
+        a.items=a.items.concat(b.items);
+        a.h+=SLOT_GAP+b.h;
+        groups.pop();
+      }
+    }
+
+    var tops=[],y,k=0;
+    for(i=0;i<groups.length;i++){
+      y=groups[i].want;
+      for(j=0;j<groups[i].items.length;j++){
+        tops[k++]=y; y+=groups[i].items[j].h+SLOT_GAP;
+      }
+    }
+
+    var edge=0;
+    for(i=0;i<recs.length;i++){
+      tops[i]=Math.max(tops[i],edge); edge=tops[i]+recs[i].h+SLOT_GAP;
+    }
+    edge=colH;
+    for(i=recs.length-1;i>=0;i--){
+      tops[i]=Math.min(tops[i],edge-recs[i].h); edge=tops[i]-SLOT_GAP;
+    }
+    for(i=0;i<recs.length;i++)
+      recs[i].el.style.top=Math.round(Math.max(0,tops[i]))+"px";
+  });
+}
+
+function drawLeads(){
+  var leads=$("leads"), stage=$("stage"), img=$("jcImg");
+  if(!leads||!stage||!img) return;
+  while(leads.firstChild) leads.removeChild(leads.firstChild);
+  var sr=stage.getBoundingClientRect(), ir=img.getBoundingClientRect();
+  if(!ir.width) return;
+  var list=slots();
+  for(var i=0;i<list.length;i++){
+    var s=list[i];
+    var el=stage.querySelector('[data-slot="'+s.id+'"]');
+    if(!el) continue;
+    var br=el.getBoundingClientRect();
+    var left=(s.col==="l");
+    var bx=(left?br.right:br.left)-sr.left, by=br.top+br.height/2-sr.top;
+    var ax=ir.left-sr.left+s.a[0]*ir.width, ay=ir.top-sr.top+s.a[1]*ir.height;
+    var b=slotBind(s.id);
+    var cls=(listening===s.id)?"hot":(b?"set":"");
+
+    if(s.rail){
+      svgAdd(leads,"line",{x1:bx,y1:by,x2:ax,y2:by},cls);
+      svgAdd(leads,"circle",{cx:ax,cy:by,r:3},cls);
+      continue;
+    }
+    var mx=(bx+ax)/2;
+    svgAdd(leads,"line",{x1:bx,y1:by,x2:mx,y2:by},cls);
+    svgAdd(leads,"line",{x1:mx,y1:by,x2:ax,y2:ay},cls);
+    svgAdd(leads,"circle",{cx:ax,cy:ay,r:3},cls);
+  }
+}
+
+var SVGNS="http://www.w3.org/2000/svg";
+function svgAdd(parent,tag,attrs,cls){
+  var e=document.createElementNS(SVGNS,tag);
+  for(var k in attrs) e.setAttribute(k,attrs[k]);
+  if(cls) e.setAttribute("class",cls);
+  parent.appendChild(e);
+}
+
+function showLive(){
+  if(!liveMouse) return;
+  for(var i=0;i<AXES.length;i++){
+    var a=AXES[i];
+    if(!a.live) continue;
+    var td=document.getElementById("axv-"+a.id);
+    if(!td) continue;
+    var v=liveMouse[a.live];
+    td.innerHTML='<span style="color:var(--ok)">'+v+'</span>'+
+      '<span style="color:var(--dim)"> (live)</span>';
+  }
+}
+
+var GRIP_ROWS=[
+ {id:"GL", name:"GL", half:"L"},
+ {id:"GR", name:"GR", half:"R"}
+];
+
+async function setGrip(on){
+  var i,n=0;
+  for(i=0;i<conns.length;i++){
+    if(!conns[i].side) continue;
+    await gripSendOne(conns[i],on);
+    n++;
+  }
+  renderGrip();
+  return n;
+}
+
+function gripSendOne(c,on){
+  return cfgLocked(c,async function(){
+    var ack=lineExpect(c,"gripWait",2000);
+    await serialSend(c,on?"grip on":"grip off");
+    if(await ack) gripState[c.side]=on;
+  });
+}
+
+function renderGrip(){
+  var tb=$("rowsGrip"),h="",i,j;
+  var st=(gripState.L!==null)?gripState.L:gripState.R;
+  h+='<tr><td colspan="3" style="padding-bottom:2px">'+
+     '<label style="display:flex;align-items:center;gap:8px;cursor:pointer">'+
+     '<input type="checkbox" id="gripOn"'+(st?" checked":"")+
+     (conns.length?"":" disabled")+'>'+
+     '<span>Charging Grip</span></label>'+
+     '</td></tr>';
+  for(i=0;i<GRIP_ROWS.length;i++){
+    var g=GRIP_ROWS[i], b=slotBind(g.id);
+    var ic=ICONS[g.id]||"";
+    var val=(b?'<span class="axk">'+esc(b.text)+'</span>':
+             '<span style="color:var(--dim)">Not set</span>');
+    h+='<tr id="axr-'+g.id+'"><td><div class="axlab">'+
+       '<span class="axico">'+ic+'</span></div></td>'+
+       '<td id="axv-'+g.id+'">'+val+'</td>'+
+       '<td style="text-align:right">'+
+       '<button data-ax="'+g.id+'">'+(listening===g.id?"Cancel":"Set")+
+       '</button>'+(b?'<button class="xbtn" aria-label="Clear this mapping" data-axclr="'+g.id+'">&times;</button>':"")+
+       '</td></tr>';
+  }
+  if(tb.gripLast===h) return;
+  tb.gripLast=h;
+  tb.innerHTML=h;
+  var bs=tb.querySelectorAll("[data-ax]");
+  for(j=0;j<bs.length;j++) bs[j].addEventListener("click",function(e){
+    var id=e.target.getAttribute("data-ax");
+    if(listening===id) cancelListen(); else beginListen(id);
+  });
+  var cs=tb.querySelectorAll("[data-axclr]");
+  for(j=0;j<cs.length;j++) cs[j].addEventListener("click",function(e){
+    clearSlot(e.target.getAttribute("data-axclr"));
+  });
+  var sw=$("gripOn");
+  if(sw) sw.addEventListener("change",function(e){
+    tb.gripLast="";
+    setGrip(e.target.checked);
+  });
+}
+
+function renderAxes(){
+  var tb=$("rowsAxis"),h="",i,j,list=axesFor(),L=(side()==="L");
+  $("axesTitle").textContent = L ? "Left Stick Config" : "Mouse Mode Config";
+  for(i=0;i<list.length;i++){
+    var a=list[i], b=a.slot?bind[kbdKey(a.id)]:(a.src?bind[a.id]:null);
+
+    var ic=ICONS[a.id];
+    var gl=ic?'<span class="axico">'+ic+'</span>':'';
+    var tx=a.name+(a.note?'<span style="color:var(--dim)">: '+a.note+'</span>':'');
+    var label='<div class="axlab">'+gl+
+      ((gl&&a.slot)?'':'<span>'+tx+'</span>')+'</div>';
+    if(a.src){
+      var sel='<select data-src="'+a.id+'">';
+      for(j=0;j<SRCS.length;j++){
+        var chosen=(b&&b.src===SRCS[j].v)||(!b&&SRCS[j].v==="");
+        sel+='<option value="'+SRCS[j].v+'"'+
+             (chosen?" selected":"")+'>'+SRCS[j].name+'</option>';
+      }
+      sel+='</select>';
+      h+='<tr><td>'+label+'</td><td colspan="2" style="text-align:right">'+
+         sel+'</td></tr>';
+      continue;
+    }
+
+    var val=(b?'<span class="axk">'+esc(b.text)+'</span>':
+             '<span style="color:var(--dim)">'+
+             (a.live?"waiting for movement":"Not set")+'</span>');
+    h+='<tr id="axr-'+a.id+'"><td>'+label+'</td>'+
+       (a.slot
+         ? '<td id="axv-'+a.id+'">'+val+'</td>'+
+           '<td style="text-align:right">'+
+           '<button data-ax="'+a.id+'">'+(listening===a.id?"Cancel":"Set")+
+           '</button>'+(b?'<button class="xbtn" aria-label="Clear this mapping" data-axclr="'+a.id+'">&times;</button>':"")+
+           '</td>'
+         : '<td id="axv-'+a.id+'" colspan="2" style="text-align:right">'+
+           val+'</td>')+
+       '</tr>';
+  }
+  if(tb.axLast===h){ showLive(); return; }
+  tb.axLast=h;
+  tb.innerHTML=h;
+  showLive();
+  var bs=tb.querySelectorAll("[data-ax]");
+  for(j=0;j<bs.length;j++) bs[j].addEventListener("click",function(e){
+    var id=e.target.getAttribute("data-ax");
+    if(listening===id) cancelListen(); else beginListen(id);
+  });
+  var cs=tb.querySelectorAll("[data-axclr]");
+  for(j=0;j<cs.length;j++) cs[j].addEventListener("click",function(e){
+    clearSlot(e.target.getAttribute("data-axclr"));
+  });
+  var ss=tb.querySelectorAll("[data-src]");
+  for(j=0;j<ss.length;j++) ss[j].addEventListener("change",function(e){
+    var id=e.target.getAttribute("data-src"), v=e.target.value, nm="";
+    tb.axLast="";
+    if(!mapReady()){ hintBad(HINT_LOADING); paint(); return; }
+    for(var q=0;q<SRCS.length;q++) if(SRCS[q].v===v) nm=SRCS[q].name;
+    if(!v) delete bind[id];
+    else bind[id]={kind:"src",src:v,text:nm,byteIdx:-1,mask:0,code:0,
+                   handle:0,len:0};
+    markEdited("R");
+    paint(); generate();
+  });
+}
+
+function renderRaw(){
+  var tb=$("rowsRaw"),keys=Object.keys(reports).sort();
+  if(!keys.length){ tb.innerHTML='<tr><td colspan="3" class="empty">'+
+    'Nothing yet. Waiting for input.</td></tr>'; return; }
+  var h="";
+  for(var k=0;k<keys.length;k++){
+    var r=reports[keys[k]],cells="";
+    for(var i=0;i<r.latest.length;i++)
+      cells+='<span class="b'+(r.changed[i]?" hot":"")+'">'+hex2(r.latest[i])+'</span> ';
+    h+='<tr><td class="hex">0x'+r.handle.toString(16).toUpperCase().padStart(4,"0")+
+       '</td><td class="hex">'+r.len+'</td><td class="hex">'+cells+'</td></tr>';
+  }
+  tb.innerHTML=h;
+}
+
+var C_CTL=/^(?:if|else|switch|case|default|break|continue|return|for|while|do|goto)$/;
+var C_KW=/^(?:static|const|void|struct|typedef|sizeof|enum|union|extern|volatile|inline|unsigned|signed|register)$/;
+var C_TYPE=/^(?:bool|char|short|int|long|float|double|size_t|ssize_t|u?int(?:8|16|32|64)_t)$/;
+
+function cHi(src){
+  var re=/(\/\*[\s\S]*?\*\/|\/\/[^\n]*)|("(?:\\.|[^"\\])*"|'(?:\\.|[^'\\])*')|(^[ \t]*#\w+)|(\b0[xX][0-9a-fA-F]+\b|\b\d+\b)|([A-Za-z_]\w*)/gm;
+  var out="",last=0,m,t,cls;
+
+  while((m=re.exec(src))){
+    out+=esc(src.slice(last,m.index));
+    last=re.lastIndex;
+    t=m[0];
+    if(m[1]) cls="c-com";
+    else if(m[2]) cls="c-str";
+    else if(m[3]) cls="c-pre";
+    else if(m[4]) cls="c-num";
+    else cls=C_CTL.test(t) ? "c-ctl"
+           : C_KW.test(t)  ? "c-kw"
+           : C_TYPE.test(t)? "c-typ"
+           : /^[A-Z][A-Z0-9_]*$/.test(t) ? "c-mac"
+           : src.charAt(last)==="(" ? "c-fn"
+           : "c-id";
+    out+='<span class="'+cls+'">'+esc(t)+'</span>';
+  }
+  return out+esc(src.slice(last));
+}
+
+
+function maskName(e){
+  if(e.kind===K_SET) return String(e.mask);
+  if(e.kind===K_MODE)
+    return "mode "+modeRowName((e.mask>>8)&0xFF)+
+           (e.mask&0xFF ? " + mods 0x"+hex2(e.mask&0xFF) : "");
+  if(e.kind===K_STICK) return STICK_NAME[e.mask]||("0x"+e.mask.toString(16));
+  if(e.kind===K_PEER||e.kind===K_PEERMOD||e.kind===K_WHEEL||e.kind===K_MOUSE)
+    return RMASK_NAME[e.mask] ? "RBTN_"+RMASK_NAME[e.mask]
+                              : "0x"+e.mask.toString(16);
+  return LMASK_NAME[e.mask] ? "BTN_"+LMASK_NAME[e.mask]
+                            : "0x"+e.mask.toString(16);
+}
+
+function genHalf(sideByte){
+  var L=[],built=cfgList(sideByte),i,e;
+
+  L.push("CFG.side = 0x"+hex2(sideByte)+";");
+  L.push("CFG.n_btn = "+built.list.length+";");
+  for(i=0;i<built.list.length;i++){
+    e=built.list[i];
+    L.push("CFG.btn["+i+"] = { 0x"+hex2(e.code)+", "+KIND_NAME[e.kind]+
+           ", "+maskName(e)+" };");
+  }
+  if(sideByte===0x66){
+    L.push("CFG.stick_src_x = "+(SRC_ID[(bind.SX&&bind.SX.src)||""]||0)+";");
+    L.push("CFG.stick_src_y = "+(SRC_ID[(bind.SY&&bind.SY.src)||""]||0)+";");
+  }
+  var c=colsBy[sideByte===0x67?"L":"R"]||colors(),CN=["body","btn","rail","stick"],
+      FN=["col_body","col_buttons","col_rail","col_stick"];
+  for(i=0;i<4;i++){
+    var v=hex3(c[CN[i]],[0,0,0]);
+    L.push("CFG."+FN[i]+" = { 0x"+hex2(v[0])+", 0x"+hex2(v[1])+", 0x"+
+           hex2(v[2])+" };");
+  }
+  return L;
+}
+
+function generate(){
+  var L=genHalf(0x67),i,p;
+
+  L.push("");
+  L=L.concat(genHalf(0x66));
+
+  L.push("");
+  if(gripState.L!==null||gripState.R!==null)
+    L.push("grip "+((gripState.L!==null?gripState.L:gripState.R)?"on":"off"));
+  for(i=1;i<=PROFILES;i++){
+    p=profState.slot[i-1];
+    if(!p) continue;
+    if(p.name) L.push("profile name "+i+" "+p.name);
+    if(p.code)
+      L.push("profile key "+i+" 0x"+hex2(p.code)+" 0x"+hex2(p.mods));
+  }
+  $("out").innerHTML=cHi(L.join("\n"));
+}
+
+var COLS=[
+ {id:"body",  name:"Body",         off:33, cls:"cBody",  c:"#323232",
+  macro:"COL_BODY",    note:"the large area, normally near-black"},
+ {id:"btn",   name:"Buttons",      off:36, cls:"cBtn",   c:"#AAAAAA",
+  macro:"COL_BUTTONS", note:"face buttons, d-pad, + and -"},
+ {id:"rail",  name:"Rail strip",   off:39, cls:"cRail",  c:"#9BE1E6",
+  macro:"COL_RAIL",    note:"the bar along the inner edge"},
+ {id:"stick", name:"Analog stick", off:42, cls:"cStick", c:"#323232",
+  macro:"COL_STICK",   note:"the stick cap"}
+];
+
+var STOCK_L={body:"#323232",btn:"#AAAAAA",rail:"#9BE1E6",stick:"#323232"};
+var STOCK_R={body:"#323232",btn:"#AAAAAA",rail:"#FF8C5F",stick:"#323232"};
+
+var fwCols={};
+
+var colsBy={};
+
+var colsSide=null;
+
+var outlineAmt=0.45;
+function stockFor(){ return side()==="L" ? STOCK_L : STOCK_R; }
+
+function colsStash(){
+  if(!colsSide) colsSide=side();
+  colsBy[colsSide]=colors();
+}
+
+function colsSwitch(to){
+  if(to!=="L"&&to!=="R") return;
+
+  if(colsSide===to){ colsBy[to]=colors(); return; }
+
+  colsStash();
+  colsSide=to;
+  setPreset(colsBy[to]||fwCols[to]||(to==="L"?STOCK_L:STOCK_R));
+}
+
+function lighten(hex,t){
+  var r=parseInt(hex.substr(1,2),16), g=parseInt(hex.substr(3,2),16),
+      b=parseInt(hex.substr(5,2),16);
+  function up(v){ return Math.round(v+(255-v)*t); }
+  function h2(v){ return v.toString(16).toUpperCase().padStart(2,"0"); }
+  return "#"+h2(up(r))+h2(up(g))+h2(up(b));
+}
+
+function applyColors(){
+  var by={};
+  for(var i=0;i<COLS.length;i++){
+    by[COLS[i].id]=COLS[i].c;
+    var els=document.querySelectorAll("#jcArt ."+COLS[i].cls);
+    for(var j=0;j<els.length;j++) els[j].setAttribute("fill",COLS[i].c);
+  }
+
+  stroke("#jcArt .cBody",  lighten(by.body, outlineAmt));
+  stroke("#jcArt .cRail",  lighten(by.rail, outlineAmt));
+
+  stroke("#jcArt .cRing",  by.rail);
+  showHalf();
+}
+function stroke(sel,col){
+  var e=document.querySelectorAll(sel);
+  for(var i=0;i<e.length;i++) e[i].setAttribute("stroke",col);
+}
+
+function halfColor(s){
+  return haveBoard(s) ? (s==="L" ? "var(--halfL)" : "var(--halfR)")
+                      : "var(--dim)";
+}
+
+function showHalf(){
+  var L=$("jcvL"), R=$("jcvR"), sel=$("selSide"), cur=$("bCurrent"),i;
+
+  if(cur) cur.disabled=!(fwCols&&fwCols[side()]);
+  if(sel){
+    sel.style.color=halfColor(side());
+    for(i=0;i<sel.options.length;i++)
+      sel.options[i].style.color=halfColor(sel.options[i].value);
+  }
+  if(!L||!R) return;
+  L.style.display = side()==="L" ? "" : "none";
+  R.style.display = side()==="R" ? "" : "none";
+}
+function renderColRows(){
+  var h="";
+  for(var i=0;i<COLS.length;i++){
+    var c=COLS[i];
+    h+='<tr><td style="width:34px"><input type="color" data-ci="'+i+
+       '" value="'+esc(c.c)+'"></td>'+
+       '<td>'+c.name+'</td>'+
+       '<td style="text-align:right"><input type="text" class="hexin" '+
+       'data-hi="'+i+'" value="'+esc(c.c.toUpperCase())+'" maxlength="7"></td></tr>';
+  }
+  $("rowsCol").innerHTML=h;
+
+  var pick=$("rowsCol").querySelectorAll("[data-ci]");
+  for(var p=0;p<pick.length;p++) pick[p].addEventListener("input",function(e){
+    var i=+e.target.getAttribute("data-ci");
+    COLS[i].c=e.target.value; markColors(side());
+    $("rowsCol").querySelector('[data-hi="'+i+'"]').value=
+      e.target.value.toUpperCase();
+    applyColors();
+  });
+  var tx=$("rowsCol").querySelectorAll("[data-hi]");
+  for(var t=0;t<tx.length;t++) tx[t].addEventListener("input",function(e){
+    var v=e.target.value.trim();
+    if(v[0]!=="#") v="#"+v;
+    if(!/^#[0-9A-Fa-f]{6}$/.test(v)) return;
+    var i=+e.target.getAttribute("data-hi");
+    COLS[i].c=v; markColors(side());
+    $("rowsCol").querySelector('[data-ci="'+i+'"]').value=v;
+    applyColors();
+  });
+}
+function setPreset(p){
+  for(var i=0;i<COLS.length;i++){
+    var v=p[COLS[i].id];
+    if(typeof v==="string"&&/^#[0-9A-Fa-f]{6}$/.test(v)) COLS[i].c=v;
+  }
+  renderColRows(); applyColors();
+}
+
+function colors(){
+  var o={};
+  for(var i=0;i<COLS.length;i++) o[COLS[i].id]=COLS[i].c;
+  return o;
+}
+
+function save(){
+  colsStash();
+  var blob=new Blob([JSON.stringify(
+    {version:CFG_VER,side:side(),bind:bind,
+     colorsBySide:{L:colsBy.L||null,R:colsBy.R||null},
+     modes:modeCuts,
+     stickSens:Math.round(stickSens),
+     stickDz:Math.round(stickDz),
+     stickVg:Math.round(stickVg),
+     mouseSens:Math.round(mouseSens),
+     mouseAccel:!!mouseAccel,
+     sync:(syncPending||syncState.known)?{code:syncCut()?syncCut().code:0,mods:0}:undefined},
+    function(k,v){ return k==="mem"?undefined:v; },2)],
+    {type:"application/json"});
+  var a=document.createElement("a");
+  a.href=URL.createObjectURL(blob); a.download="joycon2_preset.json"; a.click();
+  setTimeout(function(){URL.revokeObjectURL(a.href);},1000);
+}
+function applyPreset(o){
+  if(!o||typeof o!=="object"||!o.bind||typeof o.bind!=="object") return false;
+  if(listening) cancelListen();
+  bind=o.bind||{}; if(o.side) $("selSide").value=o.side;
+  bindSrc={L:"preset",R:"preset"}; cleared={L:false,R:false};
+
+  var cbs=o.colorsBySide;
+  if(cbs&&(cbs.L||cbs.R)){
+    colsBy={};
+    if(cbs.L){ colsBy.L=cbs.L; colEdited.L=true; }
+    if(cbs.R){ colsBy.R=cbs.R; colEdited.R=true; }
+    colsSide=side();
+    if(colsBy[colsSide]) setPreset(colsBy[colsSide]);
+  }
+
+  if(o.modes){
+    for(var mk=1;mk<=2;mk++){
+      var mc=o.modes[mk];
+      if(mc===null){ modeCuts[mk]=null; continue; }
+      if(mc&&typeof mc.code==="number"&&typeof mc.mods==="number"&&
+         mc.mode===mk){
+        modeCuts[mk]={code:mc.code&0xFF,mods:mc.mods&0xFF,mode:mk};
+      }
+    }
+    paintMode();
+  }
+
+  if(o.sync&&typeof o.sync.code==="number"){
+    syncPending={code:o.sync.code&0xFF,mods:0};
+    paintSync();
+  }
+
+  if(typeof o.stickSens==="number"&&o.stickSens>=STICK_SENS_MIN&&o.stickSens<=STICK_SENS_MAX){
+    stickSens=Math.round(o.stickSens); sensEdited=true; paintSens();
+  }
+
+  if(typeof o.stickDz==="number"&&o.stickDz>=STICK_DZ_MIN&&o.stickDz<=STICK_DZ_MAX){
+    stickDz=Math.round(o.stickDz); dzEdited=true;
+  }
+  if(typeof o.stickVg==="number"&&o.stickVg>=STICK_VG_MIN&&o.stickVg<=STICK_VG_MAX){
+    stickVg=Math.round(o.stickVg); vgEdited=true;
+  }
+  paintStickMore();
+
+  if(typeof o.mouseSens==="number"&&o.mouseSens>=MOUSE_SENS_MIN&&
+     o.mouseSens<=MOUSE_SENS_MAX){
+    mouseSens=Math.round(o.mouseSens); msensEdited=true; paintMSens();
+  }
+
+  mouseAccel=(o.mouseAccel===true);
+  paintMSens();
+
+  markEdited("L"); markEdited("R");
+  paint(); generate();
+  return true;
+}
+
+function load(file){
+  var fr=new FileReader();
+  fr.onload=function(){
+    try{ if(!applyPreset(JSON.parse(fr.result))) throw new Error("not a preset"); }
+    catch(e){ alert("Couldn't read that preset."); }
+  };
+  fr.readAsText(file);
+}
+
+var CFG_M0=0x32434A55, CFG_M1=0x1A5F4247;
+
+var CFG_VER=3, CFG_SIZE=160, CFG_COL=16, CFG_BTN=28, CFG_BTNS=32;
+
+var K_MOUSE=0, K_KEY=1, K_MOD=2, K_PEER=3, K_STICK=4, K_PEERMOD=5,
+    K_MPEER=6,
+    K_MODE=7,
+    K_SET=8,
+    K_WHEEL=9,
+    K_WPEER=10;
+
+var KIND_NAME={};
+KIND_NAME[K_MOUSE]="JC_BTN_MOUSE";   KIND_NAME[K_KEY]="JC_BTN_KEY";
+KIND_NAME[K_MOD]="JC_BTN_MOD";       KIND_NAME[K_PEER]="JC_BTN_PEER";
+KIND_NAME[K_STICK]="JC_BTN_STICK";   KIND_NAME[K_PEERMOD]="JC_BTN_PEERMOD";
+KIND_NAME[K_MPEER]="JC_BTN_MPEER";   KIND_NAME[K_MODE]="JC_BTN_MODE";
+KIND_NAME[K_SET]="JC_BTN_SET";       KIND_NAME[K_WHEEL]="JC_BTN_WHEEL";
+KIND_NAME[K_WPEER]="JC_BTN_WPEER";
+
+var SET_STICK_GAIN=1;
+var SET_MOUSE_GAIN=2;
+var SET_ACCEL=3;
+var SET_STICK_DZ=4;
+var SET_STICK_VG=5;
+
+var LBTN={DOWN:0x0001,RIGHT:0x0002,LEFT:0x0004,UP:0x0008,L:0x0010,ZL:0x0020,
+          MINUS:0x0040,LS:0x0080,CAP:0x0100,GL:0x0400,SR:0x4000,SL:0x8000};
+
+var STICK_MASK={STICK_UP:0x0100,STICK_DOWN:0xFF00,
+                STICK_LEFT:0x00FF,STICK_RIGHT:0x0001};
+var STICK_NAME={};
+for(var _s in STICK_MASK) STICK_NAME[STICK_MASK[_s]]=_s;
+var LMASK_NAME={}, RMASK_NAME={};
+for(var _l in LBTN) LMASK_NAME[LBTN[_l]]=_l;
+var SRC_ID={"":0,mouse_dx:1,mouse_dy:2,mouse_wheel:3};
+var SRC_NAME=["not set","cursor X","cursor Y","scroll wheel"];
+
+var RBTN={B:0x0001,A:0x0002,Y:0x0004,X:0x0008,R:0x0010,ZR:0x0020,
+          PLUS:0x0040,RS:0x0080,HOME:0x0100,GR:0x0400,C:0x1000,
+          SR:0x4000,SL:0x8000};
+
+for(var _r in RBTN) RMASK_NAME[RBTN[_r]]=_r;
+
+function cfgRead(img){
+  var dv=new DataView(img.buffer,img.byteOffset,img.byteLength);
+  if(img.length<CFG_SIZE) return null;
+  if(dv.getUint32(0,true)!==CFG_M0||dv.getUint32(4,true)!==CFG_M1) return null;
+  if(dv.getUint32(CFG_SIZE-4,true)!==CFG_M0) return null;
+  var c={version:dv.getUint16(8,true),side:img[10],n:img[11],
+         gain:dv.getUint16(12,true),sx:img[14],sy:img[15],
+         col:{},btn:[]};
+  var CN=["body","btn","rail","stick"],i;
+  for(i=0;i<4;i++)
+    c.col[CN[i]]="#"+hex2(img[CFG_COL+i*3])+hex2(img[CFG_COL+1+i*3])+
+                 hex2(img[CFG_COL+2+i*3]);
+  for(i=0;i<c.n&&i<CFG_BTNS;i++)
+    c.btn.push({code:img[CFG_BTN+i*4],kind:img[CFG_BTN+1+i*4],
+                mask:dv.getUint16(CFG_BTN+2+i*4,true)});
+
+  c.sens=null;
+  c.msens=null;
+  c.maccel=false;
+  c.dz=null;
+  c.vg=null;
+  for(i=0;i<c.btn.length;i++)
+    if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_STICK_GAIN)
+      c.sens=c.btn[i].mask;
+    else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_MOUSE_GAIN)
+      c.msens=c.btn[i].mask;
+    else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_ACCEL)
+      c.maccel=(c.btn[i].mask!==0);
+    else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_STICK_DZ)
+      c.dz=c.btn[i].mask;
+    else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_STICK_VG)
+      c.vg=c.btn[i].mask;
+  return c;
+}
+
+function hex3(s,fb){
+  s=String(s||"").trim().replace(/^#/,"");
+  if(!/^[0-9a-fA-F]{6}$/.test(s)) return fb;
+  return [parseInt(s.slice(0,2),16),parseInt(s.slice(2,4),16),
+          parseInt(s.slice(4,6),16)];
+}
+
+function cfgEntry(slot,e){
+  if(!e) return null;
+
+  if(slot.indexOf("R:")===0){
+    var rm=RBTN[slot.slice(2)];
+    if(!rm) return null;
+    if(e.kind==="mod") return {code:e.mask|0,kind:K_PEERMOD,mask:rm};
+    if(e.kind==="key") return {code:e.code|0,kind:K_PEER,mask:rm};
+    return null;
+  }
+
+  if(slot.indexOf("L:")===0){
+    var lm=LBTN[slot.slice(2)];
+    if(!lm) return null;
+    if(e.kind==="wheel") return {code:e.code|0,kind:K_WPEER,mask:lm};
+    return e.kind==="bit" ? {code:e.mask|0,kind:K_MPEER,mask:lm} : null;
+  }
+  if(STICK_MASK[slot]!==undefined)
+    return e.kind==="key"
+      ? {code:e.code|0,kind:K_STICK,mask:STICK_MASK[slot]} : null;
+  if(e.kind==="wheel")
+    return RBTN[slot] ? {code:e.code|0,kind:K_WHEEL,mask:RBTN[slot]} : null;
+  if(e.kind==="bit")
+    return RBTN[slot] ? {code:e.mask|0,kind:K_MOUSE,mask:RBTN[slot]} : null;
+  if(e.kind==="key")
+    return LBTN[slot] ? {code:e.code|0,kind:K_KEY,mask:LBTN[slot]} : null;
+  if(e.kind==="mod")
+    return LBTN[slot] ? {code:e.mask|0,kind:K_MOD,mask:LBTN[slot]} : null;
+  return null;
+}
+
+function cfgList(side){
+  var own=(side===0x67?"L|":"R|"),list=[],ids=Object.keys(bind).sort(),i,e;
+
+  for(i=0;i<ids.length;i++){
+    if(ids[i].indexOf(own)!==0) continue;
+    e=cfgEntry(ids[i].slice(2),bind[ids[i]]);
+    if(e) list.push(e);
+  }
+
+  if(side===0x67){
+    for(i=0;i<MODE_LIST.length;i++){
+      var mc=modeCuts[MODE_LIST[i][0]];
+      if(!mc) continue;
+      list.push({code:mc.code,kind:K_MODE,
+                 mask:((mc.mode&0xFF)<<8)|(mc.mods&0xFF)});
+    }
+  }
+
+  if(side===0x66){
+    var sg=Math.round(stickSens);
+    if(!(sg>=STICK_SENS_MIN&&sg<=STICK_SENS_MAX)) sg=STICK_SENS_DEFAULT;
+    list.push({code:SET_STICK_GAIN,kind:K_SET,mask:sg});
+    var mg=Math.round(mouseSens);
+    if(!(mg>=MOUSE_SENS_MIN&&mg<=MOUSE_SENS_MAX)) mg=MOUSE_SENS_DEFAULT;
+    list.push({code:SET_MOUSE_GAIN,kind:K_SET,mask:mg});
+    list.push({code:SET_ACCEL,kind:K_SET,mask:mouseAccel?1:0});
+    var dzv=Math.round(stickDz);
+    if(!(dzv>=STICK_DZ_MIN&&dzv<=STICK_DZ_MAX)) dzv=STICK_DZ_DEFAULT;
+    list.push({code:SET_STICK_DZ,kind:K_SET,mask:dzv*10});
+    var vgv=Math.round(stickVg);
+    if(!(vgv>=STICK_VG_MIN&&vgv<=STICK_VG_MAX)) vgv=STICK_VG_DEFAULT;
+    list.push({code:SET_STICK_VG,kind:K_SET,mask:vgv});
+  }
+  return {list:list};
+}
+
+function cfgBuild(cur,uiColors){
+  var b=new Uint8Array(CFG_SIZE),dv=new DataView(b.buffer),i;
+  dv.setUint32(0,CFG_M0,true); dv.setUint32(4,CFG_M1,true);
+  dv.setUint16(8,CFG_VER,true); b[10]=cur.side;
+  dv.setUint16(12,cur.gain,true);
+
+  if(cur.side===0x67){
+    b[14]=cur.sx||0; b[15]=cur.sy||0;
+  }else{
+    b[14]=SRC_ID[(bind.SX&&bind.SX.src)||""]||0;
+    b[15]=SRC_ID[(bind.SY&&bind.SY.src)||""]||0;
+  }
+  var CN=["body","btn","rail","stick"];
+
+  var cs=(cur.side===0x67?"L":"R");
+  var live=!colEdited[cs]?cur.col
+          :uiColors?colors()
+                   :(colsBy[cs]||cur.col);
+  for(i=0;i<4;i++){
+    var cc=hex3(live[CN[i]],hex3(cur.col[CN[i]],[0,0,0]));
+    b[CFG_COL+i*3]=cc[0]; b[CFG_COL+1+i*3]=cc[1]; b[CFG_COL+2+i*3]=cc[2];
+  }
+
+  var list=cfgList(cur.side).list;
+
+  var ex=cfgExtras[cur.side===0x67?"L":"R"]||[];
+  for(var xi=0;xi<ex.length;xi++) list.push(ex[xi]);
+  if(list.length>CFG_BTNS) throw whyErr("Too many binds: "+list.length+", the most is "+CFG_BTNS+".");
+  b[11]=list.length;
+  for(i=0;i<list.length;i++){
+    b[CFG_BTN+i*4]=list[i].code;
+    b[CFG_BTN+1+i*4]=list[i].kind;
+    dv.setUint16(CFG_BTN+2+i*4,list[i].mask,true);
+  }
+  dv.setUint32(CFG_SIZE-4,CFG_M0,true);
+  return {bytes:b};
+}
+
+function hexOf(u8){
+  var s="",i;
+  for(i=0;i<u8.length;i++) s+=("0"+u8[i].toString(16).toUpperCase()).slice(-2);
+  return s;
+}
+function unhex(h){
+  var u=new Uint8Array(h.length>>1),i;
+  for(i=0;i<u.length;i++) u[i]=parseInt(h.substr(i*2,2),16);
+  return u;
+}
+
+async function serialSend(c,text){
+  c.txq=(c.txq||Promise.resolve()).catch(function(){}).then(async function(){
+    var w=c.port.writable.getWriter();
+    try{ await w.write(new TextEncoder().encode(text+"\n")); }
+    finally{ w.releaseLock(); }
+  });
+  return c.txq;
+}
+
+function cfgExpect(c,re,ms){
+  return new Promise(function(res,rej){
+    var t=setTimeout(function(){
+      c.cfgWait=null;
+      rej(new Error("the board did not answer in "+((ms||8000)/1000)+"s"));
+    },ms||8000);
+    c.cfgWait={re:re,hit:function(line){ clearTimeout(t); c.cfgWait=null; res(line); }};
+  });
+}
+
+async function cfgAsk(c){
+  var p=cfgExpect(c,/^blob\s+[0-9A-Fa-f]+$/,6000);
+  await serialSend(c,"cfg?");
+  return unhex((await p).split(/\s+/)[1]);
+}
+
+function profSendOne(c,text){
+  return cfgLocked(c,async function(){
+    var ack=lineExpect(c,"profWait",2000);
+    await serialSend(c,text);
+    return await ack;
+  });
+}
+
+async function profSend(text){
+  var i,n=0;
+  for(i=0;i<conns.length;i++){
+    if(!conns[i].side) continue;
+    await profSendOne(conns[i],text);
+    n++;
+  }
+  return n;
+}
+
+async function profRefresh(){
+  return profSend("profile");
+}
+
+function profSay(msg){
+  $("profErr").textContent=msg||"";
+}
+
+var profSyncT=null;
+function profSyncSoon(){
+  if(profSyncT) clearTimeout(profSyncT);
+  profSyncT=setTimeout(function(){ profSyncT=null; profSyncMapping(); },200);
+}
+
+async function profSyncMapping(){
+  var i,c,p,lost=false;
+  for(i=0;i<conns.length;i++){
+    c=conns[i];
+    if(!c.side||!c.loaded) continue;
+    try{
+      p=await cfgLocked(c,async function(){ return pageFromBlob(await cfgAsk(c)); });
+      if(!p) continue;
+      if(edited[p.side]) lost=true;
+      edited[p.side]=false;
+      loadBoardIntoPage(p);
+    }catch(e){
+      profSay("Couldn't reload the mapping after switching.");
+      return;
+    }
+  }
+  profSay(lost?"Profile switched, so unapplied changes were dropped.":"");
+}
+
+async function profSetKey(n,cut){
+  var p=profState.slot[n-1];
+  if(!p) p=profState.slot[n-1]={filled:false,code:0,mods:0,name:""};
+  p.code=cut.code; p.mods=cut.mods;
+  paintProf();
+  try{
+    if(!await profSend("profile key "+n+" 0x"+hex2(cut.code)+" 0x"+hex2(cut.mods)))
+      profSay("Connect a board first.");
+    else await profRefresh();
+  }catch(e){ profSay(cut.code?"Couldn't set that shortcut.":"Couldn't remove that shortcut."); }
+}
+
+function profNameFrom(filename){
+  return String(filename||"").replace(/^.*[\\/]/,"").replace(/\.[^.]*$/,"")
+         .replace(/[^\x20-\x7E]/g," ").replace(/\s+/g," ").trim().slice(0,50);
+}
+
+async function profLoadFile(n,file){
+  var o;
+  profSay("");
+  if(!conns.filter(function(c){ return c.side; }).length){
+    profSay("Connect a board first.");
+    return false;
+  }
+  try{ o=JSON.parse(await file.text()); }
+  catch(e){ profSay("Couldn't read that preset."); return false; }
+  var keepSync=syncPending;
+  if(!applyPreset(o)){ profSay("Couldn't read that preset."); return false; }
+  syncPending=keepSync; paintSync();
+
+  if(await cfgApplyAll()){
+    profSay("Couldn't fill slot "+n+"."+(applyWhy?" "+applyWhy:""));
+    return false;
+  }
+  try{
+    await profSend("profile save "+n);
+    await profSend("profile name "+n+" "+profNameFrom(file.name));
+    await profSend("profile load "+n);
+    await profRefresh();
+  }catch(e){ profSay("Couldn't fill slot "+n+"."); return false; }
+  return true;
+}
+
+async function profUse(n){
+  profSay("");
+  try{
+    if(!await profSend("profile load "+n)) profSay("Connect a board first.");
+    else await profRefresh();
+  }catch(e){ profSay("Couldn't switch profiles."); }
+}
+
+async function profClear(n){
+  profSay("");
+  try{
+    if(!await profSend("profile key "+n+" 0 0")){
+      profSay("Connect a board first.");
+      return;
+    }
+    await profSend("profile clear "+n);
+    await profRefresh();
+  }catch(e){ profSay("Couldn't clear slot "+n+"."); }
+}
+
+function sideWord(s){ return s==="L" ? "left" : "right"; }
+function whyErr(t){ var e=new Error(t); e.why=t; return e; }
+var applyWhy="";
+
+function applyErases(cur,bytes){
+  function buttons(list){
+    var n=0;
+    for(var i=0;i<list.length;i++)
+      if(list[i].kind!==K_SET&&list[i].kind!==K_MODE) n++;
+    return n;
+  }
+  var next=cfgRead(bytes), had=buttons(cur.btn), keep=next?buttons(next.btn):0;
+  return (keep===0&&had>0)?had:0;
+}
+
+function applyTargets(){
+  return conns.filter(function(c){ return c.side && edited[c.side]; });
+}
+
+function profActiveSlot(sd){
+  var n=profState.by[sd],p;
+  if(!(n>=1&&n<=PROFILES)) return 0;
+  p=profState.slotBy[sd][n-1]||profState.slot[n-1];
+  return (p&&p.filled) ? n : 0;
+}
+
+async function cfgApplyAll(){
+  var known=conns.filter(function(c){ return c.side; }),i;
+  applyWhy="";
+  if(!known.length){
+    if(!conns.length) $("cfgOut").textContent="Connect a board first.";
+    applyWhy="Connect a board first.";
+    return 1;
+  }
+  var targets=applyTargets();
+  var absent=["L","R"].filter(function(s){
+    return edited[s]&&!known.some(function(c){ return c.side===s; });
+  });
+  var absentText=absent.length===2 ? "Not applied: the boards aren't connected."
+    : "Not applied: the "+sideWord(absent[0])+" board isn't connected.";
+  if(!targets.length){
+    $("cfgOut").textContent=absent.length ? absentText : "No changes to apply.";
+    if(absent.length) applyWhy=(absent.length===2 ? "Connect both boards."
+                                : "Connect the "+sideWord(absent[0])+" board.");
+    return absent.length ? 1 : 0;
+  }
+  $("bCfgApply").disabled=true; $("bCfgDefault").disabled=true;
+  $("cfgOut").textContent="Writing...";
+  var uiSide=(side()==="L"?0x67:0x66),lines=[],bad=0;
+  for(i=0;i<targets.length;i++){
+    var c=targets[i];
+    try{ await cfgLocked(c,async function(){
+      if(!c.loaded) throw whyErr(HINT_LOADING);
+      var cur=cfgRead(await cfgAsk(c));
+      if(!cur) throw new Error("could not read its config");
+      var mine=(cur.side===uiSide);
+      var built=cfgBuild(cur,mine);
+      var gone=applyErases(cur,built.bytes);
+      if(gone&&!cleared[c.side]) throw whyErr("It would have no buttons left.");
+      var p=cfgExpect(c,/^(write ok|write rejected|write FAILED|stored record rejected)/);
+      await serialSend(c,"cfg "+hexOf(built.bytes));
+      var reply=await p;
+      if(!/^write ok/.test(reply)) throw new Error(reply);
+
+      var back=await cfgAsk(c),same=(back.length===built.bytes.length);
+      for(var j=0;same&&j<back.length;j++) if(back[j]!==built.bytes[j]) same=false;
+      if(!same) throw new Error("read-back did not match what was sent");
+
+      var stored=pageFromBlob(back);
+      if(stored) loadBoardIntoPage(stored);
+      lines.push("Applied to the "+sideWord(c.side)+" board.");
+    }); }catch(e){
+      bad++;
+      lines.push("Couldn't apply to the "+sideWord(c.side)+" board."+(e.why?" "+e.why:""));
+      if(!applyWhy) applyWhy=e.why||"";
+    }
+  }
+  if(absent.length) lines.push(absentText);
+  var skipped=conns.length-known.length;
+  if(skipped) lines.push("Skipped "+skipped+" board"+(skipped===1?"":"s")+" still starting up.");
+  if(!bad&&syncPending){
+    var sp=syncPending;
+    try{
+      await syncSend("sync key 0x"+hex2(sp.code)+" 0x"+hex2(sp.mods));
+      if(sp.code&&!syncState.on) await syncSend("sync on");
+      syncPending=null;
+      lines.push("Pairing key "+(sp.code?"set to "+modeComboText(sp.code,0):"removed"));
+    }catch(e){ bad++; lines.push("Couldn't set the pairing key."); }
+    paintSync();
+  }
+  $("cfgOut").textContent=lines.join("\n");
+
+  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; }
+  userEdited=edited.L||edited.R;
+  connNote();
+  return bad;
+}
+
+async function cfgRestoreAll(){
+  var targets=conns.filter(function(c){ return c.side; }),i;
+  if(!targets.length){ $("cfgOut").textContent="Connect a board first."; return; }
+  $("bCfgApply").disabled=true; $("bCfgDefault").disabled=true;
+  $("cfgOut").textContent="Restoring...";
+  syncPending=null; paintSync();
+  var lines=[],notes=[],bad=0;
+  for(i=0;i<targets.length;i++){
+    var c=targets[i];
+    try{ await cfgLocked(c,async function(){
+      var p=cfgExpect(c,/^(stored config deleted|delete FAILED)/);
+      await serialSend(c,"cfg default");
+      var reply=await p;
+      if(!/^stored config deleted/.test(reply)) throw new Error(reply);
+
+      var now=pageFromBlob(await cfgAsk(c));
+      if(now&&now.side==="R"){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; }
+      if(now) loadBoardIntoPage(now);
+      lines.push("Restored defaults on the "+sideWord(c.side)+" board.");
+    });
+      var rn=profActiveSlot(c.side),
+          note="Profile "+rn+" comes back on replug. Clear it to keep the defaults.";
+      if(rn&&notes.indexOf(note)<0) notes.push(note);
+    }catch(e){ bad++; lines.push("Couldn't restore the "+sideWord(c.side)+" board."); }
+  }
+  $("cfgOut").textContent=lines.concat(notes).join("\n");
+  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; }
+  userEdited=edited.L||edited.R;
+  connNote();
+}
+
+$("bCfgApply").addEventListener("click",cfgApplyAll);
+$("bCfgDefault").addEventListener("click",function(){
+  if(confirm("Restore firmware defaults? This erases the mapping and pairing key "+
+             "saved on the connected board and puts the firmware's defaults back."))
+    cfgRestoreAll();
+});
+$("bConn").addEventListener("click",connect);
+$("bDisc").addEventListener("click",disconnect);
+if(hasPorts()){
+  var ioEvents=USE_USB?navigator.usb:navigator.serial;
+  var ioPort=function(e){ return USE_USB?usbPort(e.device):e.target; };
+  ioEvents.addEventListener("connect",function(e){
+    if(!userClosed&&xdSide(ioPort(e))) setTimeout(openGranted,500);
+  });
+  ioEvents.addEventListener("disconnect",function(e){
+    var p=ioPort(e);
+    if(USE_USB) usbWraps.delete(e.device);
+    if(!userClosed&&xdSide(p)) setTimeout(openGranted,500);
+  });
+  setTimeout(openGranted,300);
+}
+$("selSide").addEventListener("change",function(){
+  sidePicked=true;
+  if(listening) cancelListen();
+  colsSwitch(side());
+  paint(); applyColors(); generate();
+});
+$("bSave").addEventListener("click",save);
+$("bLoad").addEventListener("click",function(){ $("fLoad").value=""; $("fLoad").click(); });
+$("fLoad").addEventListener("change",function(e){
+  if(e.target.files[0]) load(e.target.files[0]); });
+$("bReset").addEventListener("click",function(){
+  if(confirm("Discard changes you haven't applied?")){
+    bind={};
+
+    edited={L:false,R:false}; colEdited={L:false,R:false}; userEdited=false; cfgExtras={L:[],R:[]};
+    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false;
+    bindSrc={L:null,R:null}; cleared={L:false,R:false};
+    syncPending=null; paintSync();
+    for(var ci=0;ci<conns.length;ci++){ conns[ci].loaded=false; loadFromBoard(conns[ci]); }
+    paint(); generate(); } });
+$("bGen").addEventListener("click",generate);
+$("bCopy").addEventListener("click",function(){
+  navigator.clipboard.writeText($("out").textContent).then(function(){
+    $("pCopied").style.display="";
+    setTimeout(function(){$("pCopied").style.display="none";},1300); }); });
+
+var DEV_RE=/^dev ([0-9A-Fa-f:]{17}) \((public|random)\) rssi=(-?\d+) hid=([01]) appearance=0x([0-9A-Fa-f]{4}) name='(.*)'$/;
+
+var LIVE_RE=/^([0-9A-Fa-f:]{17}) \((public|random)\) rssi=(-?\d+) type=(\d+) hid=([01]) appearance=0x([0-9A-Fa-f]{4}) name='(.*)'$/;
+var PIN_RE=/^pin=([0-9A-Fa-f:]{17}) \((public|random)\) name='(.*)'$/;
+var ATT_RE=/^attached=([0-9A-Fa-f:]{17}) \((public|random)\) name='(.*)' match=([01])$/;
+
+var FOLLOW_RE=/^'(.*)' (also at|paired at) ([0-9A-Fa-f:]{17}) \((public|random)\)/;
+
+var DEV_GAP_MS=300;
+function devSend(c,text,poll){
+  if(poll&&(c.cfgWait||c.profWait||c.gripWait||c.syncWait||c.cfgBusy)) return Promise.resolve();
+  return cfgLocked(c,async function(){
+    await serialSend(c,text);
+    await new Promise(function(r){ setTimeout(r,DEV_GAP_MS); });
+  }).catch(function(){});
+}
+
+function devKind(appear,hid){
+  if(appear===0x03C1) return "keyboard";
+  if(appear===0x03C2) return "mouse";
+  return ((appear>>6)===0x0F||hid) ? "input device" : "";
+}
+
+var HEARD_MAX=48;
+function devHeard(c,r,fromDump){
+  var h=c.heard||(c.heard={}),e=h[r.addr],now=Date.now(),k,old=null,n=0;
+  if(!e){
+    for(k in h){ n++; if(!old||h[k].last<old.last) old=h[k]; }
+    if(n>=HEARD_MAX&&old) delete h[old.addr];
+    e=h[r.addr]={addr:r.addr,type:r.type,rssi:r.rssi,hid:false,appear:0,
+                 name:"",first:0,last:0};
+  }
+  e.rssi=r.rssi;
+  if(!fromDump){ e.last=now; if(!e.first) e.first=now; }
+  if(r.hid) e.hid=true;
+  if(r.appear) e.appear=r.appear;
+  if(r.name&&!e.name) e.name=r.name;
+  return e;
+}
+
+function onScanLine(rest,c){
+  var m,r,e;
+  if((m=rest.match(/^begin n=(\d+)$/))){
+    if(!c.scan) c.scan={want:0,rows:[],done:false};
+    c.scan.want=parseInt(m[1],10); c.scan.done=false;
+    devPaint(); return;
+  }
+  if(rest==="end"){ if(c.scan) c.scan.done=true; devPaint(); return; }
+  if((m=rest.match(DEV_RE))){
+    if(!c.scan) c.scan={want:0,rows:[],done:false};
+    r={addr:m[1],type:m[2],rssi:parseInt(m[3],10),
+       hid:m[4]==="1",appear:parseInt(m[5],16),name:m[6]};
+    r.first=devHeard(c,r,true).first;
+    devSeen(c,r);
+    devPaint(); return;
+  }
+  if((m=rest.match(LIVE_RE))){
+    r={addr:m[1],type:m[2],rssi:parseInt(m[3],10),
+       hid:m[5]==="1",appear:parseInt(m[6],16),name:m[7]};
+    e=devHeard(c,r);
+
+    if((c.scanUntil&&Date.now()<c.scanUntil)||linkBusy(c)){
+      if(!c.scan) c.scan={want:0,rows:[],done:false};
+      r.first=e.first;
+      devSeen(c,r);
+      devPaint();
+    }
+
+    linkSeen(c,e);
+    return;
+  }
+}
+
+function devSeen(c,r){
+  var rows=c.scan.rows,i;
+  for(i=0;i<rows.length;i++){
+    if(rows[i].addr!==r.addr) continue;
+    rows[i].rssi=r.rssi;
+    if(r.hid) rows[i].hid=true;
+    if(r.appear) rows[i].appear=r.appear;
+    if(r.name && !rows[i].name) rows[i].name=r.name;
+    return;
+  }
+  rows.push(r);
+}
+
+function onPeerLine(rest,c){
+  var m;
+  if(/^pin=none/.test(rest)){ c.pin=null; devPaint(); return; }
+  if((m=rest.match(PIN_RE))){
+    c.pin={addr:m[1],type:m[2],name:m[3]}; devPaint(); return;
+  }
+  if(/^attached=none/.test(rest)){
+    c.att=null; c.attAt=Date.now(); linkWatch(c); devPaint(); return;
+  }
+  if((m=rest.match(ATT_RE))){
+    c.att={addr:m[1],type:m[2],name:m[3],match:m[4]==="1"};
+    c.attAt=Date.now(); c.watched=false;
+    devPaint(); return;
+  }
+  if((m=rest.match(FOLLOW_RE))){
+    if(c.link&&c.link.name===m[1]) linkBoard(c,m[3],m[4],true);
+    return;
+  }
+}
+
+function devGroups(c){
+  var rows=(c.scan&&c.scan.rows)||[],by={},out=[],i,r,k,g;
+  for(i=0;i<rows.length;i++){
+    r=rows[i];
+    k=r.name ? ("n:"+r.name) : ("a:"+r.addr);
+    g=by[k];
+    if(!g){ g=by[k]={key:k,name:r.name,best:r,n:0,hid:false,appear:0,addrs:[]};
+            out.push(g); }
+    if(g.addrs.indexOf(r.addr)<0){ g.addrs.push(r.addr); g.n++; }
+    if(r.hid) g.hid=true;
+    if(r.appear&&!g.appear) g.appear=r.appear;
+    if(r.rssi>g.best.rssi) g.best=r;
+  }
+  for(i=0;i<out.length;i++) out[i].kind=devKind(out[i].appear,out[i].hid);
+  out.sort(function(a,b){ return b.best.rssi-a.best.rssi; });
+  return out;
+}
+
+function devBoards(){
+  return conns.filter(function(c){ return c.side; })
+              .sort(function(a,b){ return a.side==="L" ? -1 : b.side==="L" ? 1 : 0; });
+}
+
+function devAskAll(){
+  devBoards().forEach(function(c){ devSend(c,"peer?",true); });
+}
+
+var devTimer=null;
+function devPoll(on){
+  if(devTimer){ clearInterval(devTimer); devTimer=null; }
+  if(on){ devTimer=setInterval(function(){ devAskAll(); devPaint(); },3000); }
+}
+
+async function devScan(c){
+  c.scan={want:0,rows:[],done:false};
+  c.scanUntil=Date.now()+14000; devPaint();
+  try{
+    await devSend(c,"scan!");
+    while(Date.now()<c.scanUntil){
+      await new Promise(function(r){ setTimeout(r,250); });
+      devPaint();
+    }
+    await devSend(c,"scan?");
+    await devSend(c,"peer?");
+  }catch(e){}
+  c.scanUntil=0;
+  setTimeout(devPaint,1200);
+}
+
+var LINK_TRY_MS=12000, LINK_QUIET_MS=4500, LINK_TOTAL_MS=75000,
+    LINK_NUDGE_MS=18000;
+
+function linkBusy(c){
+  return !!(c.link&&(c.link.state==="trying"||c.link.state==="waiting"));
+}
+
+function linkCands(c,L){
+  var h=c.heard||{},rows=(c.scan&&c.scan.rows)||[],seen={},out=[],k,i;
+  function add(r){
+    if(seen[r.addr]||(L.name ? r.name!==L.name : r.addr!==L.home)) return;
+    seen[r.addr]=true; out.push(r);
+  }
+  for(k in h) add(h[k]);
+  for(i=0;i<rows.length;i++) add(rows[i]);
+  out.sort(function(a,b){
+    if(!!a.hid!==!!b.hid) return a.hid ? -1 : 1;
+    if((a.first||0)!==(b.first||0)) return (b.first||0)-(a.first||0);
+    return b.rssi-a.rssi;
+  });
+  return out;
+}
+
+function linkStart(c,name,type,home,auto){
+  var L=c.link={name:name||"",type:type||"random",home:home||"",auto:!!auto,
+                hid:false,tried:{},n:0,cur:"",curAt:0,busyAt:0,connAt:0,
+                askAt:0,nudgeAt:0,repinAt:0,until:Date.now()+LINK_TOTAL_MS,
+                state:"trying",why:""};
+  L.hid=linkCands(c,L).some(function(r){ return r.hid; });
+  linkNext(c,"");
+  linkTimer();
+}
+
+function linkNext(c,why){
+  var L=c.link,cs,i,t,pick=null,pass;
+  if(!L) return;
+  if(why) L.why=why;
+  cs=linkCands(c,L);
+  for(pass=0;pass<2&&!pick;pass++){
+    for(i=0;i<cs.length;i++){
+      t=L.tried[cs[i].addr];
+      if(pass===0 ? !t : (t&&t.n<2&&(cs[i].last||0)>t.at)){ pick=cs[i]; break; }
+    }
+  }
+  if(!pick&&L.home&&!L.tried[L.home]) pick={addr:L.home,type:L.type};
+  if(pick){ linkTry(c,pick.addr,pick.type||L.type); return; }
+
+  if(L.name){ linkWait(c); return; }
+  L.state="failed"; L.cur="";
+  devPaint();
+}
+
+function linkTry(c,addr,type){
+  var L=c.link,t=L.tried[addr]||(L.tried[addr]={n:0,at:0}),now=Date.now();
+  t.n++; t.at=now; L.n++;
+  L.cur=addr; L.type=type||L.type; L.curAt=now; L.busyAt=0; L.connAt=0;
+  L.state="trying";
+
+  devSend(c,"peer "+addr+" "+L.type+(L.name?" "+L.name:""));
+
+  if(!c.att){ devSend(c,"scan!"); L.nudgeAt=now; }
+  devSend(c,"peer?",true); L.askAt=now;
+  devPaint();
+}
+
+function linkWait(c){
+  var L=c.link,now=Date.now();
+  L.state="waiting"; L.cur=""; L.busyAt=0; L.connAt=0;
+  if(!c.att&&now-L.nudgeAt>3000){ devSend(c,"scan!"); L.nudgeAt=now; }
+  devPaint();
+}
+
+function linkOk(c){
+  c.link=null;
+  devSend(c,"peer?",true);
+  devPaint();
+}
+
+function linkBoard(c,addr,type,sure){
+  var L=c.link,e=(c.heard||{})[addr],t,now=Date.now();
+  if(!linkBusy(c)) return false;
+  if(addr!==L.cur){
+    if(!sure&&addr!==L.home&&!(L.name&&e&&e.name===L.name)) return false;
+    t=L.tried[addr]||(L.tried[addr]={n:0,at:0});
+    if(!t.n){ t.n=1; t.at=now; L.n++; }
+    L.cur=addr; L.curAt=now; L.connAt=0;
+    if(type) L.type=type;
+  }
+  L.busyAt=now; L.state="trying";
+  return true;
+}
+
+var LINK_WHY={"05":"authentication failed","06":"the pairing key was missing",
+  "08":"the signal was lost","13":"the device hung up",
+  "16":"the board hung up","22":"it stopped answering mid-pairing",
+  "3e":"the connection could not be set up"};
+
+var SEC_WHY=["","authentication failed","the pairing key was missing",
+  "OOB data was not available","it insists on passkey pairing",
+  "pairing is not supported","pairing is not allowed","invalid parameters",
+  "a key was rejected","pairing failed"];
+
+function devEvent(ln,c){
+  var L=c.link,m,now=Date.now();
+
+  if(/^\[JC\s*\]\s*connect failed \(0x/.test(ln)){
+    if(linkBusy(c)&&L.state==="trying"){
+      linkNext(c,"it did not answer the connection request"); return;
+    }
+    if(!c.att) devSend(c,"scan!");
+    return;
+  }
+  if(!linkBusy(c)) return;
+  if(/^\[MOUSE\s*\]\s*connect to [0-9A-Fa-f:]{17} \((?:public|random)\) failed/.test(ln)){
+    if(L.state==="trying") linkNext(c,"it did not answer the connection request");
+    return;
+  }
+  if((m=ln.match(/^\[MOUSE\s*\]\s*HID advertiser ([0-9A-Fa-f:]{17}) \((public|random)\)/))){
+    linkBoard(c,m[1],m[2]); return;
+  }
+  if((m=ln.match(/^\[MOUSE\s*\]\s*\*\*\* CONNECTED to ([0-9A-Fa-f:]{17}) \((public|random)\)/))){
+    if(linkBoard(c,m[1],m[2])) L.connAt=now;
+    return;
+  }
+  if((m=ln.match(/^\[MOUSE\s*\]\s*security level=\d+ err=(\d+)/))){
+    if(!L.connAt) return;
+    L.busyAt=now;
+
+    if(m[1]==="2"){ L.why="it had forgotten its old pairing"; L.connAt=0; return; }
+    if(m[1]!=="0") linkNext(c,"it would not pair ("+(SEC_WHY[+m[1]]||"error "+m[1])+")");
+    return;
+  }
+  if((m=ln.match(/^\[MOUSE\s*\]\s*\*\*\* DISCONNECTED, reason 0x([0-9A-Fa-f]{2})/))){
+    if(L.connAt) linkNext(c,"it disconnected: "+
+      (LINK_WHY[m[1].toLowerCase()]||"reason 0x"+m[1]));
+    return;
+  }
+  if(/^\[MOUSE\s*\]\s*discovery done\D+[1-9]/.test(ln)||
+     /^\[HID\s*\]\s*(kbd|mouse)=subscribed/.test(ln)){
+    if(L.connAt||(c.att&&c.att.match&&c.attAt>L.curAt)) linkOk(c);
+    return;
+  }
+}
+
+function linkSeen(c,e){
+  var L=c.link,t;
+  if(!linkBusy(c)){ linkHeal(c,e); return; }
+  if(!L.name||e.name!==L.name||e.addr===L.cur||(L.hid&&!e.hid)) return;
+  t=L.tried[e.addr];
+  if(t&&!(t.n<2&&e.last>t.at)) return;
+  if(L.state==="waiting"||
+     (!L.connAt&&Date.now()-Math.max(L.curAt,L.busyAt)>LINK_QUIET_MS)){
+    linkTry(c,e.addr,e.type);
+  }
+}
+
+function linkHeal(c,e){
+  if(!c.side||!c.pin||!c.pin.name||c.att!==null||!e.hid) return;
+  if(e.name!==c.pin.name||e.addr===c.pin.addr) return;
+  if(c.link&&c.link.state==="failed"&&!c.link.auto&&c.link.tried[e.addr]) return;
+  c.healed=c.healed||{};
+  if(c.healed[e.addr]) return;
+  c.healed[e.addr]=Date.now();
+  linkStart(c,c.pin.name,e.type,e.addr,true);
+}
+
+function linkWatch(c){
+  if(!c.side||!c.pin||c.att||linkBusy(c)||c.watched) return;
+  c.watched=true;
+  devSend(c,"scan!");
+}
+
+var linkIv=null;
+function linkTimer(){
+  if(linkIv) return;
+  linkIv=setInterval(function(){
+    var any=false;
+    conns.forEach(function(c){ if(linkBusy(c)){ any=true; linkTick(c); } });
+    devPaint();
+    if(!any){ clearInterval(linkIv); linkIv=null; }
+  },500);
+}
+
+function linkTick(c){
+  var L=c.link,now=Date.now();
+  if(now>L.until&&now-L.busyAt>LINK_QUIET_MS){
+    if(!L.why) L.why=L.n ? "it never finished connecting"
+                         : "the board never heard it advertising";
+    L.state="failed"; L.cur="";
+    return;
+  }
+  if(now-L.askAt>2000){ L.askAt=now; devSend(c,"peer?",true); }
+  if(L.state==="waiting"){
+    if(!c.att&&now-L.nudgeAt>LINK_NUDGE_MS){ L.nudgeAt=now; devSend(c,"scan!"); }
+    return;
+  }
+
+  if(c.att&&!c.att.match&&c.attAt>L.curAt+1500&&now-L.repinAt>5000){
+    L.repinAt=now;
+    devSend(c,"peer "+L.cur+" "+L.type+(L.name?" "+L.name:""));
+  }
+  if(now-L.curAt>LINK_TRY_MS&&now-Math.max(L.curAt,L.busyAt)>LINK_QUIET_MS){
+    linkNext(c,L.connAt ? "it connected, but its input never started"
+                        : "it did not answer at "+L.cur);
+  }
+}
+
+function devPin(c,g){
+  if(!g) return;
+
+  c.healed={};
+  linkStart(c,g.name,g.best.type,g.best.addr,false);
+}
+
+function devChosen(c,x){
+  return !!(c.pin&&(x.addrs.indexOf(c.pin.addr)>=0||
+                    (x.name&&c.pin.name===x.name)));
+}
+
+function devKnownName(c,addrs){
+  var i,a,h;
+  for(i=0;i<addrs.length;i++){
+    a=addrs[i]; h=(c.heard||{})[a];
+    if(h&&h.name) return h.name;
+    if(c.pin&&c.pin.addr===a&&c.pin.name) return c.pin.name;
+    if(c.att&&c.att.addr===a&&c.att.name) return c.att.name;
+  }
+  return "";
+}
+
+function devIsJob(c,x){
+  var L=c.link;
+  return !!(L&&(L.name ? x.name===L.name : x.addrs.indexOf(L.home)>=0));
+}
+
+function linkLine(c){
+  var L=c.link,nm,h,k;
+  if(!L) return "";
+  nm=esc(L.name||L.home||"the device");
+  if(L.state==="failed"){
+    return '<p class="devstate bad">Can\'t connect to '+nm+
+      (L.why ? ', '+esc(L.why) : '')+'. '+linkTip(L)+'</p>';
+  }
+  if(L.state==="waiting"){
+    return '<p class="devstate"><span class="devspin"></span><span>Waiting for '+
+      nm+' to advertise. Put it in pairing mode; the board takes it as soon '+
+      'as it hears it.</span></p>';
+  }
+  k=Object.keys(L.tried).length;
+  h='<p class="devstate"><span class="devspin"></span><span>'+
+    (L.auto ? 'Changed to a new address'
+            : 'Connecting to '+nm+(L.cur ? ' at' : ''))+
+    (L.cur ? ' <span class="mono">'+esc(L.cur)+'</span>' : '')+
+    (k>1 ? ' (address '+k+')' : '')+'…';
+  if(!L.connAt&&Date.now()-L.curAt>5000){
+    h+=' If it is asleep or paired to something else, hold its pairing button.';
+  }
+  return h+'</span></p>';
+}
+
+function linkTip(L){
+  if(/set up/.test(L.why)){
+    return "The Switch connection can block new devices from connecting. "+
+           "Try again with the Switch off or asleep.";
+  }
+  if(/passkey/.test(L.why)){
+    return "This needs a pairing code.";
+  }
+  if(/would not pair/.test(L.why)){
+    return "Reset the device's pairing.";
+  }
+  return "Put it in pairing mode, then press Reconnect.";
+}
+
+function devRow(c,bi,x){
+  var L=c.link,chosen=devChosen(c,x),live=chosen&&!!c.att&&c.att.match,
+      mine=!live&&devIsJob(c,x),busy=mine&&linkBusy(c),
+      want=c.side==="L" ? "keyboard" : "mouse",h,shown,note="",bad=false;
+  shown=live ? c.att.addr : (busy&&L.cur) ? L.cur
+        : (linkCands(c,{name:x.name,home:x.best.addr})[0]||x.best).addr;
+  if(busy) note="connecting…";
+  else if(mine&&L.state==="failed"){ note="Can't connect. Try again."; bad=true; }
+  else if(chosen&&c.att===null) note="Not connected. Select to reconnect.";
+
+  if((x.kind==="mouse"&&want==="keyboard")||(x.kind==="keyboard"&&want==="mouse")){
+    note=(note ? note+" " : "")+"This half needs a "+want+".";
+    bad=true;
+  }
+  h='<div class="devrow'+(live ? " pinned" : (chosen||mine) ? " chosen" : "")+
+    (busy ? " busy" : "")+'"';
+
+  if(live) h+=' aria-current="true"';
+  else if(busy) h+=' aria-busy="true"';
+  else h+=' role="button" tabindex="0" data-dev="pin" data-i="'+bi+
+          '" data-k="'+esc(x.key)+'"';
+  h+='>';
+  h+='<div class="nm"><b>'+esc(x.name||devKnownName(c,x.addrs)||"Unnamed device")+'</b>';
+  if(x.n>1) h+=' <span class="devtag">'+
+               x.n+' addresses</span>';
+  if(note) h+='<span class="sub2'+(bad ? " devbad" : "")+'">'+esc(note)+'</span>';
+  h+='</div>';
+  h+='<div class="sig mono">'+esc(shown)+'</div>';
+  h+= live ? '<span class="devcheck">✓</span>'
+      : busy ? '<span class="devspin" aria-hidden="true"></span>'
+      : '<span class="devcheck" aria-hidden="true"></span>';
+  return h+'</div>';
+}
+
+var devHoldUntil=0, devHoldT=null;
+function devHoldFor(ms){
+  devHoldUntil=Date.now()+ms;
+  if(devHoldT) clearTimeout(devHoldT);
+  devHoldT=setTimeout(function(){ devHoldT=null; devHoldUntil=0; devPaint(); },ms);
+}
+
+function devPaint(){
+  var host=$("devList");
+  if(!host||Date.now()<devHoldUntil) return;
+  var boards=devBoards(),h;
+
+  if(!conns.length) h='<p class="sub">Connect a board first.</p>';
+  else if(!boards.length) h='<p class="sub">Connected.</p>';
+  else h='<div class="devgrid">'+boards.map(devBoardHtml).join("")+'</div>';
+
+  if(host.devLast===h) return;
+  host.devLast=h;
+  host.innerHTML=h;
+}
+
+function devBoardHtml(c,bi){
+  var g=devGroups(c),scanning=c.scanUntil&&Date.now()<c.scanUntil,
+      busy=linkBusy(c),live=!!(c.pin&&c.att&&c.att.match),ins=[],others=[],
+      h="";
+
+  if(c.link&&c.link.state==="failed"&&live) c.link=null;
+  h+='<div class="devboard">';
+
+  var whb=(c.side==="L")?' class="halfL"'
+         :(c.side==="R")?' class="halfR"':"";
+  h+='<div class="devhead"><b'+whb+'>'+
+     (c.side==="L"?"Left Joy-Con":"Right Joy-Con")+
+     '</b></div>';
+
+  h+='<div class="devnow">';
+  h+='<span class="k">Connected to</span><span>';
+  if(busy&&!live) h+='<span class="sub">connecting…</span>';
+  else if(!c.att) h+='<span class="sub">nothing</span>';
+  else{
+    var hd=(c.heard||{})[c.att.addr];
+    var an=c.att.name ||
+           (c.pin&&(c.pin.addr===c.att.addr||c.att.match) ? c.pin.name : "") ||
+           (hd ? hd.name : "");
+    h+=esc(an||"unnamed device")+' ';
+
+    if(!c.att.match) h+='<span class="devbad">NOT the device you chose</span>';
+  }
+  h+='</span>';
+  h+='<span class="k">Set to</span><span>';
+  h+= c.pin ? esc(c.pin.name||"unnamed device")
+            : '<span class="sub">nothing yet, press Search to pick one</span>';
+  h+='</span></div>';
+
+  h+=linkLine(c);
+
+  h+='<div style="display:flex;gap:9px;margin-bottom:10px;flex-wrap:wrap">';
+  h+='<button class="devsearch" data-dev="scan" data-i="'+bi+'"'+
+     (scanning?" disabled":"")+'>'+
+     (scanning ? '<span class="devspin"></span>Searching '+
+        Math.max(0,Math.ceil((c.scanUntil-Date.now())/1000))+"s"
+               : "Search")+'</button>';
+
+  if(busy) h+='<button data-dev="stop" data-i="'+bi+'">Stop</button>';
+  else if(c.pin&&!live&&c.att!==undefined){
+    h+='<button data-dev="retry" data-i="'+bi+'">Reconnect</button>';
+  }
+  h+='</div>';
+
+  g.forEach(function(x){
+    (x.kind||devChosen(c,x)||devIsJob(c,x) ? ins : others).push(x);
+  });
+
+  if(scanning){
+    h+='<p class="sub">'+(ins.length
+      ? "Listening."
+      : "Listening. Hold the pairing button on the device you want.")+'</p>';
+  }
+  if(ins.length){
+    h+='<div class="devrows">';
+    ins.forEach(function(x){ h+=devRow(c,bi,x); });
+    h+='</div>';
+  }else if(!scanning&&others.length){
+    h+='<p class="sub">No keyboard or mouse heard. Put yours in pairing mode '+
+       'and search again.</p>';
+  }
+  if(others.length){
+    h+='<button class="devmore" data-dev="more" data-i="'+bi+'" aria-expanded="'+
+       (c.showAll?"true":"false")+'">'+(c.showAll?"Hide ":"Show ")+
+       others.length+' other device'+(others.length===1?"":"s")+'</button>';
+    if(c.showAll){
+      h+='<div class="devrows">';
+      others.forEach(function(x){ h+=devRow(c,bi,x); });
+      h+='</div>';
+    }
+  }
+
+  if(c.scan&&c.scan.done&&c.scan.rows.length<c.scan.want){
+    h+='<p class="sub">Only '+c.scan.rows.length+' of '+c.scan.want+' came through. '+
+       'Search again if yours is missing.</p>';
+  }
+  if(!scanning && !g.length && c.scan){
+    h+='<p class="sub">Nothing found. Hold the pairing button and search '+
+       'again.</p>';
+  }
+  return h+'</div>';
+}
+
+$("devList").addEventListener("keydown",function(e){
+  if(e.key!=="Enter"&&e.key!==" ") return;
+  var r=e.target.closest('[data-dev="pin"]');
+  if(!r) return;
+  e.preventDefault();
+  r.click();
+});
+
+$("devList").addEventListener("pointerdown",function(){ devHoldFor(5000); });
+document.addEventListener("pointerup",function(){ if(devHoldUntil) devHoldFor(250); },true);
+document.addEventListener("pointercancel",function(){ if(devHoldUntil) devHoldFor(250); },true);
+
+$("devList").addEventListener("click",function(e){
+  devHoldUntil=0;
+  var b=e.target.closest("[data-dev]");
+  if(!b) return;
+  var boards=devBoards(),c=boards[parseInt(b.getAttribute("data-i"),10)];
+  if(!c) return;
+  var what=b.getAttribute("data-dev"),k=b.getAttribute("data-k");
+  if(what==="scan") devScan(c);
+  else if(what==="pin"){
+    devPin(c,devGroups(c).filter(function(x){ return x.key===k; })[0]);
+  }
+  else if(what==="retry"&&c.pin){
+    c.healed={};
+    linkStart(c,c.pin.name,c.pin.type,c.pin.addr,false);
+  }
+  else if(what==="stop"){ c.link=null; devPaint(); }
+  else if(what==="more"){ c.showAll=!c.showAll; devPaint(); }
+});
+
+(function(){
+  MODE_LIST.forEach(function(entry){
+    var m=entry[0];
+    $("bModeKey"+m).addEventListener("click",function(){
+      if(!mapReady()){ hintBad(HINT_LOADING); return; }
+
+      if(cutTarget==="mode"&&modeListening===m){ if(this.focus) this.focus(); return; }
+
+      if(listening) cancelListen();
+      cutTarget="mode";
+      modeListening=m; modeMods=0; modeBuilding=false; modeFrom=""; modeSwallowUp="";
+      modeHeldDone=0;
+      modeErr("");
+      if(modeCuts[m]){ modeCuts[m]=null; generate(); modeApplyNow(); }
+
+      if(this.focus) this.focus();
+      paintMode();
+    });
+    $("bModeClear"+m).addEventListener("click",function(){
+      if(!mapReady()){ hintBad(HINT_LOADING); return; }
+      modeCuts[m]=null; modeLater=false;
+      if(cutTarget==="mode"&&modeListening===m) modeStopListening();
+      paintMode(); generate(); modeApplyNow();
+    });
+  });
+  var profFileFor=0;
+  for(var pn=1;pn<=PROFILES;pn++)(function(n){
+    $("bProfKey"+n).addEventListener("click",function(){
+      if(!mapReady()){ hintBad(HINT_LOADING); return; }
+      if(cutTarget==="prof"&&modeListening===n){ if(this.focus) this.focus(); return; }
+
+      if(listening) cancelListen();
+      cutTarget="prof";
+      modeListening=n; modeMods=0; modeBuilding=false; modeFrom=""; modeSwallowUp="";
+      modeHeldDone=0;
+      modeErr("");
+      if(profCut(n)) profSetKey(n,{code:0,mods:0});
+      if(this.focus) this.focus();
+      paintMode();
+    });
+    $("bProfFile"+n).addEventListener("click",function(){
+      if(!mapReady()){ hintBad(HINT_LOADING); return; }
+      profFileFor=n;
+      $("fProf").value="";
+      $("fProf").click();
+    });
+    $("bProfUse"+n).addEventListener("click",function(){ profUse(n); });
+    $("bProfClear"+n).addEventListener("click",function(){
+      var p=profState.slot[n-1];
+      if(confirm("Delete Profile "+n+(p&&p.name?" ("+p.name+")":"")+" from the board?")) profClear(n);
+    });
+  })(pn);
+  $("fProf").addEventListener("change",function(e){
+    var f=e.target.files&&e.target.files[0];
+    if(f&&profFileFor) profLoadFile(profFileFor,f);
+  });
+  function syncClear(){
+    syncPending=null; syncFail="";
+    syncState.code=0; syncState.mods=0; paintSync();
+    syncSend("sync key 0 0").catch(function(e){
+      syncSay("Couldn't remove the pairing key.");
+    });
+  }
+  $("bSyncKey").addEventListener("click",function(){
+    if(!mapReady()){ hintBad(HINT_LOADING); return; }
+    if(cutTarget==="sync"&&modeListening===1){ if(this.focus) this.focus(); return; }
+
+    if(listening) cancelListen();
+    cutTarget="sync";
+    modeListening=1; modeMods=0; modeBuilding=false; modeFrom=""; modeSwallowUp="";
+    modeHeldDone=0;
+    modeErr("");
+    if(syncCut()) syncClear();
+    if(this.focus) this.focus();
+    paintMode();
+  });
+  $("bSyncClear").addEventListener("click",function(){
+    if(cutTarget==="sync"&&modeListening===1) modeStopListening();
+    syncClear();
+  });
+
+  document.addEventListener("keydown",modeKeyDown,true);
+  document.addEventListener("keyup",modeKeyUp,true);
+
+  window.addEventListener("blur",function(){
+    if(modeListening&&modeFrom==="pc"){
+      var c=(cutTarget==="sync")?syncCut():
+            (cutTarget==="prof")?profCut(modeListening):modeCuts[modeListening];
+      modeMods=c?c.mods:0; modeBuilding=false; modeFrom="";
+      paintMode();
+    }
+  });
+
+  document.addEventListener("mousedown",function(e){
+    if(!modeListening) return;
+    var b=(cutTarget==="sync")?$("bSyncKey"):
+          $((cutTarget==="prof"?"bProfKey":"bModeKey")+modeListening);
+    if(b&&(e.target===b||b.contains(e.target))) return;
+    modeStopListening(); paintMode();
+  },true);
+  paintMode();
+})();
+
+(function(){
+  function setSens(v){
+    v=parseInt(v,10);
+    if(!(v>=STICK_SENS_MIN&&v<=STICK_SENS_MAX)) return false;
+    if(!mapReady()){ hintBad(HINT_LOADING); paintSens(); return false; }
+
+    stickSens=v; sensEdited=true; markEdited("R"); paintSens(); generate();
+    return true;
+  }
+  $("rngSens").addEventListener("input",function(){ setSens(this.value); });
+  $("numSens").addEventListener("input",function(){ setSens(this.value); });
+
+  $("numSens").addEventListener("change",function(){
+    if(!setSens(this.value)) this.value=Math.round(stickSens);
+  });
+  $("bSensDefault").addEventListener("click",function(){
+    setSens(STICK_SENS_DEFAULT);
+  });
+
+  function setDz(v){
+    v=parseInt(v,10);
+    if(!(v>=STICK_DZ_MIN&&v<=STICK_DZ_MAX)) return false;
+    if(!mapReady()){ hintBad(HINT_LOADING); paintStickMore(); return false; }
+    stickDz=v; dzEdited=true; markEdited("R"); paintStickMore(); generate();
+    return true;
+  }
+  $("rngDz").addEventListener("input",function(){ setDz(this.value); });
+  $("numDz").addEventListener("input",function(){ setDz(this.value); });
+  $("numDz").addEventListener("change",function(){
+    if(!setDz(this.value)) this.value=Math.round(stickDz);
+  });
+  $("bDzDefault").addEventListener("click",function(){ setDz(STICK_DZ_DEFAULT); });
+
+  function setVg(v){
+    v=parseInt(v,10);
+    if(!(v>=STICK_VG_MIN&&v<=STICK_VG_MAX)) return false;
+    if(!mapReady()){ hintBad(HINT_LOADING); paintStickMore(); return false; }
+    stickVg=v; vgEdited=true; markEdited("R"); paintStickMore(); generate();
+    return true;
+  }
+  $("rngVg").addEventListener("input",function(){ setVg(this.value); });
+  $("numVg").addEventListener("input",function(){ setVg(this.value); });
+  $("numVg").addEventListener("change",function(){
+    if(!setVg(this.value)) this.value=Math.round(stickVg);
+  });
+  $("bVgDefault").addEventListener("click",function(){ setVg(STICK_VG_DEFAULT); });
+
+  function setMSens(v){
+    v=parseInt(v,10);
+    if(!(v>=MOUSE_SENS_MIN&&v<=MOUSE_SENS_MAX)) return false;
+    if(!mapReady()){ hintBad(HINT_LOADING); paintMSens(); return false; }
+    mouseSens=v; msensEdited=true; markEdited("R"); paintMSens(); generate();
+    return true;
+  }
+  $("mAccel").addEventListener("change",function(){
+    if(!mapReady()){ hintBad(HINT_LOADING); paintMSens(); return; }
+    mouseAccel=this.checked;
+    markEdited("R"); paintMSens(); generate();
+  });
+  $("rngMSens").addEventListener("input",function(){ setMSens(this.value); });
+  $("numMSens").addEventListener("input",function(){ setMSens(this.value); });
+  $("numMSens").addEventListener("change",function(){
+    if(!setMSens(this.value)) this.value=Math.round(mouseSens);
+  });
+  $("bMSensDefault").addEventListener("click",function(){
+    setMSens(MOUSE_SENS_DEFAULT);
+  });
+  paintSens();
+  paintStickMore();
+  paintMSens();
+
+  document.addEventListener("input",function(e){
+    if(e.target&&e.target.type==="range") paintRange(e.target);
+  },true);
+})();
+
+var tabs=document.querySelectorAll(".tab");
+function showTab(want){
+  if(want!=="map"&&listening) cancelListen();
+  for(var i=0;i<tabs.length;i++) tabs[i].classList.toggle("on",
+    tabs[i].getAttribute("data-tab")===want);
+  $("tabMap").style.display = want==="map" ? "" : "none";
+  $("tabCol").style.display = want==="col" ? "" : "none";
+  $("tabAdv").style.display = want==="adv" ? "" : "none";
+
+  if(want==="map"){ paint(); devPaint(); devAskAll(); }
+  devPoll(want==="map");
+  if(location.hash.slice(1)!==want) location.hash=want;
+}
+for(var t=0;t<tabs.length;t++) tabs[t].addEventListener("click",function(e){
+  showTab(e.target.getAttribute("data-tab"));
+});
+window.addEventListener("hashchange",function(){
+  var h=location.hash.slice(1);
+  if(h==="map"||h==="col"||h==="adv") showTab(h);
+});
+
+$("bStock").addEventListener("click",function(){
+  setPreset(stockFor()); markColors(side()); });
+$("bCurrent").addEventListener("click",function(){
+  var c=fwCols[side()];
+  if(!c) return;
+  setPreset(c); colEdited[side()]=false; colsBy[side()]=c; });
+$("bRandom").addEventListener("click",function(){
+  markColors(side());
+  var p={};
+  for(var i=0;i<COLS.length;i++){
+    p[COLS[i].id]="#"+Math.floor(Math.random()*0xFFFFFF)
+                      .toString(16).padStart(6,"0");
+  }
+  setPreset(p);
+});
+
+window.addEventListener("resize",function(){ if($("tabMap").style.display!=="none") paint(); });
+window.addEventListener("beforeunload",function(e){
+  if(edited.L||edited.R||syncPending){ e.preventDefault(); e.returnValue=""; }
+});
+document.addEventListener("keydown",function(e){
+  if(e.key==="Escape" && listening) cancelListen(); });
+
+try{
+  renderRaw(); paint(); renderColRows(); applyColors();
+
+  colsSide=side();
+
+  $("jcImg").addEventListener("load",relayout);
+  window.addEventListener("load",relayout);
+
+  var h0=location.hash.slice(1);
+  if(h0==="col"||h0==="adv") showTab(h0);
+  else devPoll(true);
+}catch(e){
+  fail(e.message+"\n"+(e.stack||"").split("\n").slice(0,4).join("\n"));
+}
+})();
+</script>
+</body>
+</html>
