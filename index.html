@@ -85,6 +85,8 @@
   .devstate{display:flex;align-items:center;gap:8px;font-size:12.5px;
     color:var(--dim);margin:-4px 0 10px}
   .devstate.bad{display:block;color:#e0703a}
+  .devstate.code{color:var(--ink)}
+  .devstate.code b{font-size:17px;letter-spacing:.08em}
 
   .devrow.chosen{background:rgba(4,183,239,.05)}
   .devrow.busy{cursor:progress}
@@ -1112,7 +1114,7 @@ function connNote(){
   if(!conns.length) $("cfgOut").textContent="Connect a board.";
   else if(!ready) $("cfgOut").textContent="Connected.";
 }
-var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|HID|HIDLNK|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE) *\]/;
+var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|HID|HIDLNK|HIDMAP|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE) *\]/;
 var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] shortcut key |JC\] connect failed |HID\] (?:kbd|mouse)=)/;
 var TAG_RE=new RegExp(TAG_WIDE.source+"|"+TAG_BARE.source);
 
@@ -1153,7 +1155,7 @@ function onLine(ln,c){
     setTimeout(function(){ devSend(c,"peer?",true); },400);
   }
 
-  if(c.port && /^\[(MOUSE|HID|JC)\s*\]/.test(ln)) devEvent(ln,c);
+  if(c.port && /^\[(MOUSE|HID|HIDLNK|JC)\s*\]/.test(ln)) devEvent(ln,c);
 }
 
 function onCfgLine(rest,c){
@@ -3615,7 +3617,7 @@ async function devScan(c){
 }
 
 var LINK_TRY_MS=12000, LINK_QUIET_MS=4500, LINK_TOTAL_MS=75000,
-    LINK_NUDGE_MS=18000;
+    LINK_NUDGE_MS=18000, LINK_CODE_MS=60000;
 
 function linkBusy(c){
   return !!(c.link&&(c.link.state==="trying"||c.link.state==="waiting"));
@@ -3641,7 +3643,8 @@ function linkStart(c,name,type,home,auto){
   var L=c.link={name:name||"",type:type||"random",home:home||"",auto:!!auto,
                 hid:false,tried:{},n:0,cur:"",curAt:0,busyAt:0,connAt:0,
                 askAt:0,nudgeAt:0,repinAt:0,until:Date.now()+LINK_TOTAL_MS,
-                state:"trying",why:""};
+                state:"trying",why:"",code:false};
+  c.code=null;
   L.hid=linkCands(c,L).some(function(r){ return r.hid; });
   linkNext(c,"");
   linkTimer();
@@ -3712,12 +3715,23 @@ var LINK_WHY={"05":"authentication failed","06":"the pairing key was missing",
   "3e":"the connection could not be set up"};
 
 var SEC_WHY=["","authentication failed","the pairing key was missing",
-  "OOB data was not available","it insists on passkey pairing",
+  "OOB data was not available","it needs a pairing code",
   "pairing is not supported","pairing is not allowed","invalid parameters",
   "a key was rejected","pairing failed"];
 
 function devEvent(ln,c){
   var L=c.link,m,now=Date.now();
+
+  if((m=ln.match(/^\[HIDLNK\s*\]\s*PASSKEY (\d{6})\b/))){
+    c.code={n:m[1],at:now};
+    if(linkBusy(c)){
+      L.code=true; L.busyAt=now; L.until=Math.max(L.until,now+LINK_CODE_MS);
+    }
+    devPaint(); return;
+  }
+  if(c.code&&/^\[MOUSE\s*\]\s*(security level=|\*\*\* DISCONNECTED)/.test(ln)){
+    c.code=null; devPaint();
+  }
 
   if(/^\[JC\s*\]\s*connect failed \(0x/.test(ln)){
     if(linkBusy(c)&&L.state==="trying"){
@@ -3742,8 +3756,14 @@ function devEvent(ln,c){
     if(!L.connAt) return;
     L.busyAt=now;
 
+    if(m[1]==="0"){ L.code=false; return; }
     if(m[1]==="2"){ L.why="it had forgotten its old pairing"; L.connAt=0; return; }
-    if(m[1]!=="0") linkNext(c,"it would not pair ("+(SEC_WHY[+m[1]]||"error "+m[1])+")");
+    if(m[1]==="4"||L.code){
+      L.why=m[1]==="4" ? "it needs a pairing code" : "the pairing code was not accepted";
+      L.code=true; L.connAt=0; L.until=Math.max(L.until,now+LINK_CODE_MS);
+      devPaint(); return;
+    }
+    linkNext(c,"it would not pair ("+(SEC_WHY[+m[1]]||"error "+m[1])+")");
     return;
   }
   if((m=ln.match(/^\[MOUSE\s*\]\s*\*\*\* DISCONNECTED, reason 0x([0-9A-Fa-f]{2})/))){
@@ -3761,7 +3781,7 @@ function devEvent(ln,c){
 function linkSeen(c,e){
   var L=c.link,t;
   if(!linkBusy(c)){ linkHeal(c,e); return; }
-  if(!L.name||e.name!==L.name||e.addr===L.cur||(L.hid&&!e.hid)) return;
+  if(L.code||!L.name||e.name!==L.name||e.addr===L.cur||(L.hid&&!e.hid)) return;
   t=L.tried[e.addr];
   if(t&&!(t.n<2&&e.last>t.at)) return;
   if(L.state==="waiting"||
@@ -3815,7 +3835,7 @@ function linkTick(c){
     L.repinAt=now;
     devSend(c,"peer "+L.cur+" "+L.type+(L.name?" "+L.name:""));
   }
-  if(now-L.curAt>LINK_TRY_MS&&now-Math.max(L.curAt,L.busyAt)>LINK_QUIET_MS){
+  if(!L.code&&now-L.curAt>LINK_TRY_MS&&now-Math.max(L.curAt,L.busyAt)>LINK_QUIET_MS){
     linkNext(c,L.connAt ? "it connected, but its input never started"
                         : "it did not answer at "+L.cur);
   }
@@ -3851,6 +3871,11 @@ function devIsJob(c,x){
 
 function linkLine(c){
   var L=c.link,nm,h,k;
+  if(c.code&&Date.now()-c.code.at<LINK_CODE_MS){
+    return '<p class="devstate code"><span>Type <b class="mono">'+esc(c.code.n)+
+      '</b> on the '+(c.side==="L" ? "keyboard" : "device")+
+      ', then press Enter.</span></p>';
+  }
   if(!L) return "";
   nm=esc(L.name||L.home||"the device");
   if(L.state==="failed"){
@@ -3861,6 +3886,10 @@ function linkLine(c){
     return '<p class="devstate"><span class="devspin"></span><span>Waiting for '+
       nm+' to advertise. Put it in pairing mode; the board takes it as soon '+
       'as it hears it.</span></p>';
+  }
+  if(L.code){
+    return '<p class="devstate"><span class="devspin"></span><span>'+nm+
+      ' needs a pairing code. One moment…</span></p>';
   }
   k=Object.keys(L.tried).length;
   h='<p class="devstate"><span class="devspin"></span><span>'+
@@ -3879,8 +3908,8 @@ function linkTip(L){
     return "The Switch connection can block new devices from connecting. "+
            "Try again with the Switch off or asleep.";
   }
-  if(/passkey/.test(L.why)){
-    return "This needs a pairing code.";
+  if(/pairing code/.test(L.why)){
+    return "Press Reconnect to get a new code.";
   }
   if(/would not pair/.test(L.why)){
     return "Reset the device's pairing.";
