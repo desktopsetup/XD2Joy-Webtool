@@ -496,6 +496,12 @@
           <button id="bModeKey2" class="hotkey">Click to set a shortcut</button>
           <button id="bModeClear2" class="xbtn" aria-label="Clear the right thumbstick mode shortcut">&times;</button>
         </div>
+
+        <div class="moderow hotkeyrow">
+          <label id="modeLab3">Gyro mode</label>
+          <button id="bModeKey3" class="hotkey">Click to set a shortcut</button>
+          <button id="bModeClear3" class="xbtn" aria-label="Clear the gyro mode shortcut">&times;</button>
+        </div>
         <p class="sub bad" id="modeErr"></p>
       </div>
 
@@ -1114,7 +1120,7 @@ function connNote(){
   if(!conns.length) $("cfgOut").textContent="Connect a board.";
   else if(!ready) $("cfgOut").textContent="Connected.";
 }
-var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|HID|HIDLNK|HIDMAP|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE) *\]/;
+var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|GYRO|HID|HIDLNK|HIDMAP|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE) *\]/;
 var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] shortcut key |JC\] connect failed |HID\] (?:kbd|mouse)=)/;
 var TAG_RE=new RegExp(TAG_WIDE.source+"|"+TAG_BARE.source);
 
@@ -1148,7 +1154,7 @@ function onLine(ln,c){
   if(m){ onScanLine(m[1].trim(),c); return; }
   m=ln.match(/\[PEER\s*\]\s*(.*)$/);
   if(m){ onPeerLine(m[1].trim(),c); return; }
-  m=ln.match(/\[MODE\s*\]\s*(?:now\s+|already\s+)?([A-Z]+)\b/);
+  m=ln.match(/\[MODE\s*\]\s*(?:now\s+|already\s+)?(KEYBOARD|JOYCON|STICK|GYRO)\b/);
   if(m){ onModeNow(m[1],c); return; }
 
   if(c.port && /\[MOUSE\s*\].*(CONNECTED|DISCONNECTED)/.test(ln)){
@@ -1190,8 +1196,8 @@ var HOTKEY_NAMES={0x32:"#",0x46:"PrtSc",0x47:"ScrLk",0x48:"Pause",
   0x58:"Num Enter",0x62:"Num 0",0x63:"Num .",0x64:"\\ (ISO)",0x65:"Menu",
   0x67:"Num ="};
 
-var MODE_LIST=[[1,"Keyboard"],[2,"Right Thumbstick"]];
-var modeCuts={1:null,2:null};
+var MODE_LIST=[[1,"Keyboard"],[2,"Right Thumbstick"],[3,"Gyro"]];
+var modeCuts={1:null,2:null,3:null};
 
 var PROFILES=4;
 var profState={act:0,by:{L:0,R:0},split:false,slot:[null,null,null,null],
@@ -1365,7 +1371,7 @@ function pageFromBlob(bytes){
   if(!c) return null;
   var s=(c.side===0x67)?"L":(c.side===0x66)?"R":null;
   if(!s) return null;
-  var out={side:s,bind:{},modes:{1:null,2:null},sens:c.sens,
+  var out={side:s,bind:{},modes:{1:null,2:null,3:null},sens:c.sens,
            msens:c.msens,maccel:c.maccel,dz:c.dz,vg:c.vg,col:c.col,extras:[]},i,e,ok;
 
   function put(slot,rec){
@@ -1390,8 +1396,10 @@ function pageFromBlob(bytes){
       ok=put(lname(e.mask),wheelRec(e.code));
     else if(e.kind===K_MODE){
       var md=(e.mask>>8)&0xFF;
-      if(out.modes[md]===null) out.modes[md]={code:e.code,mods:e.mask&0xFF,mode:md};
-      ok=true;
+      if(out.modes[md]===null){
+        out.modes[md]={code:e.code,mods:e.mask&0xFF,mode:md};
+        ok=true;
+      }
     }else if(e.kind===K_SET&&e.code===SET_STICK_GAIN) ok=true;
     else if(e.kind===K_SET&&e.code===SET_MOUSE_GAIN) ok=true;
     else if(e.kind===K_SET&&e.code===SET_ACCEL) ok=true;
@@ -1422,7 +1430,7 @@ function loadBoardIntoPage(p,keepCols){
   for(k in bind) if(boardOf(k)===p.side) delete bind[k];
   for(k in p.bind) bind[isAxis(k)?k:(own+k)]=p.bind[k];
   cfgExtras[p.side]=p.extras;
-  if(p.side==="L"){ modeCuts[1]=p.modes[1]; modeCuts[2]=p.modes[2]; paintMode(); }
+  if(p.side==="L"){ modeCuts[1]=p.modes[1]; modeCuts[2]=p.modes[2]; modeCuts[3]=p.modes[3]; paintMode(); }
   if(p.side==="R"){
     sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false;
     if(p.sens!==null){ stickSens=p.sens; paintSens(); }
@@ -1516,7 +1524,7 @@ function onMapLine(rest,c){
 
   if((m=rest.match(/^mode\s+([0-9A-Fa-f]{2})\s+([0-9A-Fa-f]{2})\s+(\S+)$/))){
     if(!userEdited&&!modeBusy&&!modeLater){
-      var mm=(m[3]==="KEYBOARD")?1:(m[3]==="STICK")?2:0;
+      var mm=(m[3]==="KEYBOARD")?1:(m[3]==="STICK")?2:(m[3]==="GYRO")?3:0;
       if(mm) modeCuts[mm]={code:parseInt(m[1],16),mods:parseInt(m[2],16),
                            mode:mm};
       paintMode();
@@ -1851,7 +1859,7 @@ function modeErr(msg){
 var modeBy={L:0,R:0};
 
 function onModeNow(name,c){
-  var v=(name==="KEYBOARD")?1:(name==="STICK")?2:0,k;
+  var v=(name==="KEYBOARD")?1:(name==="STICK")?2:(name==="GYRO")?3:0,k;
   if(!c.side) return;
   modeBy[c.side]=v;
   if(v===1){
@@ -2895,7 +2903,7 @@ function applyPreset(o){
   }
 
   if(o.modes){
-    for(var mk=1;mk<=2;mk++){
+    for(var mk=1;mk<=3;mk++){
       var mc=o.modes[mk];
       if(mc===null){ modeCuts[mk]=null; continue; }
       if(mc&&typeof mc.code==="number"&&typeof mc.mods==="number"&&
