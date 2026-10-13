@@ -3,7 +3,7 @@
 https://desktopsetup.github.io/XD2Joy-Webtool/
 
 <img src="Mapping.png" width="900">
-<img src="Config.png" width="900">
+<img src="config.png" width="900">
 <img src="Colors.png" width="900">
 <img src="Compile.png" width="900">
 
