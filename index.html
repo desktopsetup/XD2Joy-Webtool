@@ -56,6 +56,19 @@
   .devgrid .devboard+.devboard{padding-left:26px;
     border-left:1px solid var(--hair)}
   .devhead{font-size:14px;margin-bottom:7px}
+  .devhead{display:flex;align-items:center;gap:10px}
+  .wseg{margin-left:auto;display:inline-flex}
+  .wseg button{padding:3px 11px;font-size:12px;border-radius:0}
+  .wseg button:first-child{border-radius:4px 0 0 4px}
+  .wseg button+button{border-left:0;border-radius:0 4px 4px 0}
+  .wseg button+button:not(:last-child){border-radius:0}
+  .onedev{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13.5px;
+    margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--hair)}
+  .wseg button.on,.wseg button.on:hover:not(:disabled){background:var(--sel);border-color:var(--sel);
+    color:#12242a;font-weight:600}
+  .stog{padding:3px 11px;font-size:12px;min-width:46px}
+  .stog.on,.stog.on:hover:not(:disabled){background:var(--sel);border-color:var(--sel);
+    color:#12242a;font-weight:600}
   .devnow{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;
     font-size:12.5px;margin-bottom:10px;align-items:baseline}
   .devnow .k{color:var(--dim)}
@@ -79,8 +92,6 @@
 
   .devrow .sig{color:var(--dim);font-size:11px;white-space:nowrap;
     text-align:right}
-  .devtag{font-size:10.5px;border:1px solid var(--slotline);border-radius:4px;
-    padding:1px 5px;color:var(--dim);white-space:nowrap}
 
   .devstate{display:flex;align-items:center;gap:8px;font-size:12.5px;
     color:var(--dim);margin:-4px 0 10px}
@@ -141,11 +152,8 @@
   .slot.fromR .n svg [fill="#fff"]{fill:var(--halfR)}
   .slot.fromR .n svg [stroke="#fff"]{stroke:var(--halfR)}
 
-  .slot.fromL .v2{color:var(--halfR)}
-
   .devhead b.halfL{color:var(--halfL)}
   .devhead b.halfR{color:var(--halfR)}
-  .slot.fromR .v2{color:var(--halfL)}
   #mapGate{display:flex;flex-direction:column;align-items:center;
     justify-content:center;gap:14px;padding:24px 16px 32px;text-align:center}
 
@@ -173,6 +181,7 @@
   .top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
     padding-bottom:12px;border-bottom:1px solid var(--hair)}
   h1{font-size:21px;font-weight:500;margin:0;letter-spacing:.01em}
+  h1 .ver{font-size:14px;font-weight:400;color:var(--dim)}
   .top .sp{flex:1}
   .tabs{display:flex;gap:2px}
 
@@ -263,7 +272,9 @@
     white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .slot .v.none{color:var(--dim)}
 
-  .slot .v2{color:var(--dim);font-size:11px}
+  .slot .v2{font-size:11px}
+  .slot.tall .v{white-space:normal}
+  .slot.tall .v2{display:block}
   .slot.set{border-color:var(--slotline)}
 
   .slot.live{border-color:var(--press);background:var(--presshalo)}
@@ -380,7 +391,7 @@
 
 <div class="wrap">
   <div class="top">
-    <h1>XD Remapper</h1>
+    <h1>XD Remapper <span class="ver">v1.3</span></h1>
     <span class="pill" id="pConn">not connected</span>
     <div class="sp"></div>
     <div class="tabs">
@@ -428,7 +439,7 @@
         <div class="mapdiv"></div>
 
         <div class="panel mapaxes">
-          <h2 id="axesTitle">Mouse Mode Config</h2>
+          <h2 id="axesTitle">Right Stick Config</h2>
           <table class="axes"><tbody id="rowsAxis"></tbody></table>
           <h2 style="margin-top:18px">Grip Buttons</h2>
           <div class="sub">Reconnect on the console for grip buttons to get detected.</div>
@@ -510,7 +521,7 @@
         <div class="sub">Unpairs the currently paired devices on the console.</div>
         <div class="moderow hotkeyrow">
           <label id="syncLab">Unpair from console.</label>
-          <button id="bSyncKey" class="hotkey">Click to set a key</button>
+          <button id="bSyncKey" class="hotkey">Click to set a key or button</button>
           <button id="bSyncClear" class="xbtn" aria-label="Remove the pairing key">&times;</button>
         </div>
         <p class="sub bad" id="syncWarn"></p>
@@ -552,6 +563,16 @@
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
             <input type="checkbox" id="mAccel">
             <span>Smart acceleration</span></label>
+        </div>
+      </div>
+
+      <div class="panel devpanel">
+        <h2>Gyro sensitivity</h2>
+        <div class="moderow">
+          <label for="rngGSens">Sensitivity</label>
+          <input type="range" id="rngGSens" min="1" max="100" step="1">
+          <input type="number" id="numGSens" min="1" max="100" step="1">
+          <button id="bGSensDefault">Default</button>
         </div>
       </div>
     </div>
@@ -641,6 +662,7 @@
   </div>
 </div>
 
+
 <script>
 (function(){
 "use strict";
@@ -681,14 +703,16 @@ var ICONS={
  R:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M345.268,159.15H39.122v193.7h433.756v-66.09c0-70.364-57.245-127.61-127.609-127.61ZM278.005,300.826l-18.749-31.57h-14.751v31.57h-22.609v-97.881h44.115c4.595,0,8.845.965,12.752,2.895,3.905,1.93,7.283,4.459,10.133,7.583,2.848,3.125,5.077,6.665,6.687,10.615,1.607,3.953,2.413,7.951,2.413,11.994,0,3.033-.369,5.952-1.104,8.754-.736,2.805-1.792,5.446-3.171,7.927-1.378,2.481-3.057,4.711-5.031,6.687-1.978,1.977-4.205,3.653-6.687,5.031l21.506,36.396h-25.504Z" fill="#fff"/><path d="M264.494,222.796h-19.989v26.745h20.679c2.665,0,4.963-1.262,6.894-3.791,1.93-2.527,2.895-5.767,2.895-9.719,0-4.043-1.103-7.259-3.309-9.65-2.206-2.389-4.597-3.584-7.169-3.584Z" fill="#fff"/></svg>',
  RIGHT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle cx="251.672" cy="381.189" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><circle cx="251.672" cy="130.811" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M380.897,189.644c36.589,0,66.355,29.767,66.355,66.355s-29.767,66.355-66.355,66.355-66.356-29.767-66.356-66.355,29.768-66.355,66.356-66.355ZM380.897,302.355c25.561,0,46.355-20.795,46.355-46.355s-20.795-46.355-46.355-46.355-46.356,20.795-46.356,46.355,20.796,46.355,46.356,46.355Z" fill="#fff"/><circle cx="121.103" cy="256" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M253.596,401.89l20.851-34.007c1.043-1.702-.181-3.889-2.177-3.889h-41.702c-1.996,0-3.221,2.187-2.177,3.889l20.851,34.007c.997,1.625,3.358,1.625,4.355,0Z" fill="#fff"/><path d="M249.242,107.641l-20.851,34.007c-1.043,1.702.181,3.889,2.177,3.889h41.702c1.996,0,3.221-2.187,2.177-3.889l-20.851-34.007c-.997-1.625-3.358-1.625-4.355,0Z" fill="#fff"/><path d="M380.897,312.356c31.124,0,56.356-25.231,56.356-56.356s-25.231-56.356-56.356-56.356-56.356,25.231-56.356,56.356,25.231,56.356,56.356,56.356ZM367.373,254.765v-20.851c0-1.996,2.187-3.221,3.889-2.177l34.007,20.851c1.625.997,1.625,3.358,0,4.354l-34.007,20.851c-1.702,1.043-3.889-.181-3.889-2.177v-20.851Z" fill="#fff"/><path d="M98.915,256.942l34.007,20.851c1.702,1.043,3.889-.181,3.889-2.177v-41.702c0-1.996-2.187-3.221-3.889-2.177l-34.007,20.851c-1.625.997-1.625,3.358,0,4.355Z" fill="#fff"/></svg>',
  RS:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><polygon points="173.869 98.667 255.666 167.197 338.131 98.667 173.869 98.667" fill="#fff"/><g><path d="M262.568,271.636h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M415.836,181.871H94.163c-26.43,0-47.932,21.502-47.932,47.932v12.326c0,26.429,21.502,47.931,47.932,47.931h66.014v97.734c0,19.597,15.942,35.539,35.539,35.539h120.568c19.597,0,35.54-15.942,35.54-35.539v-97.734h64.012c26.43,0,47.932-21.502,47.932-47.931v-12.326c0-26.43-21.502-47.932-47.932-47.932ZM277.718,359.135l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
+ RSTICK_DOWN:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M147.886,428.309l-7.428,9.942,114.574,68.53,115.51-68.53-8.364-9.942c-29.17,21.284-66.48,34.062-107.146,34.062-40.666,0-77.976-12.778-107.146-34.062Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><g><path d="M262.568,221.05h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM277.718,308.549l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
+ RSTICK_LEFT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M86.83,145.942l-9.942-7.428L8.358,253.088l68.53,115.51,9.942-8.364c-21.284-29.17-34.062-66.48-34.062-107.146,0-40.666,12.778-77.976,34.062-107.146Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><g><path d="M262.568,221.05h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM277.718,308.549l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
+ RSTICK_RIGHT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M428.202,363.614l9.942,7.428,68.53-114.574-68.53-115.51-9.942,8.364c21.284,29.17,34.062,66.48,34.062,107.146,0,40.666-12.778,77.976-34.062,107.146Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><g><path d="M262.568,221.05h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM277.718,308.549l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
+ RSTICK_UP:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M363.114,85.829l7.428-9.942L255.968,7.357l-115.51,68.53,8.364,9.942c29.17-21.284,66.48-34.062,107.146-34.062s77.976,12.778,107.146,34.062Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><g><path d="M262.568,221.05h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM277.718,308.549l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
  SL:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M120.88,159.15c-29.911,0-54.246,24.334-54.246,54.246v85.209c0,29.911,24.335,54.246,54.246,54.246h324.486v-193.701H120.88ZM254.915,287.8c-1.892,3.488-4.426,6.344-7.533,8.486-3.14,2.163-6.797,3.754-10.871,4.729-4.129.988-8.441,1.489-12.819,1.489-3.364,0-6.864-.263-10.402-.78-3.543-.519-7.045-1.285-10.408-2.277-3.369-.992-6.678-2.196-9.835-3.582-2.85-1.247-5.54-2.693-8.009-4.304l8.513-16.908c.546.411,1.355.969,2.579,1.746,1.967,1.254,4.433,2.521,7.326,3.767,2.882,1.243,6.142,2.367,9.688,3.341,3.58.986,7.263,1.486,10.943,1.486,8.274,0,12.47-2.688,12.47-7.987,0-2.022-.675-3.724-2.006-5.057-1.227-1.225-2.922-2.335-5.039-3.302-2.059-.939-4.523-1.822-7.325-2.623-2.765-.79-5.773-1.667-9.021-2.633-4.231-1.296-7.953-2.718-11.054-4.227-3.055-1.482-5.605-3.217-7.581-5.154-1.955-1.912-3.429-4.142-4.381-6.63-.962-2.509-1.45-5.493-1.45-8.871,0-4.745.897-8.989,2.667-12.613,1.774-3.631,4.213-6.734,7.25-9.224,3.054-2.501,6.646-4.414,10.676-5.687,4.057-1.281,8.412-1.931,12.948-1.931,3.165,0,6.34.304,9.434.905,3.106.605,6.125,1.392,8.971,2.34,2.849.951,5.535,2.042,7.984,3.245,2.148,1.057,4.172,2.124,6.026,3.179l-8.459,15.979c-.444-.317-1.064-.726-1.944-1.265-1.619-.988-3.653-2.028-6.049-3.093-2.404-1.069-5.066-2.017-7.914-2.817-2.889-.812-5.818-1.224-8.708-1.224-10.415,0-12.602,4.774-12.602,8.778,0,1.808.494,3.348,1.47,4.577.92,1.163,2.272,2.208,4.019,3.103,1.673.861,3.797,1.661,6.312,2.379,2.453.702,5.341,1.502,8.583,2.377,4.425,1.216,8.47,2.557,12.017,3.983,3.484,1.402,6.474,3.164,8.885,5.236,2.376,2.045,4.24,4.565,5.538,7.491,1.299,2.936,1.957,6.525,1.957,10.669,0,5.083-.957,9.424-2.845,12.904ZM326.962,302.449h-56.896v-79.52h18.368v63.392h38.527v16.128Z" fill="#fff"/></svg>',
  SR:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M299.97,239.057h-16.239v21.728h16.8c2.165,0,4.032-1.025,5.6-3.08,1.568-2.053,2.353-4.685,2.353-7.896,0-3.285-.896-5.897-2.688-7.84-1.792-1.941-3.734-2.912-5.824-2.912Z" fill="#fff"/><path d="M391.121,159.15H66.634v193.701h324.487c29.911,0,54.245-24.335,54.245-54.246v-85.209c0-29.911-24.334-54.246-54.245-54.246ZM250.211,287.8c-1.892,3.488-4.426,6.344-7.533,8.486-3.14,2.163-6.797,3.754-10.871,4.729-4.129.988-8.441,1.489-12.819,1.489-3.364,0-6.864-.263-10.402-.78-3.543-.519-7.045-1.285-10.408-2.277-3.369-.992-6.678-2.196-9.835-3.582-2.85-1.247-5.54-2.693-8.009-4.304l8.513-16.908c.546.411,1.355.969,2.579,1.746,1.967,1.254,4.433,2.521,7.326,3.767,2.882,1.243,6.142,2.367,9.688,3.341,3.58.986,7.263,1.486,10.943,1.486,8.274,0,12.47-2.688,12.47-7.987,0-2.022-.675-3.724-2.006-5.057-1.227-1.225-2.922-2.335-5.039-3.302-2.059-.939-4.523-1.822-7.325-2.623-2.765-.79-5.773-1.667-9.021-2.633-4.231-1.296-7.953-2.718-11.054-4.227-3.055-1.482-5.605-3.217-7.581-5.154-1.955-1.912-3.429-4.142-4.381-6.63-.962-2.509-1.45-5.493-1.45-8.871,0-4.745.897-8.989,2.667-12.613,1.774-3.631,4.213-6.734,7.25-9.224,3.054-2.501,6.646-4.414,10.676-5.687,4.057-1.281,8.412-1.931,12.948-1.931,3.165,0,6.34.304,9.434.905,3.106.605,6.125,1.392,8.971,2.34,2.849.951,5.535,2.042,7.984,3.245,2.148,1.057,4.172,2.124,6.026,3.179l-8.459,15.979c-.444-.317-1.064-.726-1.944-1.265-1.619-.988-3.653-2.028-6.049-3.093-2.404-1.069-5.066-2.017-7.914-2.817-2.889-.812-5.818-1.224-8.708-1.224-10.415,0-12.602,4.774-12.602,8.778,0,1.808.494,3.348,1.47,4.577.92,1.163,2.272,2.208,4.019,3.103,1.673.861,3.797,1.661,6.312,2.379,2.453.702,5.341,1.502,8.583,2.377,4.425,1.216,8.47,2.557,12.017,3.983,3.484,1.402,6.474,3.164,8.885,5.236,2.376,2.045,4.24,4.565,5.538,7.491,1.299,2.936,1.957,6.525,1.957,10.669,0,5.083-.957,9.424-2.845,12.904ZM310.947,302.449l-15.232-25.648h-11.983v25.648h-18.368v-79.52h35.84c3.732,0,7.186.784,10.36,2.352,3.172,1.568,5.916,3.623,8.231,6.16,2.313,2.539,4.125,5.415,5.433,8.624,1.305,3.211,1.96,6.459,1.96,9.744,0,2.464-.3,4.835-.896,7.112-.599,2.279-1.456,4.424-2.576,6.44s-2.483,3.827-4.088,5.432-3.416,2.968-5.432,4.088l17.472,29.568h-20.72Z" fill="#fff"/></svg>',
  STICK_DOWN:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M147.886,428.309l-7.428,9.942,114.574,68.53,115.51-68.53-8.364-9.942c-29.17,21.284-66.48,34.062-107.146,34.062-40.666,0-77.976-12.778-107.146-34.062Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM300.448,308.359h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
  STICK_LEFT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M86.83,145.942l-9.942-7.428L8.358,253.088l68.53,115.51,9.942-8.364c-21.284-29.17-34.062-66.48-34.062-107.146,0-40.666,12.778-77.976,34.062-107.146Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM300.448,308.359h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
  STICK_RIGHT:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M428.202,363.614l9.942,7.428,68.53-114.574-68.53-115.51-9.942,8.364c21.284,29.17,34.062,66.48,34.062,107.146,0,40.666-12.778,77.976-34.062,107.146Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM300.448,308.359h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
  STICK_UP:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M363.114,85.829l7.428-9.942L255.968,7.357l-115.51,68.53,8.364,9.942c29.17-21.284,66.48-34.062,107.146-34.062s77.976,12.778,107.146,34.062Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM300.448,308.359h-78.423v-109.605h25.317v87.376h53.105v22.229Z" fill="#fff"/></svg>',
- SX:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M86.83,145.942l-9.942-7.428L8.358,253.088l68.53,115.51,9.942-8.364c-21.284-29.17-34.062-66.48-34.062-107.146,0-40.666,12.778-77.976,34.062-107.146Z" fill="#fff"/><path d="M428.202,363.614l9.942,7.428,68.53-114.574-68.53-115.51-9.942,8.364c21.284,29.17,34.062,66.48,34.062,107.146,0,40.666-12.778,77.976-34.062,107.146Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><g><path d="M262.568,221.05h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM277.718,308.549l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
- SY:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M363.114,85.829l7.428-9.942L255.968,7.357l-115.51,68.53,8.364,9.942c29.17-21.284,66.48-34.062,107.146-34.062s77.976,12.778,107.146,34.062Z" fill="#fff"/><path d="M147.886,428.309l-7.428,9.942,114.574,68.53,115.51-68.53-8.364-9.942c-29.17,21.284-66.48,34.062-107.146,34.062-40.666,0-77.976-12.778-107.146-34.062Z" fill="#fff"/><path d="M256,82.955c-95.57,0-173.045,77.475-173.045,173.045s77.475,173.045,173.045,173.045,173.045-77.475,173.045-173.045-77.475-173.045-173.045-173.045ZM256,387.841c-72.697,0-131.841-59.144-131.841-131.841s59.144-131.841,131.841-131.841,131.841,59.144,131.841,131.841-59.144,131.841-131.841,131.841Z" fill="#fff"/><g><path d="M262.568,221.05h-22.415v29.99h23.188c2.988,0,5.566-1.415,7.73-4.251,2.164-2.833,3.246-6.467,3.246-10.898,0-4.534-1.236-8.141-3.711-10.822-2.473-2.679-5.154-4.019-8.039-4.019Z" fill="#fff"/><path d="M256,144.159c-61.669,0-111.841,50.172-111.841,111.841s50.171,111.841,111.841,111.841,111.841-50.172,111.841-111.841-50.172-111.841-111.841-111.841ZM277.718,308.549l-21.023-35.401h-16.542v35.401h-25.354v-109.761h49.47c5.152,0,9.918,1.082,14.301,3.246,4.379,2.165,8.166,5,11.361,8.503,3.193,3.505,5.693,7.474,7.498,11.903,1.803,4.433,2.705,8.916,2.705,13.45,0,3.4-.412,6.674-1.236,9.816-.826,3.145-2.01,6.106-3.557,8.889-1.545,2.783-3.426,5.283-5.643,7.498-2.217,2.218-4.715,4.097-7.496,5.643l24.115,40.812h-28.6Z" fill="#fff"/></g></svg>',
  UP:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><circle cx="381.189" cy="260.328" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><circle cx="130.811" cy="260.328" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M189.644,131.103c0-36.589,29.767-66.355,66.355-66.355s66.355,29.767,66.355,66.355-29.767,66.356-66.355,66.356-66.355-29.768-66.355-66.356ZM302.355,131.103c0-25.561-20.795-46.355-46.355-46.355s-46.355,20.795-46.355,46.355,20.795,46.356,46.355,46.356,46.355-20.796,46.355-46.356Z" fill="#fff"/><circle cx="256" cy="390.897" r="56.356" fill="none" stroke="#fff" stroke-width="20"/><path d="M401.89,258.404l-34.007-20.851c-1.702-1.043-3.889.181-3.889,2.177v41.702c0,1.996,2.187,3.221,3.889,2.177l34.007-20.851c1.625-.997,1.625-3.358,0-4.355Z" fill="#fff"/><path d="M107.641,262.758l34.007,20.851c1.702,1.043,3.889-.181,3.889-2.177v-41.702c0-1.996-2.187-3.221-3.889-2.177l-34.007,20.851c-1.625.997-1.625,3.358,0,4.355Z" fill="#fff"/><path d="M312.356,131.103c0-31.124-25.231-56.356-56.356-56.356s-56.356,25.231-56.356,56.356,25.231,56.356,56.356,56.356,56.356-25.231,56.356-56.356ZM254.765,144.627h-20.851c-1.996,0-3.221-2.187-2.177-3.889l20.851-34.007c.997-1.625,3.358-1.625,4.354,0l20.851,34.007c1.043,1.702-.181,3.889-2.177,3.889h-20.851Z" fill="#fff"/><path d="M256.942,413.085l20.851-34.007c1.043-1.702-.181-3.889-2.177-3.889h-41.702c-1.996,0-3.221,2.187-2.177,3.889l20.851,34.007c.997,1.625,3.358,1.625,4.355,0Z" fill="#fff"/></svg>',
  X:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256,103.514c-84.081,0-152.486,68.405-152.486,152.486s68.405,152.486,152.486,152.486,152.487-68.405,152.487-152.486-68.405-152.486-152.487-152.486ZM293.224,333.057l-36.343-58.2-36.343,58.2-26.383-.229,47.982-78.776-41.121-68.402,26.383-.229,29.482,47.826,29.482-47.826,26.383.229-41.121,68.402,47.982,78.776-26.383.229Z" fill="#fff"/></svg>',
  Y:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512"><path d="M256,103.514c-84.081,0-152.486,68.405-152.486,152.486s68.405,152.486,152.486,152.486,152.487-68.405,152.487-152.486-68.405-152.486-152.487-152.486ZM265.264,263.315v64.198h-23.994v-64.198l-53.547-74.892,30.021.065,35.523,49.803,35.52-49.803,30.021-.065-53.544,74.892Z" fill="#fff"/></svg>',
@@ -726,29 +750,26 @@ var SLOTS_R=[
  {id:"C",      name:"C (chat)",    fn:"RBTN_C",      a:[.465,.828], col:"r",r:7}
 ];
 
-var SRCS=[
- {v:"",            name:"Not set"},
- {v:"mouse_wheel", name:"Scroll wheel"},
- {v:"mouse_dx",    name:"Cursor X"},
- {v:"mouse_dy",    name:"Cursor Y"}
-];
-
 var AXES_R=[
+ {id:"STICK_UP", name:"Stick Up", slot:1, ico:"RSTICK_UP"},
+ {id:"STICK_DOWN", name:"Stick Down", slot:1, ico:"RSTICK_DOWN"},
+ {id:"STICK_LEFT", name:"Stick Left", slot:1, ico:"RSTICK_LEFT"},
+ {id:"STICK_RIGHT", name:"Stick Right", slot:1, ico:"RSTICK_RIGHT"},
  {id:"AX",  name:"Cursor X",     v:"mouse_dx",    live:"dx"},
  {id:"AY",  name:"Cursor Y",     v:"mouse_dy",    live:"dy"},
- {id:"AW",  name:"Scroll wheel", v:"mouse_wheel", live:"wheel"},
- {id:"SX",  name:"Stick X",      v:"stick_x",     src:1},
- {id:"SY",  name:"Stick Y",      v:"stick_y",     src:1}
+ {id:"AW",  name:"Scroll wheel", v:"mouse_wheel", live:"wheel"}
 ];
   
 var AXES_L=[
  {id:"STICK_UP",    name:"Stick Up",    slot:1},
  {id:"STICK_DOWN",  name:"Stick Down",  slot:1},
  {id:"STICK_LEFT",  name:"Stick Left",  slot:1},
- {id:"STICK_RIGHT", name:"Stick Right", slot:1}
+ {id:"STICK_RIGHT", name:"Stick Right", slot:1},
+ {id:"AX",  name:"Cursor X",     v:"mouse_dx",    live:"dx"},
+ {id:"AY",  name:"Cursor Y",     v:"mouse_dy",    live:"dy"},
+ {id:"AW",  name:"Scroll wheel", v:"mouse_wheel", live:"wheel"}
 ];
 
-var AXES=AXES_R;
 function axesFor(){ return side()==="L" ? AXES_L : AXES_R; }
 
 function decodeMouse(d,len){
@@ -772,7 +793,101 @@ function decodeMouse(d,len){
   return {dx:x,dy:y,wheel:w,packed:packed,btn:d[0]};
 }
 
-var liveMouse=null;
+var liveBy={L:null,R:null};
+
+function ptrGet(d,n,off,size,sgn){
+  var v=0,k,bit;
+  if(!size||size>32||off+size>n*8) return 0;
+  for(k=0;k<size;k++){
+    bit=off+k;
+    if(d[bit>>3]&(1<<(bit&7))) v+=Math.pow(2,k);
+  }
+  if(size===32) return v|0;
+  if(sgn&&v>=Math.pow(2,size-1)) v-=Math.pow(2,size);
+  return v;
+}
+
+function ptrDecode(L,d,len){
+  var n=Math.min(len,d.length),o={have:0,dx:0,dy:0,wheel:0,btn:0},b;
+  if(L.x&&L.y){
+    o.dx=Math.max(-32768,Math.min(32767,ptrGet(d,n,L.x[0],L.x[1],true)));
+    o.dy=Math.max(-32768,Math.min(32767,ptrGet(d,n,L.y[0],L.y[1],true)));
+    o.have|=1;
+  }
+  if(L.w){
+    o.wheel=Math.max(-128,Math.min(127,ptrGet(d,n,L.w[0],L.w[1],true)));
+    o.have|=2;
+  }
+  for(b=0;b<8;b++){
+    if(L.b[b]===null) continue;
+    o.have|=4;
+    if(ptrGet(d,n,L.b[b],1,false)) o.btn|=(1<<b);
+  }
+  return o;
+}
+
+function ptrParse(handle,len,rest){
+  var f=rest.trim().split(/\s+/).map(function(x){ return x==="-" ? null : parseInt(x,10); });
+  if(f.length!==14) return null;
+  return {handle:handle,len:len,
+          x:(f[0]!==null&&f[1]) ? [f[0],f[1]] : null,
+          y:(f[2]!==null&&f[3]) ? [f[2],f[3]] : null,
+          w:(f[4]!==null&&f[5]) ? [f[4],f[5]] : null,
+          b:f.slice(6)};
+}
+
+function ptrCommit(c){
+  var t={},i,g=c.ptrGot||[];
+  for(i=0;i<g.length;i++) t[g[i].handle+":"+g[i].len]=g[i];
+  c.ptrGot=null;
+  if(c.side&&!g.length&&c.ptr&&Object.keys(c.ptr).length){
+    liveBy[c.side]=null; heldNow="";
+    if(c.side==="L") lmouseSeen=false;
+  }
+  c.ptr=t;
+}
+
+function ptrLayout(src,handle,len){
+  var c=connFor(src);
+  return (c&&c.ptr&&c.ptr[handle+":"+len])||null;
+}
+
+function rightByLen(){
+  var c=connFor("R");
+  return !c||!c.ptr||!!c.ptrLen;
+}
+
+function keyReport(r){
+  return !r.dm&&(r.src==="L"||(r.src==="R"&&!rightByLen()));
+}
+
+function liveTake(src,dm){
+  var o;
+  if(src!=="L"&&src!=="R") return;
+  if(dm.have===undefined){ liveBy[src]=dm; return; }
+  o=liveBy[src]||{dx:0,dy:0,wheel:0,btn:0};
+  if(dm.have&1){ o.dx=dm.dx; o.dy=dm.dy; }
+  if(dm.have&2) o.wheel=dm.wheel;
+  if(dm.have&4) o.btn=dm.btn;
+  liveBy[src]=o;
+}
+
+function boardMouse(s){
+  var c=connFor(s),d=c&&(c.att||c.pin),h=(c&&c.heard)||{},k;
+  if(!d) return false;
+  if(h[d.addr]&&h[d.addr].appear) return devKind(h[d.addr].appear,false)==="mouse";
+  for(k in h) if(d.name&&h[k].name===d.name&&h[k].appear) return devKind(h[k].appear,false)==="mouse";
+  return false;
+}
+
+function leftMouse(){
+  var k;
+  if(lmouseSeen||lmouseSet||boardMouse("L")) return true;
+  for(k in bind)
+    if(boardOf(k)==="L"&&bind[k]&&(bind[k].kind==="bit"||bind[k].kind==="wheel")) return true;
+  return false;
+}
+var lmouseSet=false, lmouseSeen=false;
 
 var KEYS={0x04:"A",0x05:"B",0x06:"C",0x07:"D",0x08:"E",0x09:"F",0x0A:"G",
  0x0B:"H",0x0C:"I",0x0D:"J",0x0E:"K",0x0F:"L",0x10:"M",0x11:"N",0x12:"O",
@@ -811,13 +926,18 @@ function halfOf(id){
 
 function kbdKey(id){ return "L|"+(halfOf(id)==="R" ? "R:"+id : id); }
 
+function lmouseKey(id){ return "L|@"+(halfOf(id)==="R" ? "R:"+id : id); }
+
 function mouseKey(id){ return "R|"+(halfOf(id)==="L" ? "L:"+id : id); }
 
-function slotKbd(id){ return bind[kbdKey(id)]; }
-function slotMouse(id){ var k=mouseKey(id); return k?bind[k]:undefined; }
-function slotOwn(id){ return side()==="R" ? slotMouse(id) : slotKbd(id); }
-function slotOther(id){ return side()==="R" ? slotKbd(id) : slotMouse(id); }
-function slotBind(id){ return slotOwn(id)||slotOther(id); }
+function slotOf(k){ return k.slice(2).replace(/^@/,""); }
+function slotKeys(id){
+  if(side()==="R") return [mouseKey(id),kbdKey(id),lmouseKey(id)];
+  return [kbdKey(id),lmouseKey(id),mouseKey(id)];
+}
+function slotSet(id){ return slotKeys(id).filter(function(k){ return !!bind[k]; }); }
+function slotRecs(id){ return slotSet(id).map(function(k){ return bind[k]; }); }
+function slotBind(id){ return slotRecs(id)[0]; }
 
 function setBoardSide(s){
   if(s!=="L"&&s!=="R") return;
@@ -834,6 +954,7 @@ function setBoardSide(s){
 function slots(){ return side()==="L" ? SLOTS_L : SLOTS_R; }
 
 var XD_IDS=[[0x2FE3,0x0005,"L"],[0x2FE3,0x0004,"R"]], opening=[], refused=[], userClosed=false, twoSaid=false;
+var regrantTries=0, regrantT=null;
 var TWO_XD="Two XD2Joys are plugged in. Unplug one.";
 function readFail(s){ return "Couldn't read the "+sideWord(s)+" board. Unplug it and plug it back in."; }
 var USE_USB=("usb" in navigator)&&(/Android/i.test(navigator.userAgent)||!("serial" in navigator)), usbWraps=new Map();
@@ -990,7 +1111,12 @@ async function openGranted(){
   }
   if($("connErr").textContent===TWO_XD) connSay("");
   twoSaid=false;
-  for(s in by) if(by[s].length&&!sideBusy(s)) await openConn(by[s][0],true);
+  var missed=false;
+  for(s in by) if(by[s].length&&!sideBusy(s)&&!await openConn(by[s][0],true)) missed=true;
+  if(!missed){ regrantTries=0; return; }
+  if(regrantTries>=5||regrantT) return;
+  regrantTries++;
+  regrantT=setTimeout(function(){ regrantT=null; openGranted(); },1000*regrantTries);
 }
 
 async function dropStranger(c){
@@ -1059,6 +1185,8 @@ function connDrop(c){
     bindSrc[c.side]=null;
     bindRecall(c.side);
   }
+  if(c.side) liveBy[c.side]=null;
+  if(c.side==="L") lmouseSeen=false;
   if(!conns.length) sidePicked=false;
   connNote(); paint(); generate();
 }
@@ -1121,7 +1249,7 @@ function connNote(){
   else if(!ready) $("cfgOut").textContent="Connected.";
 }
 var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|GYRO|HID|HIDLNK|HIDMAP|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE) *\]/;
-var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] shortcut key |JC\] connect failed |HID\] (?:kbd|mouse)=)/;
+var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors |ptrs? |single |gyrogain )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] shortcut key |JC\] connect failed |HID\] (?:kbd|mouse)=)/;
 var TAG_RE=new RegExp(TAG_WIDE.source+"|"+TAG_BARE.source);
 
 function onLine(ln,c){
@@ -1275,6 +1403,9 @@ var msensEdited=false;
 
 var msensStored=null;
 
+var GYRO_SENS_DEFAULT=32, GYRO_SENS_MIN=1, GYRO_SENS_MAX=100;
+var gyroSens=GYRO_SENS_DEFAULT, gsensEdited=false;
+
 var gripState={L:null,R:null};
 
 var userEdited=false;
@@ -1294,8 +1425,7 @@ function markColors(s){
 }
 
 function boardOf(k){
-  if(k.charAt(1)==="|") return k.charAt(0);
-  return isAxis(k) ? "R" : null;
+  return k.charAt(1)==="|" ? k.charAt(0) : null;
 }
 
 var BIND_MEM="jc2.bind.";
@@ -1310,6 +1440,16 @@ function bindRemember(sd){
   try{ localStorage.setItem(BIND_MEM+sd,JSON.stringify(out)); }catch(e){}
 }
 
+function bindTidy(o){
+  var out={},k,r,at;
+  for(k in o){
+    r=o[k]; at="L|@"+k.slice(2);
+    if(k.indexOf("L|")===0&&k.charAt(2)!=="@"&&r&&(r.kind==="bit"||r.kind==="wheel")&&!o[at]) out[at]=r;
+    else out[k]=r;
+  }
+  return out;
+}
+
 function bindRecall(sd){
   var raw=null,o=null,k;
 
@@ -1318,6 +1458,7 @@ function bindRecall(sd){
   if(!raw) return;
   try{ o=JSON.parse(raw); }catch(e){ return; }
   if(!o||typeof o!=="object") return;
+  o=bindTidy(o);
   for(k in o){
     if(boardOf(k)!==sd||bind[k]||!o[k]||typeof o[k]!=="object") continue;
     o[k].mem=true;
@@ -1358,13 +1499,6 @@ function wheelRec(dir){
           text:(dir===1?"Scroll up":dir===2?"Scroll down"
                                            :("scroll 0x"+hex2(dir)))};
 }
-function srcRec(v){
-  for(var k in SRC_ID)
-    if(k && SRC_ID[k]===v)
-      return {kind:"src",src:k,text:SRC_NAME[v],byteIdx:-1,mask:0,code:0,
-              handle:0,len:0};
-  return null;
-}
 
 function pageFromBlob(bytes){
   var c=cfgRead(bytes);
@@ -1372,15 +1506,18 @@ function pageFromBlob(bytes){
   var s=(c.side===0x67)?"L":(c.side===0x66)?"R":null;
   if(!s) return null;
   var out={side:s,bind:{},modes:{1:null,2:null,3:null},sens:c.sens,
-           msens:c.msens,maccel:c.maccel,dz:c.dz,vg:c.vg,col:c.col,extras:[]},i,e,ok;
+           msens:c.msens,maccel:c.maccel,dz:c.dz,vg:c.vg,gsens:c.gsens,col:c.col,extras:[]},i,e,ok;
 
   function put(slot,rec){
+    if(slot&&s==="L"&&(rec.kind==="bit"||rec.kind==="wheel")) slot="@"+slot;
     if(!slot||out.bind[slot]) return false;
     out.bind[slot]=rec;
     return true;
   }
   function rname(m){ return RMASK_NAME[m] ? "R:"+RMASK_NAME[m] : null; }
   function lname(m){ return LMASK_NAME[m] ? "L:"+LMASK_NAME[m] : null; }
+  function own(m){ return s==="L" ? LMASK_NAME[m] : RMASK_NAME[m]; }
+  function other(m){ return s==="L" ? rname(m) : lname(m); }
   for(i=0;i<c.btn.length;i++){
     e=c.btn[i]; ok=false;
     if(e.kind===K_KEY)          ok=put(LMASK_NAME[e.mask],keyRec(e.code));
@@ -1388,12 +1525,21 @@ function pageFromBlob(bytes){
     else if(e.kind===K_PEER)    ok=put(rname(e.mask),keyRec(e.code));
     else if(e.kind===K_PEERMOD) ok=put(rname(e.mask),modRec(e.code));
     else if(e.kind===K_STICK)   ok=put(STICK_NAME[e.mask],keyRec(e.code));
-    else if(e.kind===K_MOUSE)   ok=put(RMASK_NAME[e.mask],bitRec(e.code));
-    else if(e.kind===K_MPEER)   ok=put(lname(e.mask),bitRec(e.code));
+    else if(e.kind===K_PSTICK)
+      ok=put(STICK_NAME[e.mask]?"R:"+STICK_NAME[e.mask]:null,keyRec(e.code));
+    else if(e.kind===K_MSTICK)  ok=put(STICK_NAME[e.mask],bitRec(e.code));
+    else if(e.kind===K_WSTICK&&(e.code===1||e.code===2))
+      ok=put(STICK_NAME[e.mask],wheelRec(e.code));
+    else if(e.kind===K_MPSTICK)
+      ok=put(STICK_NAME[e.mask]?(s==="L"?"R:":"L:")+STICK_NAME[e.mask]:null,bitRec(e.code));
+    else if(e.kind===K_WPSTICK&&(e.code===1||e.code===2))
+      ok=put(STICK_NAME[e.mask]?(s==="L"?"R:":"L:")+STICK_NAME[e.mask]:null,wheelRec(e.code));
+    else if(e.kind===K_MOUSE)   ok=put(own(e.mask),bitRec(e.code));
+    else if(e.kind===K_MPEER)   ok=put(other(e.mask),bitRec(e.code));
     else if(e.kind===K_WHEEL&&(e.code===1||e.code===2))
-      ok=put(RMASK_NAME[e.mask],wheelRec(e.code));
+      ok=put(own(e.mask),wheelRec(e.code));
     else if(e.kind===K_WPEER&&(e.code===1||e.code===2))
-      ok=put(lname(e.mask),wheelRec(e.code));
+      ok=put(other(e.mask),wheelRec(e.code));
     else if(e.kind===K_MODE){
       var md=(e.mask>>8)&0xFF;
       if(out.modes[md]===null){
@@ -1405,12 +1551,14 @@ function pageFromBlob(bytes){
     else if(e.kind===K_SET&&e.code===SET_ACCEL) ok=true;
     else if(e.kind===K_SET&&e.code===SET_STICK_DZ) ok=true;
     else if(e.kind===K_SET&&e.code===SET_STICK_VG) ok=true;
+    else if(e.kind===K_SET&&e.code===SET_GYRO_GAIN) ok=true;
     if(!ok) out.extras.push({code:e.code,kind:e.kind,mask:e.mask});
   }
-  if(s==="R"){
-    var ax=srcRec(c.sx), ay=srcRec(c.sy);
-    if(ax) out.bind.SX=ax;
-    if(ay) out.bind.SY=ay;
+  if(s==="R"&&c.sy===SRC_WHEEL){
+    put("STICK_UP",wheelRec(1)); put("STICK_DOWN",wheelRec(2));
+  }
+  if(s==="R"&&c.sx===SRC_WHEEL){
+    put("STICK_RIGHT",wheelRec(1)); put("STICK_LEFT",wheelRec(2));
   }
   return out;
 }
@@ -1428,11 +1576,14 @@ function boardColors(s,col){
 function loadBoardIntoPage(p,keepCols){
   var own=p.side+"|",k;
   for(k in bind) if(boardOf(k)===p.side) delete bind[k];
-  for(k in p.bind) bind[isAxis(k)?k:(own+k)]=p.bind[k];
+  for(k in p.bind) bind[own+k]=p.bind[k];
   cfgExtras[p.side]=p.extras;
-  if(p.side==="L"){ modeCuts[1]=p.modes[1]; modeCuts[2]=p.modes[2]; modeCuts[3]=p.modes[3]; paintMode(); }
+  if(p.side==="L"){
+    modeCuts[1]=p.modes[1]; modeCuts[2]=p.modes[2]; modeCuts[3]=p.modes[3]; paintMode();
+    lmouseSet=(p.msens!==null);
+  }
   if(p.side==="R"){
-    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false;
+    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false;
     if(p.sens!==null){ stickSens=p.sens; paintSens(); }
     msensStored=p.msens;
     if(p.msens!==null) mouseSens=p.msens;
@@ -1441,6 +1592,8 @@ function loadBoardIntoPage(p,keepCols){
     if(p.dz!==null) stickDz=Math.min(Math.round(p.dz/10),STICK_DZ_MAX);
     if(p.vg!==null) stickVg=Math.min(p.vg,STICK_VG_MAX);
     paintStickMore();
+    if(p.gsens!==null) gyroSens=Math.min(p.gsens,GYRO_SENS_MAX);
+    paintGSens();
   }
   edited[p.side]=false;
   userEdited=edited.L||edited.R;
@@ -1453,16 +1606,18 @@ function loadBoardIntoPage(p,keepCols){
 }
 
 function loadFromBoard(c){
-  if(c.loading||!c.keep) return;
+  if(c.loading||!c.keep||c.fwOff) return;
   c.loading=true;
   cfgLocked(c,async function(){
-    var p=pageFromBlob(await cfgAsk(c));
+    var raw=await cfgAsk(c),p;
+    if(fwCheck(c,raw)) return;
+    p=pageFromBlob(raw);
     if(!p) throw new Error("its config did not read back");
     if(!c.side){ c.side=p.side; connNote(); }
     if(!edited[p.side]) loadBoardIntoPage(p);
     else if(!bindSrc[p.side]){ loadBoardIntoPage(p,true); markEdited(p.side); }
     else cfgExtras[p.side]=p.extras;
-    if($("connErr").textContent===readFail(c.side)) connSay("");
+    if($("connErr").textContent===readFail(c.side)||$("connErr").textContent===fwSaid[c.side]) connSay("");
     c.loaded=true; c.loadTries=0; devSend(c,"mode?");
   }).catch(function(e){
     if(!c.keep) return;
@@ -1479,6 +1634,29 @@ function mapReady(){
   return conns.every(function(c){ return c.loaded; });
 }
 var HINT_LOADING="Still loading, try again in a second.";
+var FW_REL={3:"v1.2"}, fwSaid={L:"",R:""};
+function fwSay(c,its){
+  var s=sideWord(c.side),r=FW_REL[c.fwOff];
+  if(c.fwOff>CFG_VER) return its?"Reload the page first.":"The "+s+" board's firmware is newer than this page. Reload the page.";
+  return its?"Update its firmware first.":"The "+s+" board has older firmware"+(r?" ("+r+")":"")+". Update it to use this web tool.";
+}
+function loadingWhy(){
+  for(var i=0;i<conns.length;i++) if(conns[i].fwOff) return fwSay(conns[i]);
+  return HINT_LOADING;
+}
+function fwCheck(c,raw){
+  var dv,v;
+  if(!raw||raw.length<12) return false;
+  dv=new DataView(raw.buffer,raw.byteOffset,raw.byteLength);
+  if(dv.getUint32(0,true)!==CFG_M0||dv.getUint32(4,true)!==CFG_M1) return false;
+  v=dv.getUint16(8,true);
+  if(v===CFG_VER) return false;
+  c.fwOff=v;
+  if(!c.side&&(raw[10]===0x67||raw[10]===0x66)){ c.side=raw[10]===0x67?"L":"R"; connNote(); }
+  fwSaid[c.side]=fwSay(c);
+  connSay(fwSaid[c.side]);
+  return true;
+}
 
 function onProfLine(rest,side,c){
   var m;
@@ -1505,6 +1683,18 @@ function onProfLine(rest,side,c){
 function onMapLine(rest,c){
   var m,sd;
   c=c||{};
+  if((m=rest.match(/^ptrs\s+(\d+|len)$/))){
+    c.ptrLen=(m[1]==="len");
+    c.ptrWant=c.ptrLen ? 0 : parseInt(m[1],10); c.ptrGot=[];
+    if(!c.ptrWant) ptrCommit(c);
+    return;
+  }
+  if((m=rest.match(/^ptr\s+([0-9A-Fa-f]{4})\s+(\d+)\s+(.*)$/))){
+    var pr=c.ptrGot ? ptrParse(parseInt(m[1],16),parseInt(m[2],10),m[3]) : null;
+    if(pr){ c.ptrGot.push(pr); if(c.ptrGot.length===c.ptrWant) ptrCommit(c); }
+    else c.ptrGot=null;
+    return;
+  }
   if((m=rest.match(/^side=([LR])\s+tag=(\S+)/))){
     c.mapSide=m[1];
 
@@ -1559,6 +1749,11 @@ function onMapLine(rest,c){
     renderGrip();
     return;
   }
+  if((m=rest.match(/^single\s+([0-2])$/))){
+    var sv=parseInt(m[1],10);
+    if(sv!==singleMode){ singleMode=sv; singleRemember(sv); devPaint(); }
+    return;
+  }
 
   if((m=rest.match(/^msens\s+(\d+)$/))){
     var mv2=parseInt(m[1],10);
@@ -1586,6 +1781,13 @@ function onMapLine(rest,c){
     }
     return;
   }
+  if((m=rest.match(/^gyrogain\s+(\d+)$/))){
+    var gg2=parseInt(m[1],10);
+    if(sd==="R"&&!gsensEdited&&gg2>=GYRO_SENS_MIN){
+      gyroSens=Math.min(gg2,GYRO_SENS_MAX); paintGSens();
+    }
+    return;
+  }
   if((m=rest.match(/^colors\s+([0-9A-Fa-f]{6})\s+([0-9A-Fa-f]{6})\s+([0-9A-Fa-f]{6})\s+([0-9A-Fa-f]{6})/))){
     boardColors(sd,{body:"#"+m[1].toUpperCase(),
                     btn:"#"+m[2].toUpperCase(),
@@ -1607,13 +1809,16 @@ function ingest(handle,len,bytes,src){
     if(bytes[i]!==r.latest[i]) r.changed[i]=true;
   r.latest=bytes.slice(); r.n++; nReports++;
 
-  if(r.src==="R"){
-    var dm=decodeMouse(bytes,len);
-    if(dm){ liveMouse=dm; wheelNotch(dm.wheel); showLive(); }
+  var pl=ptrLayout(r.src,handle,len);
+  r.dm=pl ? ptrDecode(pl,bytes,len) : (r.src==="R"&&rightByLen() ? decodeMouse(bytes,len) : null);
+  if(r.dm){
+    if(r.src==="L"&&(r.dm.dx||r.dm.dy||r.dm.wheel||r.dm.btn)) lmouseSeen=true;
+    liveTake(r.src,r.dm); wheelNotch(r.dm.wheel,r.src); showLive();
+    syncMouseTake(r.src);
   }
   if(listening) tryCapture(k,r);
 
-  if(modeListening&&r.src==="L") tryModeCapture(r);
+  if(modeListening&&keyReport(r)) tryModeCapture(r);
   showHeld();
   renderRaw();
 }
@@ -1774,6 +1979,7 @@ function tryModeCapture(r){
     c=r.latest[off+i];
     if(!(c>=0x04)) continue;
     if(c===0x29&&!mods&&!modeBuilding){ modeStopListening(); paintMode(); return; }
+    if(cutTarget==="sync"&&c>=0xE8){ modeErr("That key can't be the pairing key."); return; }
 
     if(modeCommit(c,mods||modeMods,true)) modeHeldDone=c;
     return;
@@ -1926,6 +2132,21 @@ function paintProf(){
   for(var n=1;n<=PROFILES;n++) paintProfRow(n);
 }
 
+var SYNC_MOUSE=0xF0, syncBtnWas={L:0,R:0};
+
+function syncMouseTake(src){
+  var held=((liveBy[src]||{}).btn)|0,nw=held&~(syncBtnWas[src]|0),i;
+  if(src!=="L"&&src!=="R") return;
+  syncBtnWas[src]=held;
+  if(!nw||cutTarget!=="sync"||modeListening!==1) return;
+  for(i=0;i<8;i++) if(nw&(1<<i)){ modeCommit(SYNC_MOUSE+i,0,true); return; }
+}
+
+function syncName(c){
+  var b=c.code-SYNC_MOUSE;
+  return (b>=0&&b<8) ? (bitNames(1<<b,MOUSEBTN)||"Mouse button "+(b+1)) : modeComboText(c.code,c.mods);
+}
+
 function syncCut(){
   if(syncPending) return syncPending.code?{code:syncPending.code,mods:syncPending.mods}:null;
   return (syncState.known&&syncState.on&&syncState.code)
@@ -1938,11 +2159,13 @@ function syncLeft(){
 }
 
 function syncKeyMapped(code){
-  var list,i,e;
-  try{ list=cfgList(0x67).list; }catch(x){ return false; }
+  var list,i,e,b=code-SYNC_MOUSE,mouse=(b>=0&&b<8);
+  try{ list=cfgList(0x67).list.concat(mouse?cfgList(0x66).list:[]); }catch(x){ return false; }
   for(i=0;i<list.length;i++){
     e=list[i];
-    if((e.kind===K_KEY||e.kind===K_PEER||e.kind===K_STICK)&&e.code===code) return true;
+    if(mouse){
+      if((e.kind===K_MOUSE||e.kind===K_MPEER||e.kind===K_MSTICK||e.kind===K_MPSTICK)&&(e.code&(1<<b))) return true;
+    }else if((e.kind===K_KEY||e.kind===K_PEER||e.kind===K_STICK||e.kind===K_PSTICK)&&e.code===code) return true;
   }
   return false;
 }
@@ -1960,8 +2183,7 @@ function syncWarning(){
   }
   if(syncKeyMapped(c.code)) names.push("mapped to a button");
   return names.length
-    ? modeComboText(c.code,c.mods)+" is also "+names.join(" and ")+
-      ". Holding it for 2 seconds will also unpair."
+    ? "Button is also "+names.join(" and ")+". Holding will still unpair."
     : "";
 }
 
@@ -1972,11 +2194,11 @@ function paintSync(){
       live=!!syncLeft(),
       sc=syncCut(),
       set=!!sc,
-      cut=set?modeComboText(sc.code,sc.mods):"";
+      cut=set?syncName(sc):"";
   if(b){
     b.classList.toggle("arm",listening);
-    if(listening) b.textContent=cut||"Press a key...";
-    else b.textContent=cut||"Click to set a key";
+    if(listening) b.textContent=cut||"Press a key or mouse button...";
+    else b.textContent=cut||"Click to set a key or button";
     b.disabled=!live;
   }
   if(x) x.disabled=!live||!set;
@@ -2068,29 +2290,39 @@ function paintMSens(){
   if($("mAccel")) $("mAccel").checked=!!mouseAccel;
 }
 
+function paintGSens(){
+  var v=Math.round(gyroSens);
+  $("rngGSens").value=v;
+  paintRange($("rngGSens"));
+  if(document.activeElement!==$("numGSens")) $("numGSens").value=v;
+  $("bGSensDefault").disabled=(v===GYRO_SENS_DEFAULT);
+}
+
 function reportsForFeedback(){
   var kr=null,mr=null,k;
   for(k in reports){
     var r=reports[k];
-    if(!kr && r.src==="L" && (r.len===7||r.len===8)) kr=r;
-    if(!mr && r.src==="R" && decodeMouse(r.latest,r.len)) mr=r;
+    if(!kr && keyReport(r) && (r.len===7||r.len===8)) kr=r;
+    if(!mr && r.src==="R" && r.dm) mr=r;
   }
   return {kbd:kr,mouse:mr};
 }
 
-var WHEEL_LIT_MS=90, wheelLit={1:0,2:0}, wheelLitT=null;
-function wheelNotch(w){
+var WHEEL_LIT_MS=90, wheelLit={L:{1:0,2:0},R:{1:0,2:0}}, wheelLitT=null;
+function wheelNotch(w,src){
   if(!w) return;
-  wheelLit[w>0?1:2]=Date.now()+WHEEL_LIT_MS;
+  wheelLit[src==="L"?"L":"R"][w>0?1:2]=Date.now()+WHEEL_LIT_MS;
   if(wheelLitT) clearTimeout(wheelLitT);
   wheelLitT=setTimeout(function(){ wheelLitT=null; showHeld(); },WHEEL_LIT_MS+10);
 }
 
-function bindHeld(rec,rp){
+function bindHeld(rec,rp,board){
   if(!rec) return false;
-  if(rec.kind==="wheel") return Date.now()<wheelLit[rec.code];
-  if(rec.kind==="bit")
+  if(rec.kind==="wheel") return Date.now()<wheelLit[board==="L"?"L":"R"][rec.code];
+  if(rec.kind==="bit"){
+    if(board==="L"||!rightByLen()) return !!(liveBy[board] && (liveBy[board].btn&rec.mask));
     return !!(rp.mouse && (rp.mouse.latest[rec.byteIdx||0]&rec.mask));
+  }
   if(!rp.kbd) return false;
   if(rec.kind==="mod") return !!(rp.kbd.latest[0]&rec.mask);
   if(rec.kind==="key"){
@@ -2102,6 +2334,7 @@ function bindHeld(rec,rp){
 }
 
 function heldSlotId(k){
+  k=k.replace("|@","|");
   if(k.indexOf("R|L:")===0) return side()==="L" ? k.slice(4) : null;
   if(k.indexOf("L|R:")===0) return side()==="R" ? k.slice(4) : null;
   if(k.indexOf("R|")===0)   return side()==="R" ? k.slice(2) : null;
@@ -2113,7 +2346,7 @@ var heldNow="";
 function showHeld(){
   var rp=reportsForFeedback(),on=[],k,id;
   for(k in bind){
-    if(!bindHeld(bind[k],rp)) continue;
+    if(!bindHeld(bind[k],rp,k.charAt(0))) continue;
     id=heldSlotId(k);
     if(id) on.push(id);
   }
@@ -2141,7 +2374,7 @@ function showHeld(){
 function beginListen(slotId){
   if(!conns.length) return;
   if(side()==="R" && !haveBoard("R") && !haveBoard("L")) return;
-  if(!mapReady()){ hintBad(HINT_LOADING); return; }
+  if(!mapReady()){ hintBad(loadingWhy()); return; }
   listening=slotId;
 
   listenBase={};
@@ -2170,11 +2403,6 @@ var HINT_NO_KEYCODE="That key sent no usable code. For F1-F12, hold Fn.";
 var HINT_KEY_ALONE="Press the key on its own. For F1-F12, hold Fn.";
 
 var captureHold=false;
-
-function isAxis(id){
-  for(var i=0;i<AXES.length;i++) if(AXES[i].id===id) return true;
-  return false;
-}
 
 var MOUSEBTN=[[0x01,"Left click"],[0x02,"Right click"],[0x04,"Middle click"],
               [0x08,"Side button 1"],[0x10,"Side button 2"],
@@ -2241,7 +2469,8 @@ function captureButton(key,r,dm){
 
 function tryCapture(key,r){
   if(r.src!=="L"&&r.src!=="R") return;
-  if(r.src==="L"){
+  if(r.dm){ captureButton(key,r,r.dm); return; }
+  if(keyReport(r)){
     if(r.len===7||r.len===8){ captureKey(key,r); return; }
 
     var any=false;
@@ -2252,8 +2481,6 @@ function tryCapture(key,r){
     captureHold=true;
     return;
   }
-  var dm=decodeMouse(r.latest,r.len);
-  if(dm){ captureButton(key,r,dm); return; }
   var base=listenBase[key];
   if(!base){ listenBase[key]=r.latest.slice(); return; }
   var diffs=[],i;
@@ -2286,12 +2513,13 @@ function clearPendingMod(){
 }
 
 function commitCapture(rec,src){
-  var key=(src==="R") ? (mouseKey(listening)||("R|"+listening))
-                      : kbdKey(listening);
+  var ms=(rec.kind!=="key"&&rec.kind!=="mod"),key=kbdKey(listening);
+  if(ms&&src==="R") key=mouseKey(listening);
+  else if(ms&&src==="L") key=lmouseKey(listening);
 
-  if(!cfgEntry(key.slice(2),rec)){
-    hintBad(STICK_MASK[listening]!==undefined ? "For the stick, use a regular key like W."
-                                              : "That input can't be used here.");
+  if(!cfgEntry(slotOf(key),rec,key.charAt(0))){
+    hintBad(STICK_MASK[listening]===undefined ? "That input can't be used here."
+            : "For the stick, use a regular key like W.");
     clearPendingMod(); captureHold=true;
     return;
   }
@@ -2320,7 +2548,8 @@ function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 
 function paint(){
-  $("jcImg").src = side()==="L" ? "ns2blue.png" : "ns2red.png";
+  var jw=side()==="L" ? "ns2blue.png" : "ns2red.png";
+  if($("jcImg").getAttribute("src")!==jw) $("jcImg").src=jw;
   var cl=$("colL"), cr=$("colR");
   cl.innerHTML=""; cr.innerHTML="";
 
@@ -2344,28 +2573,38 @@ function paint(){
 
 function relayout(){ layoutSlots(); drawLeads(); }
 
+var imgKeep=[];
+function imgWarm(){
+  ["ns2blue.png","ns2red.png","Connecting.png","NoConnection.png"].forEach(function(f){
+    var im=new Image();
+    im.src=f;
+    imgKeep.push(im);
+    if(im.decode) im.decode().catch(function(){});
+  });
+}
+
 var lastPointer="";
 document.addEventListener("pointerdown",function(e){ lastPointer=e.pointerType||""; },true);
 
 function build(s,parent){
-  var own=slotOwn(s.id), other=slotOther(s.id), b=own||other;
+  var ks=slotSet(s.id), b=ks.length?bind[ks[0]]:null;
 
-  var both=!!(own&&other);
   var el=document.createElement("div");
 
-  var fromB=own?(side()==="R"?"R":"L")
-              :(other?(side()==="R"?"L":"R"):"");
+  var fromB=ks.length?ks[0].charAt(0):"";
   el.className="slot"+(b?" set":"")+((b&&b.mem)?" mem":"")+
     (fromB?" from"+fromB:"")+(listening===s.id?" listening":"");
   el.setAttribute("data-slot",s.id);
 
-  el.title=b?(both?own.text+" + "+other.text:b.text):"";
+  el.title=ks.map(function(k){ return bind[k].text; }).join(" + ");
+  var more=ks.slice(1).map(function(k){
+    return ' <span class="v2">+ '+esc(bind[k].text)+'</span>';
+  }).join("");
   var ico=ICONS[s.id];
   el.innerHTML='<div class="n">'+(ico||esc(s.name))+'</div>'+
     '<div class="v'+(b?"":" none")+'">'+
     (listening===s.id ? "Press now…"
-      : (b?esc(b.text)+(both?' <span class="v2">+ '+esc(other.text)+'</span>':"")
-          :"Not set"))+
+      : (b?esc(b.text)+more:"Not set"))+
     '</div><div class="x">&times;</div>';
   el.addEventListener("click",function(ev){
     if(ev.target.className==="x"){ ev.stopPropagation(); clearSlot(s.id); return; }
@@ -2377,10 +2616,12 @@ function build(s,parent){
     ev.preventDefault(); clearSlot(s.id);
   });
   parent.appendChild(el);
+  var v=el.querySelector(".v");
+  if(ks.length>1&&v&&v.scrollWidth>v.clientWidth) el.classList.add("tall");
 }
 
 function clearSlot(id){
-  var keys=isAxis(id)?[id]:[mouseKey(id),kbdKey(id)],gone=0,mem=0,i;
+  var keys=slotKeys(id),gone=0,mem=0,i;
   for(i=0;i<keys.length;i++){
     if(!keys[i]||!bind[keys[i]]) continue;
     if(bind[keys[i]].mem) mem++; else gone++;
@@ -2389,7 +2630,7 @@ function clearSlot(id){
     if(mem) hintBad("Connect the other board to clear this.");
     return;
   }
-  if(!mapReady()){ hintBad(HINT_LOADING); return; }
+  if(!mapReady()){ hintBad(loadingWhy()); return; }
   if(listening===id){ listening=null; listenBase=null; }
   for(i=0;i<keys.length;i++){
     if(!keys[i]||!bind[keys[i]]||bind[keys[i]].mem) continue;
@@ -2500,13 +2741,14 @@ function svgAdd(parent,tag,attrs,cls){
 }
 
 function showLive(){
-  if(!liveMouse) return;
-  for(var i=0;i<AXES.length;i++){
-    var a=AXES[i];
+  var lm=liveBy[side()],ax=axesFor();
+  if(!lm) return;
+  for(var i=0;i<ax.length;i++){
+    var a=ax[i];
     if(!a.live) continue;
     var td=document.getElementById("axv-"+a.id);
     if(!td) continue;
-    var v=liveMouse[a.live];
+    var v=lm[a.live];
     td.innerHTML='<span style="color:var(--ok)">'+v+'</span>'+
       '<span style="color:var(--dim)"> (live)</span>';
   }
@@ -2546,9 +2788,9 @@ function renderGrip(){
      '<span>Charging Grip</span></label>'+
      '</td></tr>';
   for(i=0;i<GRIP_ROWS.length;i++){
-    var g=GRIP_ROWS[i], b=slotBind(g.id);
+    var g=GRIP_ROWS[i], gr=slotRecs(g.id), b=gr[0];
     var ic=ICONS[g.id]||"";
-    var val=(b?'<span class="axk">'+esc(b.text)+'</span>':
+    var val=(b?'<span class="axk">'+gr.map(function(r){ return esc(r.text); }).join(" + ")+'</span>':
              '<span style="color:var(--dim)">Not set</span>');
     h+='<tr id="axr-'+g.id+'"><td><div class="axlab">'+
        '<span class="axico">'+ic+'</span></div></td>'+
@@ -2579,29 +2821,17 @@ function renderGrip(){
 
 function renderAxes(){
   var tb=$("rowsAxis"),h="",i,j,list=axesFor(),L=(side()==="L");
-  $("axesTitle").textContent = L ? "Left Stick Config" : "Mouse Mode Config";
+  $("axesTitle").textContent = L ? "Left Stick Config" : "Right Stick Config";
   for(i=0;i<list.length;i++){
-    var a=list[i], b=a.slot?bind[kbdKey(a.id)]:(a.src?bind[a.id]:null);
+    var a=list[i], rs=a.slot?slotRecs(a.id):[], b=rs[0];
 
-    var ic=ICONS[a.id];
+    var ic=ICONS[a.ico||a.id];
     var gl=ic?'<span class="axico">'+ic+'</span>':'';
     var tx=a.name+(a.note?'<span style="color:var(--dim)">: '+a.note+'</span>':'');
     var label='<div class="axlab">'+gl+
       ((gl&&a.slot)?'':'<span>'+tx+'</span>')+'</div>';
-    if(a.src){
-      var sel='<select data-src="'+a.id+'">';
-      for(j=0;j<SRCS.length;j++){
-        var chosen=(b&&b.src===SRCS[j].v)||(!b&&SRCS[j].v==="");
-        sel+='<option value="'+SRCS[j].v+'"'+
-             (chosen?" selected":"")+'>'+SRCS[j].name+'</option>';
-      }
-      sel+='</select>';
-      h+='<tr><td>'+label+'</td><td colspan="2" style="text-align:right">'+
-         sel+'</td></tr>';
-      continue;
-    }
 
-    var val=(b?'<span class="axk">'+esc(b.text)+'</span>':
+    var val=(b?'<span class="axk">'+rs.map(function(r){ return esc(r.text); }).join(" + ")+'</span>':
              '<span style="color:var(--dim)">'+
              (a.live?"waiting for movement":"Not set")+'</span>');
     h+='<tr id="axr-'+a.id+'"><td>'+label+'</td>'+
@@ -2627,18 +2857,6 @@ function renderAxes(){
   var cs=tb.querySelectorAll("[data-axclr]");
   for(j=0;j<cs.length;j++) cs[j].addEventListener("click",function(e){
     clearSlot(e.target.getAttribute("data-axclr"));
-  });
-  var ss=tb.querySelectorAll("[data-src]");
-  for(j=0;j<ss.length;j++) ss[j].addEventListener("change",function(e){
-    var id=e.target.getAttribute("data-src"), v=e.target.value, nm="";
-    tb.axLast="";
-    if(!mapReady()){ hintBad(HINT_LOADING); paint(); return; }
-    for(var q=0;q<SRCS.length;q++) if(SRCS[q].v===v) nm=SRCS[q].name;
-    if(!v) delete bind[id];
-    else bind[id]={kind:"src",src:v,text:nm,byteIdx:-1,mask:0,code:0,
-                   handle:0,len:0};
-    markEdited("R");
-    paint(); generate();
   });
 }
 
@@ -2685,13 +2903,16 @@ function cHi(src){
 }
 
 
-function maskName(e){
+function maskName(e,sideByte){
+  var peer=(e.kind===K_PEER||e.kind===K_PEERMOD||e.kind===K_MPEER||e.kind===K_WPEER);
   if(e.kind===K_SET) return String(e.mask);
   if(e.kind===K_MODE)
     return "mode "+modeRowName((e.mask>>8)&0xFF)+
            (e.mask&0xFF ? " + mods 0x"+hex2(e.mask&0xFF) : "");
-  if(e.kind===K_STICK) return STICK_NAME[e.mask]||("0x"+e.mask.toString(16));
-  if(e.kind===K_PEER||e.kind===K_PEERMOD||e.kind===K_WHEEL||e.kind===K_MOUSE)
+  if(e.kind===K_STICK||e.kind===K_PSTICK||e.kind===K_MSTICK||e.kind===K_WSTICK||
+     e.kind===K_MPSTICK||e.kind===K_WPSTICK)
+    return STICK_NAME[e.mask]||("0x"+e.mask.toString(16));
+  if((sideByte===0x67)===peer)
     return RMASK_NAME[e.mask] ? "RBTN_"+RMASK_NAME[e.mask]
                               : "0x"+e.mask.toString(16);
   return LMASK_NAME[e.mask] ? "BTN_"+LMASK_NAME[e.mask]
@@ -2706,11 +2927,7 @@ function genHalf(sideByte){
   for(i=0;i<built.list.length;i++){
     e=built.list[i];
     L.push("CFG.btn["+i+"] = { 0x"+hex2(e.code)+", "+KIND_NAME[e.kind]+
-           ", "+maskName(e)+" };");
-  }
-  if(sideByte===0x66){
-    L.push("CFG.stick_src_x = "+(SRC_ID[(bind.SX&&bind.SX.src)||""]||0)+";");
-    L.push("CFG.stick_src_y = "+(SRC_ID[(bind.SY&&bind.SY.src)||""]||0)+";");
+           ", "+maskName(e,sideByte)+" };");
   }
   var c=colsBy[sideByte===0x67?"L":"R"]||colors(),CN=["body","btn","rail","stick"],
       FN=["col_body","col_buttons","col_rail","col_stick"];
@@ -2880,6 +3097,7 @@ function save(){
      stickVg:Math.round(stickVg),
      mouseSens:Math.round(mouseSens),
      mouseAccel:!!mouseAccel,
+     gyroSens:Math.round(gyroSens),
      sync:(syncPending||syncState.known)?{code:syncCut()?syncCut().code:0,mods:0}:undefined},
     function(k,v){ return k==="mem"?undefined:v; },2)],
     {type:"application/json"});
@@ -2890,8 +3108,17 @@ function save(){
 function applyPreset(o){
   if(!o||typeof o!=="object"||!o.bind||typeof o.bind!=="object") return false;
   if(listening) cancelListen();
-  bind=o.bind||{}; if(o.side) $("selSide").value=o.side;
+  bind=bindTidy(o.bind); if(o.side) $("selSide").value=o.side;
   bindSrc={L:"preset",R:"preset"}; cleared={L:false,R:false};
+  if(bind.SY&&bind.SY.src==="mouse_wheel"){
+    bind["R|STICK_UP"]=bind["R|STICK_UP"]||wheelRec(1);
+    bind["R|STICK_DOWN"]=bind["R|STICK_DOWN"]||wheelRec(2);
+  }
+  if(bind.SX&&bind.SX.src==="mouse_wheel"){
+    bind["R|STICK_RIGHT"]=bind["R|STICK_RIGHT"]||wheelRec(1);
+    bind["R|STICK_LEFT"]=bind["R|STICK_LEFT"]||wheelRec(2);
+  }
+  delete bind.SX; delete bind.SY;
 
   var cbs=o.colorsBySide;
   if(cbs&&(cbs.L||cbs.R)){
@@ -2939,6 +3166,10 @@ function applyPreset(o){
   mouseAccel=(o.mouseAccel===true);
   paintMSens();
 
+  if(typeof o.gyroSens==="number"&&o.gyroSens>=GYRO_SENS_MIN){
+    gyroSens=Math.min(Math.round(o.gyroSens),GYRO_SENS_MAX); gsensEdited=true; paintGSens();
+  }
+
   markEdited("L"); markEdited("R");
   paint(); generate();
   return true;
@@ -2955,14 +3186,19 @@ function load(file){
 
 var CFG_M0=0x32434A55, CFG_M1=0x1A5F4247;
 
-var CFG_VER=3, CFG_SIZE=160, CFG_COL=16, CFG_BTN=28, CFG_BTNS=32;
+var CFG_VER=4, CFG_SIZE=288, CFG_COL=16, CFG_BTN=28, CFG_BTNS=64;
 
 var K_MOUSE=0, K_KEY=1, K_MOD=2, K_PEER=3, K_STICK=4, K_PEERMOD=5,
     K_MPEER=6,
     K_MODE=7,
     K_SET=8,
     K_WHEEL=9,
-    K_WPEER=10;
+    K_WPEER=10,
+    K_PSTICK=11,
+    K_MSTICK=12,
+    K_WSTICK=13,
+    K_MPSTICK=14,
+    K_WPSTICK=15;
 
 var KIND_NAME={};
 KIND_NAME[K_MOUSE]="JC_BTN_MOUSE";   KIND_NAME[K_KEY]="JC_BTN_KEY";
@@ -2971,12 +3207,18 @@ KIND_NAME[K_STICK]="JC_BTN_STICK";   KIND_NAME[K_PEERMOD]="JC_BTN_PEERMOD";
 KIND_NAME[K_MPEER]="JC_BTN_MPEER";   KIND_NAME[K_MODE]="JC_BTN_MODE";
 KIND_NAME[K_SET]="JC_BTN_SET";       KIND_NAME[K_WHEEL]="JC_BTN_WHEEL";
 KIND_NAME[K_WPEER]="JC_BTN_WPEER";
+KIND_NAME[K_PSTICK]="JC_BTN_PSTICK";
+KIND_NAME[K_MSTICK]="JC_BTN_MSTICK";
+KIND_NAME[K_WSTICK]="JC_BTN_WSTICK";
+KIND_NAME[K_MPSTICK]="JC_BTN_MPSTICK";
+KIND_NAME[K_WPSTICK]="JC_BTN_WPSTICK";
 
 var SET_STICK_GAIN=1;
 var SET_MOUSE_GAIN=2;
 var SET_ACCEL=3;
 var SET_STICK_DZ=4;
 var SET_STICK_VG=5;
+var SET_GYRO_GAIN=6;
 
 var LBTN={DOWN:0x0001,RIGHT:0x0002,LEFT:0x0004,UP:0x0008,L:0x0010,ZL:0x0020,
           MINUS:0x0040,LS:0x0080,CAP:0x0100,GL:0x0400,SR:0x4000,SL:0x8000};
@@ -2987,8 +3229,7 @@ var STICK_NAME={};
 for(var _s in STICK_MASK) STICK_NAME[STICK_MASK[_s]]=_s;
 var LMASK_NAME={}, RMASK_NAME={};
 for(var _l in LBTN) LMASK_NAME[LBTN[_l]]=_l;
-var SRC_ID={"":0,mouse_dx:1,mouse_dy:2,mouse_wheel:3};
-var SRC_NAME=["not set","cursor X","cursor Y","scroll wheel"];
+var SRC_WHEEL=3;
 
 var RBTN={B:0x0001,A:0x0002,Y:0x0004,X:0x0008,R:0x0010,ZR:0x0020,
           PLUS:0x0040,RS:0x0080,HOME:0x0100,GR:0x0400,C:0x1000,
@@ -3017,6 +3258,7 @@ function cfgRead(img){
   c.maccel=false;
   c.dz=null;
   c.vg=null;
+  c.gsens=null;
   for(i=0;i<c.btn.length;i++)
     if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_STICK_GAIN)
       c.sens=c.btn[i].mask;
@@ -3028,6 +3270,8 @@ function cfgRead(img){
       c.dz=c.btn[i].mask;
     else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_STICK_VG)
       c.vg=c.btn[i].mask;
+    else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_GYRO_GAIN)
+      c.gsens=c.btn[i].mask;
   return c;
 }
 
@@ -3038,34 +3282,54 @@ function hex3(s,fb){
           parseInt(s.slice(4,6),16)];
 }
 
-function cfgEntry(slot,e){
+function cfgEntry(slot,e,board){
   if(!e) return null;
+  var mouse=(e.kind==="bit"||e.kind==="wheel"),own;
+  if(board!=="L"&&board!=="R") board=mouse ? "R" : "L";
 
   if(slot.indexOf("R:")===0){
+    var rs=STICK_MASK[slot.slice(2)];
+    if(rs!==undefined){
+      if(e.kind==="key") return {code:e.code|0,kind:K_PSTICK,mask:rs};
+      if(e.kind==="bit") return {code:e.mask|0,kind:K_MPSTICK,mask:rs};
+      if(e.kind==="wheel") return {code:e.code|0,kind:K_WPSTICK,mask:rs};
+      return null;
+    }
     var rm=RBTN[slot.slice(2)];
     if(!rm) return null;
     if(e.kind==="mod") return {code:e.mask|0,kind:K_PEERMOD,mask:rm};
     if(e.kind==="key") return {code:e.code|0,kind:K_PEER,mask:rm};
+    if(e.kind==="bit") return {code:e.mask|0,kind:K_MPEER,mask:rm};
+    if(e.kind==="wheel") return {code:e.code|0,kind:K_WPEER,mask:rm};
     return null;
   }
 
   if(slot.indexOf("L:")===0){
+    var ls=STICK_MASK[slot.slice(2)];
+    if(ls!==undefined){
+      if(e.kind==="bit") return {code:e.mask|0,kind:K_MPSTICK,mask:ls};
+      if(e.kind==="wheel") return {code:e.code|0,kind:K_WPSTICK,mask:ls};
+      return null;
+    }
     var lm=LBTN[slot.slice(2)];
     if(!lm) return null;
     if(e.kind==="wheel") return {code:e.code|0,kind:K_WPEER,mask:lm};
     return e.kind==="bit" ? {code:e.mask|0,kind:K_MPEER,mask:lm} : null;
   }
-  if(STICK_MASK[slot]!==undefined)
-    return e.kind==="key"
-      ? {code:e.code|0,kind:K_STICK,mask:STICK_MASK[slot]} : null;
-  if(e.kind==="wheel")
-    return RBTN[slot] ? {code:e.code|0,kind:K_WHEEL,mask:RBTN[slot]} : null;
-  if(e.kind==="bit")
-    return RBTN[slot] ? {code:e.mask|0,kind:K_MOUSE,mask:RBTN[slot]} : null;
-  if(e.kind==="key")
-    return LBTN[slot] ? {code:e.code|0,kind:K_KEY,mask:LBTN[slot]} : null;
-  if(e.kind==="mod")
-    return LBTN[slot] ? {code:e.mask|0,kind:K_MOD,mask:LBTN[slot]} : null;
+  if(STICK_MASK[slot]!==undefined){
+    var sm=STICK_MASK[slot];
+    if(e.kind==="key") return board==="L" ? {code:e.code|0,kind:K_STICK,mask:sm} : null;
+    if(e.kind==="bit") return {code:e.mask|0,kind:K_MSTICK,mask:sm};
+    if(e.kind==="wheel") return {code:e.code|0,kind:K_WSTICK,mask:sm};
+    return null;
+  }
+  own=(board==="L") ? LBTN[slot] : RBTN[slot];
+  if(!own) return null;
+  if(e.kind==="wheel") return {code:e.code|0,kind:K_WHEEL,mask:own};
+  if(e.kind==="bit") return {code:e.mask|0,kind:K_MOUSE,mask:own};
+  if(board!=="L") return null;
+  if(e.kind==="key") return {code:e.code|0,kind:K_KEY,mask:own};
+  if(e.kind==="mod") return {code:e.mask|0,kind:K_MOD,mask:own};
   return null;
 }
 
@@ -3074,7 +3338,7 @@ function cfgList(side){
 
   for(i=0;i<ids.length;i++){
     if(ids[i].indexOf(own)!==0) continue;
-    e=cfgEntry(ids[i].slice(2),bind[ids[i]]);
+    e=cfgEntry(slotOf(ids[i]),bind[ids[i]],own.charAt(0));
     if(e) list.push(e);
   }
 
@@ -3084,6 +3348,12 @@ function cfgList(side){
       if(!mc) continue;
       list.push({code:mc.code,kind:K_MODE,
                  mask:((mc.mode&0xFF)<<8)|(mc.mods&0xFF)});
+    }
+    var lg=Math.round(mouseSens);
+    if(!(lg>=MOUSE_SENS_MIN&&lg<=MOUSE_SENS_MAX)) lg=MOUSE_SENS_DEFAULT;
+    if(leftMouse()||lg!==MOUSE_SENS_DEFAULT||!mouseAccel){
+      list.push({code:SET_MOUSE_GAIN,kind:K_SET,mask:lg});
+      list.push({code:SET_ACCEL,kind:K_SET,mask:mouseAccel?1:0});
     }
   }
 
@@ -3101,6 +3371,9 @@ function cfgList(side){
     var vgv=Math.round(stickVg);
     if(!(vgv>=STICK_VG_MIN&&vgv<=STICK_VG_MAX)) vgv=STICK_VG_DEFAULT;
     list.push({code:SET_STICK_VG,kind:K_SET,mask:vgv});
+    var ggv=Math.round(gyroSens);
+    if(!(ggv>=GYRO_SENS_MIN&&ggv<=GYRO_SENS_MAX)) ggv=GYRO_SENS_DEFAULT;
+    list.push({code:SET_GYRO_GAIN,kind:K_SET,mask:ggv});
   }
   return {list:list};
 }
@@ -3113,9 +3386,6 @@ function cfgBuild(cur,uiColors){
 
   if(cur.side===0x67){
     b[14]=cur.sx||0; b[15]=cur.sy||0;
-  }else{
-    b[14]=SRC_ID[(bind.SX&&bind.SX.src)||""]||0;
-    b[15]=SRC_ID[(bind.SY&&bind.SY.src)||""]||0;
   }
   var CN=["body","btn","rail","stick"];
 
@@ -3345,7 +3615,7 @@ async function cfgApplyAll(){
   for(i=0;i<targets.length;i++){
     var c=targets[i];
     try{ await cfgLocked(c,async function(){
-      if(!c.loaded) throw whyErr(HINT_LOADING);
+      if(!c.loaded) throw whyErr(c.fwOff?fwSay(c,true):HINT_LOADING);
       var cur=cfgRead(await cfgAsk(c));
       if(!cur) throw new Error("could not read its config");
       var mine=(cur.side===uiSide);
@@ -3379,13 +3649,13 @@ async function cfgApplyAll(){
       await syncSend("sync key 0x"+hex2(sp.code)+" 0x"+hex2(sp.mods));
       if(sp.code&&!syncState.on) await syncSend("sync on");
       syncPending=null;
-      lines.push("Pairing key "+(sp.code?"set to "+modeComboText(sp.code,0):"removed"));
+      lines.push("Pairing key "+(sp.code?"set to "+syncName(sp):"removed"));
     }catch(e){ bad++; lines.push("Couldn't set the pairing key."); }
     paintSync();
   }
   $("cfgOut").textContent=lines.join("\n");
 
-  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; }
+  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; }
   userEdited=edited.L||edited.R;
   connNote();
   return bad;
@@ -3407,7 +3677,7 @@ async function cfgRestoreAll(){
       if(!/^stored config deleted/.test(reply)) throw new Error(reply);
 
       var now=pageFromBlob(await cfgAsk(c));
-      if(now&&now.side==="R"){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; }
+      if(now&&now.side==="R"){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; }
       if(now) loadBoardIntoPage(now);
       lines.push("Restored defaults on the "+sideWord(c.side)+" board.");
     });
@@ -3417,7 +3687,7 @@ async function cfgRestoreAll(){
     }catch(e){ bad++; lines.push("Couldn't restore the "+sideWord(c.side)+" board."); }
   }
   $("cfgOut").textContent=lines.concat(notes).join("\n");
-  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; }
+  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; }
   userEdited=edited.L||edited.R;
   connNote();
 }
@@ -3434,7 +3704,7 @@ if(hasPorts()){
   var ioEvents=USE_USB?navigator.usb:navigator.serial;
   var ioPort=function(e){ return USE_USB?usbPort(e.device):e.target; };
   ioEvents.addEventListener("connect",function(e){
-    if(!userClosed&&xdSide(ioPort(e))) setTimeout(openGranted,500);
+    if(!userClosed&&xdSide(ioPort(e))){ regrantTries=0; setTimeout(openGranted,500); }
   });
   ioEvents.addEventListener("disconnect",function(e){
     var p=ioPort(e);
@@ -3458,7 +3728,7 @@ $("bReset").addEventListener("click",function(){
     bind={};
 
     edited={L:false,R:false}; colEdited={L:false,R:false}; userEdited=false; cfgExtras={L:[],R:[]};
-    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false;
+    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false;
     bindSrc={L:null,R:null}; cleared={L:false,R:false};
     syncPending=null; paintSync();
     for(var ci=0;ci<conns.length;ci++){ conns[ci].loaded=false; loadFromBoard(conns[ci]); }
@@ -3610,6 +3880,7 @@ function devPoll(on){
 
 async function devScan(c){
   c.scan={want:0,rows:[],done:false};
+  c.listOff=false; c.listFrom=Date.now();
   c.scanUntil=Date.now()+14000; devPaint();
   try{
     await devSend(c,"scan!");
@@ -3652,7 +3923,7 @@ function linkStart(c,name,type,home,auto){
                 hid:false,tried:{},n:0,cur:"",curAt:0,busyAt:0,connAt:0,
                 askAt:0,nudgeAt:0,repinAt:0,until:Date.now()+LINK_TOTAL_MS,
                 state:"trying",why:"",code:false};
-  c.code=null;
+  c.code=null; c.listFrom=Date.now();
   L.hid=linkCands(c,L).some(function(r){ return r.hid; });
   linkNext(c,"");
   linkTimer();
@@ -3851,9 +4122,32 @@ function linkTick(c){
 
 function devPin(c,g){
   if(!g) return;
+  var from=devRelease(c,g);
 
   c.healed={};
   linkStart(c,g.name,g.best.type,g.best.addr,false);
+  if(from&&c.link) c.link.moved=from;
+}
+
+function devHas(o,g){
+  var L=o.link;
+  function same(d){ return !!(d&&(g.addrs.indexOf(d.addr)>=0||(g.name&&d.name===g.name))); }
+  return same(o.pin)||same(o.att)||
+         !!(L&&(g.name ? L.name===g.name : g.addrs.indexOf(L.home)>=0));
+}
+
+function devRelease(c,g){
+  var bs=devBoards(),from="",i,o;
+  for(i=0;i<bs.length;i++){
+    o=bs[i];
+    if(o===c||!devHas(o,g)) continue;
+    o.link=null;
+    o.pin=null;
+    devSend(o,"peer none");
+    devSend(o,"peer?",true);
+    from=o.side;
+  }
+  return from;
 }
 
 function devChosen(c,x){
@@ -3905,7 +4199,10 @@ function linkLine(c){
             : 'Connecting to '+nm+(L.cur ? ' at' : ''))+
     (L.cur ? ' <span class="mono">'+esc(L.cur)+'</span>' : '')+
     (k>1 ? ' (address '+k+')' : '')+'…';
-  if(!L.connAt&&Date.now()-L.curAt>5000){
+  if(!L.connAt&&L.moved){
+    h+=' Taken off the '+(L.moved==="L" ? "left" : "right")+' Joy-Con. '+
+       'If it does not connect, hold its pairing button.';
+  }else if(!L.connAt&&Date.now()-L.curAt>5000){
     h+=' If it is asleep or paired to something else, hold its pairing button.';
   }
   return h+'</span></p>';
@@ -3928,17 +4225,13 @@ function linkTip(L){
 function devRow(c,bi,x){
   var L=c.link,chosen=devChosen(c,x),live=chosen&&!!c.att&&c.att.match,
       mine=!live&&devIsJob(c,x),busy=mine&&linkBusy(c),
-      want=c.side==="L" ? "keyboard" : "mouse",h,shown,note="",bad=false;
+      h,shown,note="",bad=false;
   shown=live ? c.att.addr : (busy&&L.cur) ? L.cur
         : (linkCands(c,{name:x.name,home:x.best.addr})[0]||x.best).addr;
   if(busy) note="connecting…";
   else if(mine&&L.state==="failed"){ note="Can't connect. Try again."; bad=true; }
   else if(chosen&&c.att===null) note="Not connected. Select to reconnect.";
 
-  if((x.kind==="mouse"&&want==="keyboard")||(x.kind==="keyboard"&&want==="mouse")){
-    note=(note ? note+" " : "")+"This half needs a "+want+".";
-    bad=true;
-  }
   h='<div class="devrow'+(live ? " pinned" : (chosen||mine) ? " chosen" : "")+
     (busy ? " busy" : "")+'"';
 
@@ -3948,8 +4241,6 @@ function devRow(c,bi,x){
           '" data-k="'+esc(x.key)+'"';
   h+='>';
   h+='<div class="nm"><b>'+esc(x.name||devKnownName(c,x.addrs)||"Unnamed device")+'</b>';
-  if(x.n>1) h+=' <span class="devtag">'+
-               x.n+' addresses</span>';
   if(note) h+='<span class="sub2'+(bad ? " devbad" : "")+'">'+esc(note)+'</span>';
   h+='</div>';
   h+='<div class="sig mono">'+esc(shown)+'</div>';
@@ -3966,6 +4257,43 @@ function devHoldFor(ms){
   devHoldT=setTimeout(function(){ devHoldT=null; devHoldUntil=0; devPaint(); },ms);
 }
 
+var singleMode=null, singleLast=1, SINGLE_NAMES=["off","keyboard","mouse"];
+try{
+  var singleSaved=parseInt(localStorage.getItem("jc2.singleLast"),10);
+  if(singleSaved===1||singleSaved===2) singleLast=singleSaved;
+}catch(e){}
+
+function singleRemember(v){
+  if(v!==1&&v!==2) return;
+  singleLast=v;
+  try{ localStorage.setItem("jc2.singleLast",String(v)); }catch(e){}
+}
+
+function singleSet(v){
+  var n=0,i;
+  if(v===singleMode) return;
+  for(i=0;i<conns.length;i++)
+    if(conns[i].side){ devSend(conns[i],"single "+SINGLE_NAMES[v]); n++; }
+  if(!n) return;
+  singleMode=v;
+  singleRemember(v);
+  devPaint();
+}
+
+function singleHtml(){
+  var on=(singleMode===1||singleMode===2),dis=on?"":" disabled",lab=["","Left","Right"],i;
+  var h='<div class="onedev"><button class="stog'+(on?' on':'')+'" data-dev="singleon"'+
+        (singleMode===null?' disabled':'')+'>'+(on?"On":"Off")+'</button>'+
+        '<span>Split device connection</span><span class="wseg">';
+  for(i=1;i<3;i++)
+    h+='<button data-dev="single" data-v="'+i+'"'+(singleMode===i?' class="on"':"")+dis+'>'+lab[i]+'</button>';
+  return h+'</span></div>';
+}
+
+function singleFollows(c){
+  return (singleMode===1&&c.side==="R")||(singleMode===2&&c.side==="L");
+}
+
 function devPaint(){
   var host=$("devList");
   if(!host||Date.now()<devHoldUntil) return;
@@ -3973,11 +4301,27 @@ function devPaint(){
 
   if(!conns.length) h='<p class="sub">Connect a board first.</p>';
   else if(!boards.length) h='<p class="sub">Connected.</p>';
-  else h='<div class="devgrid">'+boards.map(devBoardHtml).join("")+'</div>';
+  else h=singleHtml()+'<div class="devgrid">'+boards.map(devBoardHtml).join("")+'</div>';
 
   if(host.devLast===h) return;
   host.devLast=h;
   host.innerHTML=h;
+}
+
+var DEV_FOLD_MS=2000;
+function devFold(c,live,scanning,busy){
+  var now=Date.now(),wait;
+  if(!live) c.liveAt=0;
+  else if(!c.liveAt) c.liveAt=now;
+  if(c.listOff||!live||scanning||busy||!c.listFrom||c.liveAt<c.listFrom) return !!c.listOff;
+  wait=c.liveAt+DEV_FOLD_MS-now;
+  if(wait>0){
+    clearTimeout(c.listT);
+    c.listT=setTimeout(devPaint,wait+50);
+    return false;
+  }
+  c.listOff=true; c.showAll=false;
+  return true;
 }
 
 function devBoardHtml(c,bi){
@@ -3990,6 +4334,13 @@ function devBoardHtml(c,bi){
 
   var whb=(c.side==="L")?' class="halfL"'
          :(c.side==="R")?' class="halfR"':"";
+  if(singleFollows(c)){
+    return h+'<div class="devhead"><b'+whb+'>'+
+      (c.side==="L"?"Left Joy-Con":"Right Joy-Con")+'</b></div>'+
+      '<p class="sub">Split connection will fake this Joy-Con as connected to the console '+
+      'so you can use the other device to control both inputs on that single device, '+
+      '2 boards are still needed to handle each others input.</p></div>';
+  }
   h+='<div class="devhead"><b'+whb+'>'+
      (c.side==="L"?"Left Joy-Con":"Right Joy-Con")+
      '</b></div>';
@@ -4027,6 +4378,8 @@ function devBoardHtml(c,bi){
     h+='<button data-dev="retry" data-i="'+bi+'">Reconnect</button>';
   }
   h+='</div>';
+
+  if(devFold(c,live,scanning,busy)) return h+'</div>';
 
   g.forEach(function(x){
     (x.kind||devChosen(c,x)||devIsJob(c,x) ? ins : others).push(x);
@@ -4083,6 +4436,8 @@ $("devList").addEventListener("click",function(e){
   devHoldUntil=0;
   var b=e.target.closest("[data-dev]");
   if(!b) return;
+  if(b.getAttribute("data-dev")==="single"){ singleSet(parseInt(b.getAttribute("data-v"),10)); return; }
+  if(b.getAttribute("data-dev")==="singleon"){ singleSet(singleMode===1||singleMode===2?0:singleLast); return; }
   var boards=devBoards(),c=boards[parseInt(b.getAttribute("data-i"),10)];
   if(!c) return;
   var what=b.getAttribute("data-dev"),k=b.getAttribute("data-k");
@@ -4102,7 +4457,7 @@ $("devList").addEventListener("click",function(e){
   MODE_LIST.forEach(function(entry){
     var m=entry[0];
     $("bModeKey"+m).addEventListener("click",function(){
-      if(!mapReady()){ hintBad(HINT_LOADING); return; }
+      if(!mapReady()){ hintBad(loadingWhy()); return; }
 
       if(cutTarget==="mode"&&modeListening===m){ if(this.focus) this.focus(); return; }
 
@@ -4117,7 +4472,7 @@ $("devList").addEventListener("click",function(e){
       paintMode();
     });
     $("bModeClear"+m).addEventListener("click",function(){
-      if(!mapReady()){ hintBad(HINT_LOADING); return; }
+      if(!mapReady()){ hintBad(loadingWhy()); return; }
       modeCuts[m]=null; modeLater=false;
       if(cutTarget==="mode"&&modeListening===m) modeStopListening();
       paintMode(); generate(); modeApplyNow();
@@ -4126,7 +4481,7 @@ $("devList").addEventListener("click",function(e){
   var profFileFor=0;
   for(var pn=1;pn<=PROFILES;pn++)(function(n){
     $("bProfKey"+n).addEventListener("click",function(){
-      if(!mapReady()){ hintBad(HINT_LOADING); return; }
+      if(!mapReady()){ hintBad(loadingWhy()); return; }
       if(cutTarget==="prof"&&modeListening===n){ if(this.focus) this.focus(); return; }
 
       if(listening) cancelListen();
@@ -4139,7 +4494,7 @@ $("devList").addEventListener("click",function(e){
       paintMode();
     });
     $("bProfFile"+n).addEventListener("click",function(){
-      if(!mapReady()){ hintBad(HINT_LOADING); return; }
+      if(!mapReady()){ hintBad(loadingWhy()); return; }
       profFileFor=n;
       $("fProf").value="";
       $("fProf").click();
@@ -4162,7 +4517,7 @@ $("devList").addEventListener("click",function(e){
     });
   }
   $("bSyncKey").addEventListener("click",function(){
-    if(!mapReady()){ hintBad(HINT_LOADING); return; }
+    if(!mapReady()){ hintBad(loadingWhy()); return; }
     if(cutTarget==="sync"&&modeListening===1){ if(this.focus) this.focus(); return; }
 
     if(listening) cancelListen();
@@ -4205,7 +4560,7 @@ $("devList").addEventListener("click",function(e){
   function setSens(v){
     v=parseInt(v,10);
     if(!(v>=STICK_SENS_MIN&&v<=STICK_SENS_MAX)) return false;
-    if(!mapReady()){ hintBad(HINT_LOADING); paintSens(); return false; }
+    if(!mapReady()){ hintBad(loadingWhy()); paintSens(); return false; }
 
     stickSens=v; sensEdited=true; markEdited("R"); paintSens(); generate();
     return true;
@@ -4223,7 +4578,7 @@ $("devList").addEventListener("click",function(e){
   function setDz(v){
     v=parseInt(v,10);
     if(!(v>=STICK_DZ_MIN&&v<=STICK_DZ_MAX)) return false;
-    if(!mapReady()){ hintBad(HINT_LOADING); paintStickMore(); return false; }
+    if(!mapReady()){ hintBad(loadingWhy()); paintStickMore(); return false; }
     stickDz=v; dzEdited=true; markEdited("R"); paintStickMore(); generate();
     return true;
   }
@@ -4237,7 +4592,7 @@ $("devList").addEventListener("click",function(e){
   function setVg(v){
     v=parseInt(v,10);
     if(!(v>=STICK_VG_MIN&&v<=STICK_VG_MAX)) return false;
-    if(!mapReady()){ hintBad(HINT_LOADING); paintStickMore(); return false; }
+    if(!mapReady()){ hintBad(loadingWhy()); paintStickMore(); return false; }
     stickVg=v; vgEdited=true; markEdited("R"); paintStickMore(); generate();
     return true;
   }
@@ -4251,14 +4606,16 @@ $("devList").addEventListener("click",function(e){
   function setMSens(v){
     v=parseInt(v,10);
     if(!(v>=MOUSE_SENS_MIN&&v<=MOUSE_SENS_MAX)) return false;
-    if(!mapReady()){ hintBad(HINT_LOADING); paintMSens(); return false; }
-    mouseSens=v; msensEdited=true; markEdited("R"); paintMSens(); generate();
+    if(!mapReady()){ hintBad(loadingWhy()); paintMSens(); return false; }
+    mouseSens=v; msensEdited=true; markEdited("R"); markEdited("L");
+    paintMSens(); generate();
     return true;
   }
   $("mAccel").addEventListener("change",function(){
-    if(!mapReady()){ hintBad(HINT_LOADING); paintMSens(); return; }
+    if(!mapReady()){ hintBad(loadingWhy()); paintMSens(); return; }
     mouseAccel=this.checked;
-    markEdited("R"); paintMSens(); generate();
+    markEdited("R"); markEdited("L");
+    paintMSens(); generate();
   });
   $("rngMSens").addEventListener("input",function(){ setMSens(this.value); });
   $("numMSens").addEventListener("input",function(){ setMSens(this.value); });
@@ -4268,9 +4625,24 @@ $("devList").addEventListener("click",function(e){
   $("bMSensDefault").addEventListener("click",function(){
     setMSens(MOUSE_SENS_DEFAULT);
   });
+
+  function setGSens(v){
+    v=parseInt(v,10);
+    if(!(v>=GYRO_SENS_MIN&&v<=GYRO_SENS_MAX)) return false;
+    if(!mapReady()){ hintBad(loadingWhy()); paintGSens(); return false; }
+    gyroSens=v; gsensEdited=true; markEdited("R"); paintGSens(); generate();
+    return true;
+  }
+  $("rngGSens").addEventListener("input",function(){ setGSens(this.value); });
+  $("numGSens").addEventListener("input",function(){ setGSens(this.value); });
+  $("numGSens").addEventListener("change",function(){
+    if(!setGSens(this.value)) this.value=Math.round(gyroSens);
+  });
+  $("bGSensDefault").addEventListener("click",function(){ setGSens(GYRO_SENS_DEFAULT); });
   paintSens();
   paintStickMore();
   paintMSens();
+  paintGSens();
 
   document.addEventListener("input",function(e){
     if(e.target&&e.target.type==="range") paintRange(e.target);
@@ -4328,6 +4700,7 @@ try{
 
   $("jcImg").addEventListener("load",relayout);
   window.addEventListener("load",relayout);
+  window.addEventListener("load",imgWarm);
 
   var h0=location.hash.slice(1);
   if(h0==="col"||h0==="adv") showTab(h0);
