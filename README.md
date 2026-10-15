@@ -2,7 +2,7 @@
 
 https://desktopsetup.github.io/XD2Joy-Webtool/
 
-Release notes on the Web-Tool are made in [firmware updates ](https://github.com/desktopsetup/XD2Joy/releases) 
+Release notes on the Web-Tool are made in [firmware's releases](https://github.com/desktopsetup/XD2Joy/releases) 
 
 <img src="Mapping.png" width="900">
 <img src="config.png" width="900">
