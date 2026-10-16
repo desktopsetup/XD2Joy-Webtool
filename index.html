@@ -140,6 +140,8 @@
     padding:6px 10px}
 
   .moderow.hotkeyrow + .moderow.hotkeyrow{margin-top:10px}
+  .moderow.syncnow{margin-top:10px}
+  #syncPanel .syncnow .sub{margin:0}
 
   .profrow label{min-width:66px}
   .profrow .pname{color:var(--dim);font-size:13px;flex:1;min-width:80px}
@@ -497,18 +499,21 @@
       <div class="panel devpanel" id="modesPanel">
         <h2>Modes</h2>
         <div class="moderow hotkeyrow">
+          <button id="bModeOn1" class="stog">Off</button>
           <label id="modeLab1">Keyboard mode</label>
           <button id="bModeKey1" class="hotkey">Click to set a shortcut</button>
           <button id="bModeClear1" class="xbtn" aria-label="Clear the keyboard mode shortcut">&times;</button>
         </div>
 
         <div class="moderow hotkeyrow">
+          <button id="bModeOn2" class="stog">Off</button>
           <label id="modeLab2">Right Thumbstick mode</label>
           <button id="bModeKey2" class="hotkey">Click to set a shortcut</button>
           <button id="bModeClear2" class="xbtn" aria-label="Clear the right thumbstick mode shortcut">&times;</button>
         </div>
 
         <div class="moderow hotkeyrow">
+          <button id="bModeOn3" class="stog">Off</button>
           <label id="modeLab3">Gyro mode</label>
           <button id="bModeKey3" class="hotkey">Click to set a shortcut</button>
           <button id="bModeClear3" class="xbtn" aria-label="Clear the gyro mode shortcut">&times;</button>
@@ -524,6 +529,7 @@
           <button id="bSyncKey" class="hotkey">Click to set a key or button</button>
           <button id="bSyncClear" class="xbtn" aria-label="Remove the pairing key">&times;</button>
         </div>
+        <div class="moderow syncnow"><button id="bSyncNow">Unpair now</button><span class="sub" id="syncNowMsg"></span></div>
         <p class="sub bad" id="syncWarn"></p>
         <p class="sub bad" id="syncErr"></p>
       </div>
@@ -2062,7 +2068,25 @@ function modeErr(msg){
   if(a) a.textContent=msg||modeFail;
 }
 
-var modeBy={L:0,R:0};
+var modeBy={L:0,R:0},MODE_CMD={1:"keyboard",2:"stick",3:"gyro"};
+
+function modeTarget(m){
+  var L=syncLeft(),i;
+  if(L) return L;
+  if(m===1) return null;
+  for(i=0;i<conns.length;i++) if(conns[i].side==="R") return conns[i];
+  return null;
+}
+
+function modeToggle(m){
+  var c=modeTarget(m),i;
+  if(!c) return;
+  if(modeBy.L===m||modeBy.R===m){
+    for(i=0;i<conns.length;i++) if(conns[i].side&&modeBy[conns[i].side]===m) devSend(conns[i],"mode joycon");
+    return;
+  }
+  devSend(c,"mode "+MODE_CMD[m]);
+}
 
 function onModeNow(name,c){
   var v=(name==="KEYBOARD")?1:(name==="STICK")?2:(name==="GYRO")?3:0,k;
@@ -2092,6 +2116,8 @@ function paintModeRow(m){
   if($("bModeClear"+m)) $("bModeClear"+m).disabled=!cut||!live;
   var lab=$("modeLab"+m);
   if(lab) lab.className=(modeBy.L===m||modeBy.R===m)?"on":"";
+  var tg=$("bModeOn"+m),on=(modeBy.L===m||modeBy.R===m);
+  if(tg){ tg.textContent=on?"On":"Off"; tg.classList.toggle("on",on); tg.disabled=!modeTarget(m); }
 }
 
 function paintMode(){
@@ -2202,8 +2228,17 @@ function paintSync(){
     b.disabled=!live;
   }
   if(x) x.disabled=!live||!set;
+  if($("bSyncNow")) $("bSyncNow").disabled=!conns.some(function(c){ return c.side; });
   if(w) w.textContent=syncWarning();
   if(er&&!listening) er.textContent=syncFail;
+}
+
+var syncNowT=null;
+function syncNowSay(t){
+  var m=$("syncNowMsg");
+  if(m) m.textContent=t;
+  clearTimeout(syncNowT);
+  syncNowT=t?setTimeout(function(){ syncNowSay(""); },120000):null;
 }
 
 function onSyncLine(code,mods,on,c){
@@ -4471,6 +4506,7 @@ $("devList").addEventListener("click",function(e){
       if(this.focus) this.focus();
       paintMode();
     });
+    $("bModeOn"+m).addEventListener("click",function(){ modeToggle(m); });
     $("bModeClear"+m).addEventListener("click",function(){
       if(!mapReady()){ hintBad(loadingWhy()); return; }
       modeCuts[m]=null; modeLater=false;
@@ -4528,6 +4564,12 @@ $("devList").addEventListener("click",function(e){
     if(syncCut()) syncClear();
     if(this.focus) this.focus();
     paintMode();
+  });
+  $("bSyncNow").addEventListener("click",function(){
+    var n=0;
+    conns.forEach(function(c){ if(c.side){ devSend(c,"sync"); n++; } });
+    if(n) syncNowSay("Successfully unpaired");
+    paintSync();
   });
   $("bSyncClear").addEventListener("click",function(){
     if(cutTarget==="sync"&&modeListening===1) modeStopListening();
