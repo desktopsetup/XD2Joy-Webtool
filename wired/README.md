@@ -2,7 +2,7 @@
 
 An optional Windows app for the wired mode. 
 
-pick which keyboard or mouse each Joy-Con should be. A PC with other keyboards or mice connected can still work on the PC, well the selected devices with the Wired app are sent only to the console. The .exe is just a python script running its tasks in the background so you can tab out of the Web-Tool and do other things well its running.
+pick which keyboard or mouse each Joy-Con should be. A PC with other keyboards or mice connected can still work on the PC, well the selected devices with the Wired app are sent only to the console. The .exe is just a python script running its tasks in the background so you can tab out of the Web-Tool and do other things well its running. The Web-Tool alone is more vulnerable to slip ups like having keystrokes still be sent to the PC and the console at the same time. The wired app helps prevent it.
 
 You can run it from the source or install the .exe :
 
