@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>XD2Joy Web-Tool</title>
-<link rel="icon" href="xd.png" type="image/png">
+<link rel="icon" href="assets/xd.png" type="image/png">
 <style>
 
   @font-face{font-family:"Noto Sans";font-style:normal;font-weight:100 900;
-    font-stretch:100%;font-display:swap;src:url("fonts/NotoSans-var-latin.woff2") format("woff2");
+    font-stretch:100%;font-display:swap;src:url("assets/fonts/NotoSans-var-latin.woff2") format("woff2");
     unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
   @font-face{font-family:"Noto Sans";font-style:normal;font-weight:100 900;
-    font-stretch:100%;font-display:swap;src:url("fonts/NotoSans-var-latin-ext.woff2") format("woff2");
+    font-stretch:100%;font-display:swap;src:url("assets/fonts/NotoSans-var-latin-ext.woff2") format("woff2");
     unicode-range:U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF}
 
   :root{
@@ -58,6 +58,7 @@
   .devhead{font-size:14px;margin-bottom:7px}
   .devhead{display:flex;align-items:center;gap:10px}
   .wseg{margin-left:auto;display:inline-flex}
+  .wghost{visibility:hidden}
   .wseg button{padding:3px 11px;font-size:12px;border-radius:0}
   .wseg button:first-child{border-radius:4px 0 0 4px}
   .wseg button+button{border-left:0;border-radius:0 4px 4px 0}
@@ -69,6 +70,16 @@
   .stog{padding:3px 11px;font-size:12px;min-width:46px}
   .stog.on,.stog.on:hover:not(:disabled){background:var(--sel);border-color:var(--sel);
     color:#12242a;font-weight:600}
+  .wstart{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair)}
+  .wrow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:13.5px}
+  .wstart .wrow .sub{margin:0;font-size:13.5px}
+.wstart a{color:var(--sel)}
+  .wpk{display:flex;align-items:center;gap:8px;flex-wrap:wrap;min-width:0}
+  .wpk select{padding:3px 8px;font-size:12.5px;max-width:230px;min-width:0}
+  .wpk button{padding:3px 11px;font-size:12px}
+  .wpk input[type=text]{font:inherit;font-size:12.5px;background:var(--panel2);color:var(--ink);
+    border:1px solid var(--slotline);border-radius:4px;padding:3px 8px;width:200px;min-width:0}
+  .wsk{display:inline-flex;align-items:center;gap:8px;margin-left:auto;color:var(--dim)}
   .devnow{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;
     font-size:12.5px;margin-bottom:10px;align-items:baseline}
   .devnow .k{color:var(--dim)}
@@ -393,7 +404,7 @@
 
 <div class="wrap">
   <div class="top">
-    <h1>XD Remapper <span class="ver">v1.3</span></h1>
+    <h1>XD Remapper <span class="ver">v1.4</span></h1>
     <span class="pill" id="pConn">not connected</span>
     <div class="sp"></div>
     <div class="tabs">
@@ -422,7 +433,7 @@
 
   <div id="tabMap">
     <div id="mapGate">
-      <img id="mapGateImg" src="NoConnection.png" alt="No board connected">
+      <img id="mapGateImg" src="assets/NoConnection.png" alt="No board connected">
       <p id="mapGateMsg">Connect a board to start</p>
     </div>
 
@@ -432,7 +443,7 @@
           <div class="stage" id="stage">
             <svg class="leads" id="leads"></svg>
             <div class="colL" id="colL"></div>
-            <div class="cen"><img id="jcImg" src="ns2blue.png" alt="Joy-Con"></div>
+            <div class="cen"><img id="jcImg" src="assets/ns2blue.png" alt="Joy-Con"></div>
             <div class="colR" id="colR"></div>
           </div>
           <div class="hint" id="stageHint" style="text-align:center"></div>
@@ -450,7 +461,7 @@
       </div>
 
       <div class="panel devpanel">
-        <h2>Bluetooth devices</h2>
+        <h2>Devices</h2>
         <div id="devList"></div>
       </div>
 
@@ -864,7 +875,7 @@ function rightByLen(){
 }
 
 function keyReport(r){
-  return !r.dm&&(r.src==="L"||(r.src==="R"&&!rightByLen()));
+  return !r.dm&&(r.wk==="k"||r.src==="L"||(r.src==="R"&&!rightByLen()));
 }
 
 function liveTake(src,dm){
@@ -1081,7 +1092,7 @@ async function openConn(p,quiet){
     opening.splice(opening.indexOf(p),1);
   }
   c={port:p,reader:null,keep:true,buf:"",side:null,pside:s};
-  conns.push(c); connSay("");
+  conns.push(c); connSay(""); hlog("board "+(s||"?")+" connected to the web tool over USB");
   connNote(); c.loop=readLoop(c);
   loadFromBoard(c);
   return true;
@@ -1127,7 +1138,7 @@ async function openGranted(){
 
 async function dropStranger(c){
   connSay("That's not an XD2Joy board.");
-  refused.push(c.port);
+  refused.push(c.port); c.dropWhy="not an XD2Joy board";
   await closeConn(c);
   connDrop(c);
   try{ if(c.port.forget) await c.port.forget(); }catch(e){}
@@ -1153,7 +1164,7 @@ async function readLoop(c){
           catch(e){}
         }
       }
-    }catch(e){}
+    }catch(e){ hlog("board "+(c.side||c.pside||"?")+": USB read error, "+((e&&e.name)||e)); }
     try{c.reader.releaseLock();}catch(e){}
     await done;
     if(!c.keep||c.port instanceof UsbSerialPort) break;
@@ -1165,6 +1176,7 @@ async function readLoop(c){
   if(c.keep){
     c.keep=false;
     try{ await c.port.close(); }catch(e){}
+    c.dropWhy=c.dropWhy||"its USB connection ended: unplugged, restarted, or read errors";
     connDrop(c);
   }
 }
@@ -1185,7 +1197,10 @@ async function closeConn(c){
 function connDrop(c){
   var i=conns.indexOf(c),k;
   if(i<0) return;
+  hlog("board "+(c.side||c.pside||"?")+" disconnected from the web tool"+(c.dropWhy?": "+c.dropWhy:""));
   conns.splice(i,1);
+  helperSendPick();
+  if(wrun&&!helperAll()) wrunStop("A board disconnected.");
   if(c.side&&!edited[c.side]){
     for(k in bind) if(boardOf(k)===c.side) delete bind[k];
     bindSrc[c.side]=null;
@@ -1200,7 +1215,7 @@ function connDrop(c){
 async function disconnect(){
   userClosed=true;
   var list=conns.slice();
-  for(var i=0;i<list.length;i++){ await closeConn(list[i]); connDrop(list[i]); }
+  for(var i=0;i<list.length;i++){ list[i].dropWhy="the Disconnect button"; await closeConn(list[i]); connDrop(list[i]); }
   conns=[]; sidePicked=false;
   connNote(); paint(); generate();
 }
@@ -1222,7 +1237,7 @@ function mapGate(){
   }
   var img=$("mapGateImg"), msg=$("mapGateMsg");
   if(img){
-    img.src = (want==="connecting") ? "Connecting.png" : "NoConnection.png";
+    img.src = (want==="connecting") ? "assets/Connecting.png" : "assets/NoConnection.png";
     img.alt = (want==="connecting") ? "Connecting" : "No board connected";
   }
   if(msg){
@@ -1254,9 +1269,10 @@ function connNote(){
   if(!conns.length) $("cfgOut").textContent="Connect a board.";
   else if(!ready) $("cfgOut").textContent="Connected.";
 }
-var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|GYRO|HID|HIDLNK|HIDMAP|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE) *\]/;
-var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors |ptrs? |single |gyrogain )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] shortcut key |JC\] connect failed |HID\] (?:kbd|mouse)=)/;
+var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|GYRO|HID|HIDLNK|HIDMAP|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE|WIRED) *\]/;
+var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors |ptrs? |single |gyrogain )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] (?:shortcut key |\*\*\* PAIR MODE)|JC\] (?:connect failed |\*\*\* CONNECTED from |bonded from now on)|HID\] (?:kbd|mouse)=|HIDLNK\] PASSKEY |WIRED\] input |ADV\] (?:PAIRABLE|BONDED|OFF|WAKE) )/;
 var TAG_RE=new RegExp(TAG_WIDE.source+"|"+TAG_BARE.source);
+var HFWD=/^(?:=== gatt_probe|\[RPT   \] (?:buttons|LEFT buttons|streaming|mouse sensor)|\[JC    \] (?:\*\*\*|PARAMS UPDATED)|\[WIRED \]|\[FAULT \]|\[LINK  \] (?:RX|TX|stale|keyboard on the other half)|\[HID   \] (?:kbd|mouse)=|\[MOUSE \]|\[HIDMAP\]|\[RAW   \]|\[CMD   \])/;
 
 function onLine(ln,c){
   if(!ln) return;
@@ -1264,6 +1280,7 @@ function onLine(ln,c){
 
   var cut=ln.slice(1).search(TAG_RE);
   if(cut>=0){ onLine(ln.slice(0,cut+1),c); onLine(ln.slice(cut+1),c); return; }
+  if(helper.ok&&HFWD.test(ln)) helperSay({t:"board",side:c.side||c.pside||"?",s:ln});
 
   var m=ln.match(/\[MAP\s*\]\s*(.*)$/);
   if(m){ onMapLine(m[1].trim(),c); return; }
@@ -1279,6 +1296,10 @@ function onLine(ln,c){
   if(m){ onProfLine(m[1].trim(),c.side,c); return; }
   m=ln.match(/\[SYNC\s*\]\s*shortcut key 0x([0-9A-Fa-f]{2}) mods 0x([0-9A-Fa-f]{2}) (on|off)/);
   if(m){ onSyncLine(parseInt(m[1],16),parseInt(m[2],16),m[3]==="on",c); return; }
+  m=ln.match(/\[ADV\s*\]\s*(PAIRABLE|BONDED|OFF|WAKE)\s/);
+  if(m){ pairSeen(c,m[1]==="PAIRABLE"); return; }
+  if(/\[SYNC\s*\]\s*\*\*\* PAIR MODE\b/.test(ln)){ pairSeen(c,true); return; }
+  if(/\[JC\s*\]\s*(bonded from now on|\*\*\* CONNECTED from)/.test(ln)) pairSeen(c,false);
   m=ln.match(/\[GRIP\s*\]\s*(off\b|byte 0x04)/);
   if(m&&c.gripWait) c.gripWait();
 
@@ -1288,6 +1309,10 @@ function onLine(ln,c){
   if(m){ onScanLine(m[1].trim(),c); return; }
   m=ln.match(/\[PEER\s*\]\s*(.*)$/);
   if(m){ onPeerLine(m[1].trim(),c); return; }
+  m=ln.match(/\[WIRED\s*\]\s*input (usb|bt)\b/);
+  if(m){ c.wiredOk=true; wiredSeen(c,m[1]==="usb",true); return; }
+  m=ln.match(/^\[HID\s*\]\s*(?:kbd|mouse)=(wired|subscribed|linked|--|none)(?=\s|$)/);
+  if(m){ if(m[1]==="wired") c.wiredOk=true; wiredSeen(c,m[1]==="wired",false); }
   m=ln.match(/\[MODE\s*\]\s*(?:now\s+|already\s+)?(KEYBOARD|JOYCON|STICK|GYRO)\b/);
   if(m){ onModeNow(m[1],c); return; }
 
@@ -1624,7 +1649,7 @@ function loadFromBoard(c){
     else if(!bindSrc[p.side]){ loadBoardIntoPage(p,true); markEdited(p.side); }
     else cfgExtras[p.side]=p.extras;
     if($("connErr").textContent===readFail(c.side)||$("connErr").textContent===fwSaid[c.side]) connSay("");
-    c.loaded=true; c.loadTries=0; devSend(c,"mode?");
+    c.loaded=true; c.loadTries=0; devSend(c,"mode?"); devSend(c,"input?"); devSend(c,"fault?");
   }).catch(function(e){
     if(!c.keep) return;
     c.loadTries=(c.loadTries||0)+1;
@@ -1807,16 +1832,18 @@ function onMapLine(rest,c){
   }
 }
 
-function ingest(handle,len,bytes,src){
+function ingest(handle,len,bytes,src,wk){
   var k=(src||"?")+":"+handle+":"+len, r=reports[k];
   if(!r){ r={handle:handle,len:len,src:src||"?",latest:bytes.slice(),
              changed:bytes.map(function(){return false;}),n:0}; reports[k]=r; }
+  r.wk=wk||"";
   for(var i=0;i<bytes.length&&i<r.latest.length;i++)
     if(bytes[i]!==r.latest[i]) r.changed[i]=true;
   r.latest=bytes.slice(); r.n++; nReports++;
 
   var pl=ptrLayout(r.src,handle,len);
-  r.dm=pl ? ptrDecode(pl,bytes,len) : (r.src==="R"&&rightByLen() ? decodeMouse(bytes,len) : null);
+  r.dm=r.wk==="m" ? decodeMouse(bytes,len) : r.wk==="k" ? null :
+       pl ? ptrDecode(pl,bytes,len) : (r.src==="R"&&rightByLen() ? decodeMouse(bytes,len) : null);
   if(r.dm){
     if(r.src==="L"&&(r.dm.dx||r.dm.dy||r.dm.wheel||r.dm.btn)) lmouseSeen=true;
     liveTake(r.src,r.dm); wheelNotch(r.dm.wheel,r.src); showLive();
@@ -1825,6 +1852,8 @@ function ingest(handle,len,bytes,src){
   if(listening) tryCapture(k,r);
 
   if(modeListening&&keyReport(r)) tryModeCapture(r);
+  if(wstopRec&&!r.dm&&(r.src==="L"||r.wk==="k")) wStopFromReport(r);
+  else if(r.src==="L"&&r.handle&&!r.dm) wStopWatch(k,r);
   showHeld();
   renderRaw();
 }
@@ -2092,6 +2121,11 @@ function onModeNow(name,c){
   var v=(name==="KEYBOARD")?1:(name==="STICK")?2:(name==="GYRO")?3:0,k;
   if(!c.side) return;
   modeBy[c.side]=v;
+  if(c.side==="L"){
+    helperSay({t:"kbmode",on:v===1});
+    if(v===1&&wrun&&helperHas("m")&&wiredFor("m")) wiredLine(wiredFor("m"),"m 0 0 0 0");
+    devPaint();
+  }
   if(v===1){
     for(k in reports) if(reports[k].src===c.side) delete reports[k];
     showHeld(); renderRaw();
@@ -2231,14 +2265,29 @@ function paintSync(){
   if($("bSyncNow")) $("bSyncNow").disabled=!conns.some(function(c){ return c.side; });
   if(w) w.textContent=syncWarning();
   if(er&&!listening) er.textContent=syncFail;
+  syncNowPaint();
 }
 
-var syncNowT=null;
+var syncNowT=null,syncNowText="";
 function syncNowSay(t){
-  var m=$("syncNowMsg");
-  if(m) m.textContent=t;
+  syncNowText=t;
   clearTimeout(syncNowT);
   syncNowT=t?setTimeout(function(){ syncNowSay(""); },120000):null;
+  syncNowPaint();
+}
+
+function syncNowPaint(){
+  var m=$("syncNowMsg"),t=syncNowText,
+      un=conns.filter(function(c){ return c.side&&c.unpaired; });
+  if(!t&&un.length>1) t="Neither Joy-Con is paired. Pair them in Change Grip/Order.";
+  else if(!t&&un.length) t=(un[0].side==="L"?"Left":"Right")+" Joy-Con isn't paired. Pair it in Change Grip/Order.";
+  if(m) m.textContent=t;
+}
+
+function pairSeen(c,on){
+  if(!!c.unpaired===on) return;
+  c.unpaired=on;
+  syncNowPaint();
 }
 
 function onSyncLine(code,mods,on,c){
@@ -2583,7 +2632,7 @@ function esc(s){ return String(s).replace(/[&<>"]/g,function(c){
   return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
 
 function paint(){
-  var jw=side()==="L" ? "ns2blue.png" : "ns2red.png";
+  var jw=side()==="L" ? "assets/ns2blue.png" : "assets/ns2red.png";
   if($("jcImg").getAttribute("src")!==jw) $("jcImg").src=jw;
   var cl=$("colL"), cr=$("colR");
   cl.innerHTML=""; cr.innerHTML="";
@@ -2610,7 +2659,7 @@ function relayout(){ layoutSlots(); drawLeads(); }
 
 var imgKeep=[];
 function imgWarm(){
-  ["ns2blue.png","ns2red.png","Connecting.png","NoConnection.png"].forEach(function(f){
+  ["assets/ns2blue.png","assets/ns2red.png","assets/Connecting.png","assets/NoConnection.png"].forEach(function(f){
     var im=new Image();
     im.src=f;
     imgKeep.push(im);
@@ -4292,6 +4341,81 @@ function devHoldFor(ms){
   devHoldT=setTimeout(function(){ devHoldT=null; devHoldUntil=0; devPaint(); },ms);
 }
 
+var WIRED_MS=8,WIRED_KEEP=50,WIRED_ESC_MS=1000,
+    WIRED_MOVE=("onpointerrawupdate" in window)?"pointerrawupdate":"pointermove";
+var wcap=null,wrun=false,wiredErr="",wstopRec=false,wstopRecMods=0,wstopKey={code:0x18,mods:0},
+    wstopT=null,wstopAt=0,wstopBy="";
+try{ wstopKey=wStopLoad(JSON.parse(localStorage.getItem("xd2joyStopKey"))); }catch(e){}
+
+function wStopLoad(v){
+  return (v&&v.code>=4&&v.code<=0xFF)?{code:v.code,mods:(v.mods|0)&0xFF}:{code:0x18,mods:0};
+}
+
+function wiredOf(s){
+  var c=connFor(s);
+  return c&&c.wired&&c.keep?c:null;
+}
+
+function helperOn(s){
+  var c=connFor(s);
+  if(!helper.ok||!c||!c.wired) return null;
+  return helperFind(helper.use[s]);
+}
+function wSideKind(s){
+  var d=helperOn(s);
+  return d?d.kind:(s==="L"?"k":"m");
+}
+function wKindOf(s){ return wSideKind(s); }
+function helperSideOfKind(kind){
+  if(helperOn("L")&&helperOn("L").kind===kind) return "L";
+  if(helperOn("R")&&helperOn("R").kind===kind) return "R";
+  return "";
+}
+function wiredFor(kind){
+  var a=wiredOf("L"),b=wiredOf("R");
+  if(a&&wSideKind("L")===kind) return a;
+  if(b&&wSideKind("R")===kind) return b;
+  return null;
+}
+
+function wiredSeen(c,on,reply){
+  var k;
+  if(c.wiredBusy&&!reply) return;
+  if(!!c.wired!==on&&c.side){
+    for(k in reports) if(reports[k].src===c.side) delete reports[k];
+    showHeld(); renderRaw();
+  }
+  c.wired=on; c.wiredBusy=false;
+  if(on) helperConnect();
+  if(reply) c.wiredErr="";
+  if(reply&&on&&!wcap&&!wrun) devSend(c,"input stop");
+  if(wcap&&!wiredOf("L")&&!wiredOf("R")){ hlog("no board is on wired input any more: stopping"); wiredStop(); }
+  helperSendPick();
+  if(wrun&&!helperAll()){ hlog("board "+c.side+" left wired input: stopping"); wrunStop(); }
+  devPaint();
+}
+
+function wiredSet(c,on){
+  if(c.wiredBusy||wcap||wrun||!!c.wired===on) return;
+  if(on) helperConnect();
+  c.wiredBusy=true; c.wiredErr="";
+  devPaint();
+  devSend(c,"input "+(on?"usb":"bt"));
+  setTimeout(function(){
+    if(!c.wiredBusy) return;
+    c.wiredBusy=false; c.wiredErr="Couldn't switch. Try again.";
+    devPaint();
+  },4000);
+}
+
+function wiredSeg(c,bi){
+  var on=!!c.wired,dis=(c.wiredBusy||wcap||wrun)?" disabled":"";
+  return '<span class="wseg">'+
+    '<button data-dev="wired" data-on="0" data-i="'+bi+'"'+(on?"":' class="on"')+dis+'>Bluetooth</button>'+
+    '<button data-dev="wired" data-on="1" data-i="'+bi+'"'+(on?' class="on"':"")+dis+'>Wired</button>'+
+    '</span>';
+}
+
 var singleMode=null, singleLast=1, SINGLE_NAMES=["off","keyboard","mouse"];
 try{
   var singleSaved=parseInt(localStorage.getItem("jc2.singleLast"),10);
@@ -4329,6 +4453,714 @@ function singleFollows(c){
   return (singleMode===1&&c.side==="R")||(singleMode===2&&c.side==="L");
 }
 
+var WIRED_APP="https://github.com/desktopsetup/XD2Joy-Webtool/tree/main/wired";
+
+function wiredStartHtml(boards){
+  var page;
+  if(!boards.some(function(c){ return c.wired; })) return "";
+  page=!!wcap||(!wrun&&!helperAll());
+  return '<div class="wstart">'+
+    (helper.ok?'':'<div class="sub">By default this takes all keyboards and mice. The <a href="'+WIRED_APP+
+      '" target="_blank" rel="noopener">XD2Joy Wired</a> app is a script that runs in the background with the Web-Tool so you can select what devices to use on the console, so other keyboards and mice are ignored and usable on the PC.</div>')+
+    '<div class="sub">Enable wired inputs from this PC to send to the Switch 2</div>'+
+    '<div class="wrow">'+
+    ((wrun||wcap)?'<button data-dev="wstop"'+((wcap&&wcap.paused)?' disabled':'')+'>Stop</button>':'<button class="go" data-dev="wstart">Start</button>')+
+    (wiredErr?'<span class="sub bad">'+esc(wiredErr)+'</span>':(wcap&&wcap.paused)?'<span class="sub">Paused. Press a key or click to resume.</span>':"")+
+    '<span class="wsk"><span>Hold</span><button data-dev="wstopkey">'+
+    (wstopRec?"Press a key\u2026":esc(wStopName()))+'</button><span>'+
+    (page?"to stop":"or refresh to stop")+'</span></span></div></div>';
+}
+
+function wHex(n){ return (n<16?"0":"")+n.toString(16).toUpperCase(); }
+
+function wiredLine(c,t){ serialSend(c,t).catch(function(){}); wiredShow(c,t); }
+
+function wiredRun(on){
+  ["L","R"].forEach(function(s){ var c=wiredOf(s); if(c) devSend(c,"input "+(on?"start":"stop")); });
+}
+
+function wiredShow(c,t){
+  var v=t.split(/\s+/),b,i;
+  if(v[0]==="k"){
+    b=[parseInt(v[1],16)&0xFF,0];
+    for(i=2;i<8;i++) b.push(parseInt(v[i],16)&0xFF);
+    ingest(0,8,b,c.side,"k");
+  }else if(v[0]==="m"){
+    v=v.slice(1).map(function(x){ return parseInt(x,10)|0; });
+    ingest(0,6,[v[3]&0xFF,v[0]&0xFF,(v[0]>>8)&0xFF,v[1]&0xFF,(v[1]>>8)&0xFF,v[2]&0xFF],c.side,"m");
+  }
+}
+
+function wkSend(){
+  var K=wiredFor("k"),t,i;
+  if(!wcap||!K) return;
+  if(helperHas("k")){ helperKSend(K.side); return; }
+  t="k "+wHex(wcap.mods);
+  for(i=0;i<wcap.keys.length&&i<6;i++) t+=" "+wHex(wcap.keys[i]);
+  wiredLine(K,t);
+}
+
+function wkDown(e){
+  var b,k;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(!wcap||e.repeat) return;
+  b=HOTKEY_MODBITS[e.code];
+  k=HOTKEY_CODES[e.code];
+  if(wcap.paused){
+    if(!b&&k===0x29) return;
+    if(!b&&k&&wStopIs(k,wcap.mods)){ if(!wcap.escT){ wcap.escK=k; wcap.escSent=false; wcap.escT=setTimeout(wStopKeyHeld,WIRED_ESC_MS); } return; }
+    wiredResume();
+  }
+  if(b){ wcap.mods|=b; wkSend(); return; }
+  if(k&&wStopIs(k,wcap.mods)&&!wcap.escT){ wcap.escK=k; wcap.escSent=true; wcap.escT=setTimeout(wStopKeyHeld,WIRED_ESC_MS); }
+  if(k&&wcap.keys.indexOf(k)<0){ wcap.keys.push(k); wkSend(); }
+}
+
+function wkUp(e){
+  var b,k,i;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(!wcap) return;
+  b=HOTKEY_MODBITS[e.code];
+  if(b){ wcap.mods&=~b; wkSend(); return; }
+  k=HOTKEY_CODES[e.code];
+  if(k&&wcap.escT&&k===wcap.escK){
+    clearTimeout(wcap.escT); wcap.escT=null;
+    if(!wcap.escSent){ if(wcap.paused) wiredResume(); wkTap(k); return; }
+  }
+  i=wcap.keys.indexOf(k);
+  if(k&&i>=0){ wcap.keys.splice(i,1); wkSend(); }
+}
+
+function wkTap(k){
+  if(wcap.keys.indexOf(k)<0) wcap.keys.push(k);
+  wkSend();
+  setTimeout(function(){
+    var i=wcap?wcap.keys.indexOf(k):-1;
+    if(i>=0){ wcap.keys.splice(i,1); wkSend(); }
+  },80);
+}
+
+function wmMove(e){
+  if(!wcap||wcap.paused) return;
+  wcap.dx+=e.movementX||0; wcap.dy+=e.movementY||0;
+  wmSoon();
+}
+
+function wmBtn(e){
+  var b;
+  if(wcap&&wcap.paused){
+    e.preventDefault(); e.stopImmediatePropagation();
+    if(e.type==="mousedown") wiredResume();
+    return;
+  }
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(!wcap) return;
+  b=e.buttons&0x1F;
+  if(b!==wcap.btn){ wcap.btn=b; wmFlush(); }
+}
+
+function wmWheel(e){
+  var d,n;
+  e.preventDefault(); e.stopImmediatePropagation();
+  if(!wcap||wcap.paused) return;
+  if(e.wheelDeltaY&&e.wheelDeltaY!==e.deltaY){
+    wcap.wd+=e.wheelDeltaY;
+    n=Math.trunc(wcap.wd/120);
+    if(!n) return;
+    wcap.wd-=n*120;
+  }else{
+    d=e.deltaY*(e.deltaMode===1?33:e.deltaMode===2?100:1);
+    if(Math.abs(d)>=40){ n=d>0?-1:1; wcap.wacc=0; }
+    else{
+      wcap.wacc+=d;
+      if(Math.abs(wcap.wacc)<100) return;
+      n=wcap.wacc>0?-1:1; wcap.wacc=0;
+    }
+  }
+  wcap.wheel+=n; wmFlush();
+}
+
+function wmSoon(){
+  var wait;
+  if(!wcap||wcap.mT) return;
+  wait=WIRED_MS-(Date.now()-wcap.mAt);
+  if(wait<=0) wmFlush();
+  else wcap.mT=setTimeout(wmFlush,wait);
+}
+
+function wmFlush(){
+  var M=wiredFor("m"),x,y;
+  if(!wcap) return;
+  if(wcap.mT){ clearTimeout(wcap.mT); wcap.mT=null; }
+  x=Math.trunc(wcap.dx); y=Math.trunc(wcap.dy);
+  wcap.dx-=x; wcap.dy-=y;
+  if(!M||helperHas("m")||(!x&&!y&&!wcap.wheel&&wcap.btn===wcap.sent)){ wcap.wheel=0; return; }
+  wiredLine(M,"m "+x+" "+y+" "+wcap.wheel+" "+wcap.btn);
+  wcap.wheel=0; wcap.sent=wcap.btn; wcap.mAt=Date.now();
+}
+
+function wNo(e){ e.preventDefault(); e.stopImmediatePropagation(); }
+
+function wClick(e){ if(wcap&&wcap.paused){ e.preventDefault(); e.stopImmediatePropagation(); } }
+
+function wiredKeep(){
+  var M=wiredFor("m");
+  if(!wcap) return;
+  if(!wiredOf("L")&&!wiredOf("R")){ wiredStop(); return; }
+  if(wcap.mods||wcap.keys.length) wkSend();
+  if(wcap.btn&&M&&!helperHas("m")) wiredLine(M,"m 0 0 0 "+wcap.btn);
+}
+
+var wiredEvents=[[window,"keydown",wkDown],[window,"keyup",wkUp],
+  [document,WIRED_MOVE,wmMove],[document,"mousedown",wmBtn],[document,"mouseup",wmBtn],
+  [document,"wheel",wmWheel],[document,"contextmenu",wNo],[document,"auxclick",wNo],[document,"click",wClick]];
+
+function wiredArm(){
+  wcap={keys:[],mods:0,btn:0,sent:0,dx:0,dy:0,wheel:0,wacc:0,wd:0,mAt:0,
+        mT:null,escT:null,keep:null,live:false};
+  wiredEvents.forEach(function(x){ x[0].addEventListener(x[1],x[2],{capture:true,passive:false}); });
+  wcap.keep=setInterval(wiredKeep,WIRED_KEEP);
+  devPaint();
+}
+
+function wiredWatch(){
+  var el=document.documentElement;
+  if(wcap&&wcap.live&&(document.fullscreenElement!==el||document.pointerLockElement!==el)) wiredPause();
+}
+
+function wiredPause(){
+  var w=wcap,K=wiredFor("k"),M=wiredFor("m");
+  hlog("paused: full screen or the mouse lock was lost");
+  w.live=false; w.paused=true;
+  clearTimeout(w.escT); w.escT=null; clearTimeout(w.mT); w.mT=null;
+  w.keys=[]; w.mods=0; w.btn=0; w.sent=0; w.dx=0; w.dy=0; w.wheel=0; w.wacc=0; w.wd=0;
+  if(K) wiredLine(K,"k");
+  if(M) wiredLine(M,"m 0 0 0 0");
+  wiredFree();
+  helperRun();
+  devPaint();
+}
+
+async function wiredResume(){
+  var el=document.documentElement,w=wcap;
+  if(!w||!w.paused||w.resuming) return;
+  w.resuming=true; wiredErr="";
+  try{
+    await el.requestFullscreen({navigationUI:"hide"});
+    if(navigator.keyboard&&navigator.keyboard.lock) await navigator.keyboard.lock();
+    try{ await el.requestPointerLock({unadjustedMovement:true}); }
+    catch(e){ await el.requestPointerLock(); }
+    w.resuming=false;
+    if(wcap!==w){ wiredFree(); return; }
+    w.paused=false; w.live=true; hlog("resumed");
+    helperRun();
+    wiredWatch();
+  }catch(e){
+    w.resuming=false;
+    if(wcap===w){ wiredFree(); wiredErr="Couldn't resume. Try again."; }
+  }
+  devPaint();
+}
+
+function wiredFree(){
+  var el=document.documentElement;
+  if(document.pointerLockElement===el) document.exitPointerLock();
+  if(navigator.keyboard&&navigator.keyboard.unlock) navigator.keyboard.unlock();
+  if(document.fullscreenElement===el) document.exitFullscreen().catch(function(){});
+}
+
+async function wiredStart(){
+  var el=document.documentElement;
+  if(wcap||wrun||(!wiredOf("L")&&!wiredOf("R"))) return;
+  hlog("the Start button");
+  wiredErr="";
+  if(helperAll()){ wrun=true; helper.who="o"; wiredRun(true); helperRun(); devPaint(); return; }
+  wiredArm();
+  helperRun();
+  try{
+    await el.requestFullscreen({navigationUI:"hide"});
+    if(navigator.keyboard&&navigator.keyboard.lock) await navigator.keyboard.lock();
+    try{ await el.requestPointerLock({unadjustedMovement:true}); }
+    catch(e){ await el.requestPointerLock(); }
+    if(!wcap){ wiredFree(); return; }
+    wcap.live=true;
+    wiredWatch();
+    if(wcap) wiredRun(true);
+  }catch(e){
+    wiredStop();
+    wiredErr="Couldn't start. Try again.";
+    devPaint();
+  }
+}
+
+function wStopKeyHeld(){ hlog("the stop key was held: the web tool saw it"); wiredStop(); }
+
+function wiredStop(){
+  var w=wcap,K=wiredFor("k"),M=wiredFor("m");
+  if(!w) return;
+  wcap=null; wStopOff();
+  clearTimeout(w.escT); clearTimeout(w.mT); clearInterval(w.keep);
+  wiredEvents.forEach(function(x){ x[0].removeEventListener(x[1],x[2],{capture:true}); });
+  if(K) wiredLine(K,"k");
+  if(M) wiredLine(M,"m 0 0 0 0");
+  wiredRun(false);
+  wiredFree();
+  helperRun();
+  devPaint();
+}
+
+document.addEventListener("fullscreenchange",wiredWatch);
+document.addEventListener("pointerlockchange",wiredWatch);
+window.addEventListener("blur",function(){ if(wcap&&wcap.live) wiredPause(); });
+window.addEventListener("beforeunload",function(e){ if(wcap&&wcap.live){ e.preventDefault(); e.returnValue=""; } });
+
+function wrunStop(err){
+  var K=wiredFor("k"),M=wiredFor("m");
+  if(!wrun) return;
+  wrun=false; helper.who="o"; wStopOff();
+  if(err){ wiredErr=err; hlog(err); }
+  if(K) wiredLine(K,"k");
+  if(M) wiredLine(M,"m 0 0 0 0");
+  wiredRun(false);
+  helperRun();
+  devPaint();
+}
+
+function wrunKey(e){
+  var t=e.target;
+  if(!wrun||!helperHas("k")||(t&&t.tagName==="INPUT"&&t.type==="text")) return;
+  if(modeBy.L===1&&!modeListening) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+}
+
+function wrunMouse(e){
+  if(!wrun||helper.who!=="p"||!helperHas("m")||modeBy.L===1) return;
+  if(e.cancelable) e.preventDefault();
+  e.stopImmediatePropagation();
+}
+
+["keydown","keyup"].forEach(function(n){ window.addEventListener(n,wrunKey,true); });
+["pointerdown","pointerup","mousedown","mouseup","click","dblclick","auxclick","contextmenu","wheel"].forEach(function(n){
+  window.addEventListener(n,wrunMouse,{capture:true,passive:false});
+});
+
+function wStopName(){ return modeComboText(wstopKey.code,wstopKey.mods); }
+
+function wStopIs(code,mods){ return code===wstopKey.code&&(mods&wstopKey.mods)===wstopKey.mods; }
+
+function helperStopSay(){ helperSay({t:"stopkey",code:wstopKey.code,mods:wstopKey.mods}); }
+
+function wStopSet(v){
+  wstopKey=v; wstopRec=false;
+  try{ localStorage.setItem("xd2joyStopKey",JSON.stringify(v)); }catch(e){}
+  helperStopSay();
+  devPaint();
+}
+
+function wStopKeys(r){
+  var off=(r.len===8)?2:1,keys=[],i,c;
+  if(r.len!==7&&r.len!==8) return null;
+  for(i=0;i<6;i++){ c=r.latest[off+i]; if(c>=0x04) keys.push(c); }
+  return {mods:r.latest[0]||0,keys:keys};
+}
+
+function wStopFromReport(r){
+  var x=wStopKeys(r);
+  if(x&&x.keys.length) wStopSet({code:x.keys[0],mods:x.mods});
+}
+
+function wStopOff(){ clearTimeout(wstopT); wstopT=null; }
+
+function wStopHit(why){
+  wStopOff();
+  if(why) hlog(why);
+  if(wcap) wiredStop();
+  wrunStop();
+}
+
+function wStopWatch(k,r){
+  var x=wStopKeys(r),down=!!x&&x.keys.indexOf(wstopKey.code)>=0;
+  if(wstopT){
+    if(k!==wstopBy) return;
+    if(!down) wStopOff();
+    else if(Date.now()-wstopAt>=WIRED_ESC_MS) wStopHit("the stop key was held on board L's Bluetooth keyboard");
+    return;
+  }
+  if(down&&(wrun||wcap)&&(x.mods&wstopKey.mods)===wstopKey.mods){
+    wstopBy=k; wstopAt=Date.now();
+    wstopT=setTimeout(function(){ wStopHit("the stop key was held on board L's Bluetooth keyboard"); },WIRED_ESC_MS);
+  }
+}
+
+window.addEventListener("keydown",function(e){
+  var b,k;
+  if(!wstopRec) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  b=HOTKEY_MODBITS[e.code];
+  if(b){ wstopRecMods|=b; return; }
+  if(e.repeat) return;
+  k=HOTKEY_CODES[e.code];
+  if(k) wStopSet({code:k,mods:wstopRecMods});
+},true);
+window.addEventListener("keyup",function(e){
+  var b=HOTKEY_MODBITS[e.code];
+  if(wstopRec&&b){ wstopRecMods&=~b; e.preventDefault(); e.stopImmediatePropagation(); }
+},true);
+document.addEventListener("mousedown",function(e){
+  if(wstopRec&&!(e.target.closest&&e.target.closest('[data-dev="wstopkey"]'))){ wstopRec=false; devPaint(); }
+},true);
+
+var helper={ws:null,ok:false,list:[],pick:{L:"",R:""},who:"o",detect:"",detSide:"",detT:null,
+  names:{},ren:"",renFrom:"",renText:"",k:{L:{mods:0,keys:[]},R:{mods:0,keys:[]}},
+  pickKey:{L:"",R:""},use:{L:"",R:""},recent:{k:"",m:""},seen:{},mainOf:{}};
+try{ helper.pick=JSON.parse(localStorage.getItem("xd2joyHelperSide"))||helper.pick; }catch(e){}
+try{ helper.pickKey=JSON.parse(localStorage.getItem("xd2joyHelperSideKey"))||helper.pickKey; }catch(e){}
+try{ helper.names=JSON.parse(localStorage.getItem("xd2joyHelperNames"))||{}; }catch(e){}
+try{ helper.seen=JSON.parse(localStorage.getItem("xd2joyHelperSeen"))||{}; }catch(e){}
+try{ helper.mainOf=JSON.parse(localStorage.getItem("xd2joyHelperMain"))||{}; }catch(e){}
+
+function helperConnect(){
+  var ws;
+  if(helper.ws) return;
+  try{ ws=new WebSocket("ws://127.0.0.1:47123/ws"); }catch(e){ return; }
+  helper.ws=ws;
+  ws.onmessage=function(e){ helperMsg(e.data); };
+  ws.onclose=function(){
+    helper.ws=null; helper.ok=false; helper.list=[]; helper.ren=""; helperDetect("");
+    helper.k={L:{mods:0,keys:[]},R:{mods:0,keys:[]}};
+    wrunStop("The helper closed.");
+    devPaint();
+    if(wiredOf("L")||wiredOf("R")) setTimeout(helperConnect,3000);
+  };
+}
+
+function helperSay(o){
+  if(helper.ws&&helper.ok){ try{ helper.ws.send(JSON.stringify(o)); }catch(e){} }
+}
+
+function hlog(t){ helperSay({t:"log",s:t}); }
+
+function helperFind(id){
+  var i;
+  if(!id) return null;
+  for(i=0;i<helper.list.length;i++) if(helper.list[i].id===id) return helper.list[i];
+  return null;
+}
+
+function helperDev(kind){
+  var d=helperOn("L");
+  if(d&&d.kind===kind) return d;
+  d=helperOn("R");
+  return d&&d.kind===kind?d:null;
+}
+
+function helperBest(kind,skip){
+  var best=null,top=-9,like=kind==="k"?/keyboard/i:/mouse/i,unlike=kind==="k"?/mouse/i:/keyboard/i;
+  helper.list.forEach(function(d){
+    var s;
+    if(d.kind!==kind||(helperReal(d)||d)!==d||(skip&&skip[d.id.slice(1)])) return;
+    s=(d.id===helper.recent[kind]?8:0)+(d.main?4:0)+(like.test(d.name)?2:0)-(unlike.test(d.name)?1:0);
+    if(s>top){ top=s; best=d; }
+  });
+  return best;
+}
+
+function helperPickSave(){
+  try{
+    localStorage.setItem("xd2joyHelperSide",JSON.stringify(helper.pick));
+    localStorage.setItem("xd2joyHelperSideKey",JSON.stringify(helper.pickKey));
+  }catch(e){}
+}
+
+function helperFix(){
+  var save=false,taken={};
+  ["L","R"].forEach(function(side){
+    var d=helperFind(helper.pick[side]),key=helper.pickKey[side],keep=true;
+    if(!d&&key) d=helper.list.filter(function(x){ return helperSaveKey(x)===key; })[0]||null;
+    if(d) d=helperReal(d)||d;
+    if(d&&taken[d.id.slice(1)]) d=null;
+    if(!d){ d=helperBest(side==="L"?"k":"m",taken); keep=!helper.pick[side]; }
+    if(d) taken[d.id.slice(1)]=true;
+    helper.use[side]=d?d.id:"";
+    if(d&&keep&&(helper.pick[side]!==d.id||key!==helperSaveKey(d))){
+      helper.pick[side]=d.id; helper.pickKey[side]=helperSaveKey(d); save=true;
+    }
+  });
+  if(save) helperPickSave();
+}
+
+function helperHas(kind){ return !!helperDev(kind); }
+
+function helperAll(){
+  var L=wiredOf("L"),R=wiredOf("R");
+  return !!(L||R)&&(!L||!!helperOn("L"))&&(!R||!!helperOn("R"));
+}
+
+function helperSendPick(){
+  var o={t:"pick",sides:{}};
+  ["L","R"].forEach(function(s){
+    var d=helperOn(s);
+    o.sides[s]=d?{id:d.id,kind:d.kind}:null;
+  });
+  if(helper.ren&&(helperOn(helper.ren)||{}).id!==helper.renId) helper.ren="";
+  helperSay(o);
+}
+
+function helperRun(){ helperSay({t:"run",on:!!((wcap&&!wcap.paused)||wrun)}); }
+
+function helperKeys(side,s){
+  var p=s.split(/\s+/).slice(1).map(function(x){ return parseInt(x,16)&0xFF; });
+  helper.k[side]={mods:p[0]||0,keys:p.slice(1,7)};
+  helperKSend(side);
+}
+
+function helperKSend(side){
+  var K=wiredOf(side||(wiredFor("k")||{}).side),k,t,i;
+  if(!K) return;
+  k=helper.k[K.side]||{mods:0,keys:[]};
+  t="k "+wHex(k.mods|(wcap?wcap.mods&0xDD:0));
+  for(i=0;i<k.keys.length;i++) t+=" "+wHex(k.keys[i]);
+  wiredLine(K,t);
+}
+
+function helperPick(side,id){
+  var d=helperFind(id),other=side==="L"?"R":"L",k;
+  if(!d||(side!=="L"&&side!=="R")) return;
+  d=helperReal(d)||d; id=d.id;
+  hlog("you picked "+(d.kind==="k"?"the keyboard ":"the mouse ")+helperName(d)+" for the "+
+    (side==="L"?"left":"right")+" Joy-Con");
+  if(helperSame(helper.use[other],id)||helperSame(helper.pick[other],id)){
+    helper.pick[other]=helper.pick[side]; helper.pickKey[other]=helper.pickKey[side];
+    helper.use[other]=helper.use[side];
+  }
+  helper.pick[side]=helper.use[side]=id; helper.pickKey[side]=helperSaveKey(d);
+  helperPickSave();
+  for(k in reports) if(reports[k].handle===0) delete reports[k];
+  showHeld(); renderRaw();
+  helperSendPick();
+  devPaint();
+}
+
+function helperDetect(kind,side){
+  clearTimeout(helper.detT);
+  helper.detect=kind||"";
+  helper.detSide=kind?(side||""):"";
+  helperSay({t:"detect",kind:helper.detect});
+  if(kind) helper.detT=setTimeout(function(){ helperDetect(""); devPaint(); },10000);
+}
+
+function helperKey(d){ return d.vp+"|"+d.name; }
+
+function helperName(d){ return helper.names[helperKey(d)]||d.name; }
+function helperSaveKey(d){ return d.kind+"|"+helperKey(d); }
+
+function helperTwins(d){
+  var s=d.id.slice(1);
+  return helper.list.filter(function(x){ return x.kind!==d.kind&&x.id.slice(1)===s; });
+}
+
+function helperById(id){
+  var i;
+  for(i=0;i<helper.list.length;i++) if(helper.list[i].id===id) return helper.list[i];
+  return null;
+}
+
+function helperSeenOf(d){ return helper.seen[helperKey(d)]||""; }
+
+function helperSeenId(id){
+  var d=id&&helperById(id),k;
+  if(!d) return false;
+  k=helperKey(d);
+  if(helper.seen[k]&&helper.seen[k].indexOf(d.kind)>=0) return false;
+  helper.seen[k]=(helper.seen[k]||"")+d.kind;
+  try{ localStorage.setItem("xd2joyHelperSeen",JSON.stringify(helper.seen)); }catch(e){}
+  return true;
+}
+
+function helperSeenNote(){
+  var k=helperSeenId(helper.recent.k);
+  return helperSeenId(helper.recent.m)||k;
+}
+
+function helperSame(a,b){ return !!a&&!!b&&a.slice(1)===b.slice(1); }
+
+function helperDevice(d){ return [d].concat(helperTwins(d)); }
+
+function helperMainNote(){
+  var changed=false,done={};
+  helper.list.forEach(function(d){
+    var c=d.id.slice(1),m;
+    if(done[c]) return;
+    done[c]=true;
+    m=helperDevice(d).filter(function(x){ return x.main; });
+    if(m.length===1&&helper.mainOf[c]!==m[0].kind){ helper.mainOf[c]=m[0].kind; changed=true; }
+  });
+  if(changed) try{ localStorage.setItem("xd2joyHelperMain",JSON.stringify(helper.mainOf)); }catch(e){}
+}
+
+function helperReal(d){
+  var all=helperDevice(d),m;
+  if(all.length<2) return d;
+  m=all.filter(function(x){ return x.main; });
+  if(m.length===1) return m[0];
+  m=all.filter(function(x){ return x.kind===helper.mainOf[d.id.slice(1)]; });
+  if(m.length===1) return m[0];
+  m=all.filter(function(x){ return helperSeenOf(x).indexOf(x.kind)>=0; });
+  return m.length===1?m[0]:null;
+}
+
+function helperRow(d,side){
+  var all=helperDevice(d),i;
+  for(i=0;i<all.length;i++) if(all[i].id===helper.use[side]) return all[i];
+  return helperReal(d)||all.filter(function(x){ return x.kind==="m"; })[0]||d;
+}
+
+function helperRows(side){
+  var done={},out=[];
+  helper.list.forEach(function(d){
+    if(done[d.id.slice(1)]) return;
+    done[d.id.slice(1)]=true;
+    out.push(helperRow(d,side));
+  });
+  return out.sort(function(a,b){ return helperName(a).toLowerCase().localeCompare(helperName(b).toLowerCase()); });
+}
+
+function helperNamesSave(){
+  try{ localStorage.setItem("xd2joyHelperNames",JSON.stringify(helper.names)); }catch(e){}
+}
+
+function helperNamesAlign(){
+  var changed=false;
+  helper.list.forEach(function(d){
+    var n=helper.names[helperKey(d)];
+    if(!n) return;
+    helperTwins(d).forEach(function(x){
+      if(!helper.names[helperKey(x)]){ helper.names[helperKey(x)]=n; changed=true; }
+    });
+  });
+  if(changed) helperNamesSave();
+}
+
+function helperRename(side){
+  var d=helperOn(side),i;
+  if(!d) return;
+  helper.ren=side; helper.renId=d.id;
+  helper.renFrom=helper.renText=helperName(d);
+  devPaint();
+  i=$("devList").querySelector('[data-dev="wname"]');
+  if(i){ i.focus(); i.select(); }
+}
+
+function helperRenEnd(save){
+  var d=helperOn(helper.ren),t=helper.renText.trim(),clear=!t||(d&&t===d.name);
+  if(save&&d){
+    [d].concat(helperTwins(d)).forEach(function(x){
+      if(clear) delete helper.names[helperKey(x)];
+      else helper.names[helperKey(x)]=t;
+    });
+    helperNamesSave();
+  }
+  helper.ren=""; helper.renFrom=helper.renText="";
+  devPaint();
+}
+
+function helperRenKeep(host,focus){
+  var i=host.querySelector('[data-dev="wname"]');
+  if(!i) return;
+  i.value=helper.renText;
+  if(focus){ i.focus(); i.setSelectionRange(i.value.length,i.value.length); }
+}
+
+function helperMsg(t){
+  var m;
+  try{ m=JSON.parse(t); }catch(e){ return; }
+  if(!m||(!helper.ok&&m.t!=="devices")) return;
+  if(m.t==="l"){
+    if(!wcap&&!wrun) return;
+    (m.s||[]).forEach(function(x){
+      var side=x&&x[0],s=String(x&&x[1]),c=wiredOf(side);
+      if(!c) return;
+      if(s.charAt(0)==="k"){ helperKeys(side,s); return; }
+      if(modeBy.L===1) wiredShow(c,s); else wiredLine(c,s);
+    });
+  }else if(m.t==="devices"){
+    helper.list=m.list||[];
+    helperMainNote();
+    helperNamesAlign();
+    if(m.recent) helper.recent={k:m.recent.k||"",m:m.recent.m||""};
+    helperSeenNote();
+    helperFix();
+    if(!helper.ok){ helper.ok=true; helperSay({t:"kbmode",on:modeBy.L===1}); helperStopSay(); helperRun(); }
+    helperSendPick();
+    if(wrun&&!helperAll()) wrunStop("A picked device was unplugged.");
+    devPaint();
+  }else if(m.t==="detected"){
+    var dside=helper.detSide||helperSideOfKind(m.kind)||"L";
+    helperSeenId(m.id);
+    helperDetect("");
+    helperPick(dside,m.id);
+  }else if(m.t==="stopped"){
+    if(wcap) wiredStop();
+    wrunStop();
+  }else if(m.t==="who"){
+    helper.who=m.m==="p"?"p":"o";
+  }else if(m.t==="recent"){
+    helper.recent={k:m.k||"",m:m.m||""};
+    if(helperSeenNote()) devPaint();
+  }else if(m.t==="err"){
+    wiredErr=String(m.s||"");
+    devPaint();
+  }
+}
+
+function helperNow(c){
+  var d=helperOn(c.side);
+  return d ? helperName(d) : helper.ok ? "nothing" :
+    "the PC's "+(wSideKind(c.side)==="k"?"keyboard":"mouse");
+}
+
+function helperPickHtml(c,bi){
+  var cur=helperOn(c.side),h,o="";
+  if(!helper.ok) return "";
+  h='<span class="k">'+(cur?(cur.kind==="k"?"Keyboard":"Mouse"):"Device")+'</span><span class="wpk">';
+  if(helper.detect&&helper.detSide===c.side){
+    return h+'<span class="sub">Press a key or move the device you want.</span>'+
+      '<button data-dev="wdetect" data-i="'+bi+'">Cancel</button></span>';
+  }
+  if(helper.ren===c.side&&cur){
+    return h+'<input type="text" data-dev="wname" data-i="'+bi+'" maxlength="40" spellcheck="false" placeholder="'+
+      esc(cur.name)+'" value="'+esc(helper.renFrom)+'"><button data-dev="wsave" data-i="'+bi+'">Save</button>'+
+      '<button data-dev="wcancel" data-i="'+bi+'">Cancel</button></span>';
+  }
+  var rows=helperRows(c.side);
+  rows.forEach(function(d){
+    var same=rows.filter(function(x){ return helperName(x)===helperName(d); }).length>1;
+    o+='<option value="'+esc(d.id)+'"'+(helper.use[c.side]===d.id?" selected":"")+'>'+esc(helperName(d))+
+      (same?(d.kind==="k"?" (keyboard)":" (mouse)"):"")+'</option>';
+  });
+  h+=o?'<select data-dev="wpick" data-i="'+bi+'">'+o+'</select>'
+      :'<select disabled><option>No keyboard or mouse found</option></select>';
+  return h+'<button data-dev="wdetect" data-i="'+bi+'"'+(o?"":" disabled")+'>Detect</button>'+
+    '<button data-dev="wren" data-i="'+bi+'"'+(cur?"":" disabled")+'>Rename</button></span>';
+}
+
+$("devList").addEventListener("change",function(e){
+  var s=e.target.closest('[data-dev="wpick"]'),c;
+  if(!s) return;
+  c=devBoards()[parseInt(s.getAttribute("data-i"),10)];
+  if(c) helperPick(c.side,s.value);
+});
+
+$("devList").addEventListener("input",function(e){
+  if(e.target.getAttribute("data-dev")==="wname") helper.renText=e.target.value;
+});
+
+$("devList").addEventListener("keydown",function(e){
+  if(e.target.getAttribute("data-dev")!=="wname") return;
+  if(e.key==="Enter"){ e.preventDefault(); helperRenEnd(true); }
+  else if(e.key==="Escape"){ e.preventDefault(); helperRenEnd(false); }
+});
+
 function devPaint(){
   var host=$("devList");
   if(!host||Date.now()<devHoldUntil) return;
@@ -4336,11 +5168,14 @@ function devPaint(){
 
   if(!conns.length) h='<p class="sub">Connect a board first.</p>';
   else if(!boards.length) h='<p class="sub">Connected.</p>';
-  else h=singleHtml()+'<div class="devgrid">'+boards.map(devBoardHtml).join("")+'</div>';
+  else h=singleHtml()+'<div class="devgrid">'+boards.map(devBoardHtml).join("")+'</div>'+
+    wiredStartHtml(boards);
 
   if(host.devLast===h) return;
   host.devLast=h;
+  var typing=document.activeElement&&document.activeElement.getAttribute("data-dev")==="wname";
   host.innerHTML=h;
+  helperRenKeep(host,typing);
 }
 
 var DEV_FOLD_MS=2000;
@@ -4371,14 +5206,20 @@ function devBoardHtml(c,bi){
          :(c.side==="R")?' class="halfR"':"";
   if(singleFollows(c)){
     return h+'<div class="devhead"><b'+whb+'>'+
-      (c.side==="L"?"Left Joy-Con":"Right Joy-Con")+'</b></div>'+
+      (c.side==="L"?"Left Joy-Con":"Right Joy-Con")+'</b>'+
+      (c.wiredOk?'<span class="wseg wghost"><button>Bluetooth</button><button>Wired</button></span>':'')+'</div>'+
       '<p class="sub">Split connection will fake this Joy-Con as connected to the console '+
       'so you can use the other device to control both inputs on that single device, '+
       '2 boards are still needed to handle each others input.</p></div>';
   }
   h+='<div class="devhead"><b'+whb+'>'+
      (c.side==="L"?"Left Joy-Con":"Right Joy-Con")+
-     '</b></div>';
+     '</b>'+(c.wiredOk?wiredSeg(c,bi):'')+'</div>';
+  if(c.wiredErr) h+='<p class="sub bad">'+esc(c.wiredErr)+'</p>';
+  if(c.wired){
+    return h+'<div class="devnow"><span class="k">Connected to</span><span>'+esc(helperNow(c))+
+      '</span>'+helperPickHtml(c,bi)+'</div></div>';
+  }
 
   h+='<div class="devnow">';
   h+='<span class="k">Connected to</span><span>';
@@ -4471,6 +5312,9 @@ $("devList").addEventListener("click",function(e){
   devHoldUntil=0;
   var b=e.target.closest("[data-dev]");
   if(!b) return;
+  if(b.getAttribute("data-dev")==="wstart"){ wiredStart(); return; }
+  if(b.getAttribute("data-dev")==="wstop"){ wStopHit("the Stop button"); return; }
+  if(b.getAttribute("data-dev")==="wstopkey"){ wstopRec=!wstopRec; wstopRecMods=0; devPaint(); return; }
   if(b.getAttribute("data-dev")==="single"){ singleSet(parseInt(b.getAttribute("data-v"),10)); return; }
   if(b.getAttribute("data-dev")==="singleon"){ singleSet(singleMode===1||singleMode===2?0:singleLast); return; }
   var boards=devBoards(),c=boards[parseInt(b.getAttribute("data-i"),10)];
@@ -4486,6 +5330,11 @@ $("devList").addEventListener("click",function(e){
   }
   else if(what==="stop"){ c.link=null; devPaint(); }
   else if(what==="more"){ c.showAll=!c.showAll; devPaint(); }
+  else if(what==="wired") wiredSet(c,b.getAttribute("data-on")==="1");
+  else if(what==="wdetect"){ helperDetect(helper.detect?"":"a",c.side); devPaint(); }
+  else if(what==="wren") helperRename(c.side);
+  else if(what==="wsave") helperRenEnd(true);
+  else if(what==="wcancel") helperRenEnd(false);
 });
 
 (function(){
