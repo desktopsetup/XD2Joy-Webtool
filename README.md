@@ -8,6 +8,7 @@ smaller changes might not be added but you can always see the changes in this re
 <img src="assets/Mapping.png" width="900">
 <img src="assets/config.png" width="900">
 <img src="assets/Colors.png" width="900">
+<img src="assets/amibo.png" width="900">
 <img src="assets/Compile.png" width="900">
 
 
