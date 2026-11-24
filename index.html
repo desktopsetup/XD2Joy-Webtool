@@ -45,7 +45,7 @@
   .wrap{max-width:1180px;margin:0 auto;
     min-height:calc(100vh - 82px);display:flex;flex-direction:column}
 
-  #tabMap,#tabCol,#tabAdv{flex:1;
+  #tabMap,#tabCol,#tabAmb,#tabAdv{flex:1;
     display:flex;flex-direction:column;justify-content:safe center}
 
   .devpanel{margin:20px auto 0;width:100%;max-width:1080px}
@@ -146,6 +146,10 @@
   .moderow input[type=number]{font:inherit;font-size:13.5px;width:5.5em;
     background:var(--panel2);color:var(--ink);border:1px solid var(--slotline);
     border-radius:4px;padding:5px 8px}
+
+  .accrow.accoff label,.accrow.accoff input[type=number],.accrow.accoff button{color:#6f747b}
+  .accrow.accoff input[type=number],.accrow.accoff button{border-color:var(--hair)}
+  .accrow.accoff button:disabled{opacity:1}
 
   button.hotkey{background:var(--panel2);min-width:16em;text-align:left;
     padding:6px 10px}
@@ -369,6 +373,52 @@
   .cardbg{background:#c8c9cb;border-radius:16px;padding:20px 18px 24px;
     margin-top:4px}
   #jcArt{display:flex;justify-content:center}
+  .ambcard{display:flex;align-items:center;justify-content:center;min-height:444px}
+  #ambImg{max-height:400px;max-width:100%;object-fit:contain;
+    filter:drop-shadow(0 5px 16px rgba(0,0,0,.3))}
+  #ambImg.ambdim{filter:grayscale(1) drop-shadow(0 5px 16px rgba(0,0,0,.3))}
+  .ambnone{color:var(--dim);font-size:14px}
+  #ambSel{display:none;width:100%;max-width:440px}
+  #ambSel option,#ambSel.ambdim{color:var(--dim)}
+  #ambSel optgroup,#ambSel option.ambon{color:var(--ink)}
+  .ambpick{position:relative;flex:1 1 200px;min-width:0;max-width:440px}
+  .ambbtn{position:relative;width:100%;text-align:left;background:var(--panel);
+    padding:6px 30px 6px 10px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+  .ambbtn.ambdim{color:var(--dim)}
+  .ambbtn:after{content:"";position:absolute;right:11px;top:50%;margin-top:-2px;
+    border:5px solid transparent;border-top-color:var(--dim)}
+  .ambpop{position:absolute;top:calc(100% + 4px);left:0;width:100%;z-index:30;
+    background:var(--panel2);border:1px solid var(--slotline);border-radius:4px;
+    box-shadow:0 10px 26px rgba(0,0,0,.5);overflow:hidden}
+  #ambFind{font:inherit;font-size:13.5px;background:var(--code);color:var(--ink);
+    border:0;border-bottom:1px solid var(--hair);border-radius:0;outline:none;
+    width:100%;padding:8px 10px}
+  #ambFind::placeholder{color:var(--dim)}
+  .ambrows{position:relative;max-height:300px;overflow:auto;padding:4px 0}
+  .ambg{color:var(--ink);font-weight:600;font-size:12.5px;padding:7px 10px 2px;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ambr{color:var(--dim);font-size:13.5px;padding:5px 10px 5px 20px;cursor:pointer;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ambr.ambon{color:var(--ink)}
+  .ambr.at{background:rgba(4,183,239,.28);color:var(--ink)}
+  .ambnorow{color:var(--dim);font-size:13.5px;padding:7px 10px}
+  .ambrow{margin-top:12px}
+  .ambtagrow{margin-top:28px}
+  .ambonly{display:flex;align-items:center;gap:6px;cursor:pointer}
+  #ambErr:empty,#ambUid:empty,#ambCutErr:empty{display:none}
+  #ambState:empty::before{content:"\00a0"}
+  #ambChecks{max-height:440px;overflow:auto}
+  #ambChecks:empty{display:none}
+  .ambcheck{margin-top:12px;border-top:1px solid var(--hair);padding-top:10px}
+  .ambcheck summary{cursor:pointer;overflow-wrap:anywhere}
+  .ambcheck table{table-layout:fixed;width:100%;margin-top:8px}
+  .ambcheck th,.ambcheck td{text-align:left;white-space:normal;overflow-wrap:anywhere;padding:6px;vertical-align:top}
+  .ambcheck th:nth-child(2),.ambcheck td:nth-child(2){width:70px}
+  #ambSaves{flex:1;min-width:0;max-width:330px}
+  #ambSaves:disabled{color:var(--dim)}
+  #ambRenameIn{font:inherit;font-size:13.5px;background:var(--panel2);color:var(--ink);
+    border:1px solid var(--slotline);border-radius:4px;padding:6px 10px;flex:1;min-width:0;max-width:330px}
+  #ambRenameIn::placeholder{color:var(--dim)}
   .jcv{height:400px;width:auto;filter:drop-shadow(0 5px 16px rgba(0,0,0,.3))}
   .sw{width:26px;height:26px;border-radius:4px;border:1px solid var(--slotline);
     padding:0;background:none;cursor:pointer;vertical-align:middle}
@@ -404,12 +454,13 @@
 
 <div class="wrap">
   <div class="top">
-    <h1>XD Remapper <span class="ver">v1.4</span></h1>
+    <h1>XD Remapper <span class="ver">v1.5</span></h1>
     <span class="pill" id="pConn">not connected</span>
     <div class="sp"></div>
     <div class="tabs">
       <button class="tab on" data-tab="map">Mapping</button>
       <button class="tab" data-tab="col">Colors</button>
+      <button class="tab" data-tab="amb">Amiibos</button>
       <button class="tab" data-tab="adv">Compile</button>
     </div>
   </div>
@@ -454,6 +505,14 @@
         <div class="panel mapaxes">
           <h2 id="axesTitle">Right Stick Config</h2>
           <table class="axes"><tbody id="rowsAxis"></tbody></table>
+          <div id="ambCutBox">
+            <h2 style="margin-top:18px">Amiibo</h2>
+            <div class="sub">Hold or tap the set key to emulate the amiibo's state.</div>
+            <table class="axes"><tbody>
+              <tr id="ambCutRow"><td><div class="axlab"><span class="axico"><svg xmlns="http://www.w3.org/2000/svg" viewBox="14.85 22.64 140.37 82.43"><path d="M134.65,70.21l18.95,2.5a1,1,0,0,0,1.17-.89,69.48,69.48,0,0,0,0-15.92,1,1,0,0,0-1.16-.9l-19,2.47a1,1,0,0,0-.88,1.14,48.13,48.13,0,0,1,0,10.46,1,1,0,0,0,.88,1.14" style="fill:#f5aa00"/><path d="M125.09,93.19l15.16,11.65a1,1,0,0,0,1.46-.2,69.71,69.71,0,0,0,8-13.77,1,1,0,0,0-.56-1.36l-17.65-7.34a1,1,0,0,0-1.34.54,47,47,0,0,1-5.24,9.06,1,1,0,0,0,.2,1.42" style="fill:#e62d8c"/><path d="M131.46,45.52l17.66-7.3a1,1,0,0,0,.56-1.36,69.45,69.45,0,0,0-7.94-13.79,1,1,0,0,0-1.46-.2L125.1,34.49a1,1,0,0,0-.2,1.42A48.31,48.31,0,0,1,130.12,45a1,1,0,0,0,1.34.54" style="fill:#009682"/><path d="M45,34.51,29.83,22.87a1,1,0,0,0-1.46.2,69.22,69.22,0,0,0-8,13.77A1,1,0,0,0,21,38.2L38.6,45.54A1,1,0,0,0,39.94,45a47.83,47.83,0,0,1,5.25-9,1,1,0,0,0-.2-1.44" style="fill:#e6001e"/><path d="M35.43,57.5,16.48,55a1,1,0,0,0-1.17.9,69.48,69.48,0,0,0,0,15.92,1,1,0,0,0,1.16.9l18.95-2.47a1,1,0,0,0,.89-1.14,48.13,48.13,0,0,1,0-10.46,1,1,0,0,0-.88-1.14" style="fill:#a5c80f"/><path d="M38.62,82.19,21,89.49a1,1,0,0,0-.56,1.36,69.45,69.45,0,0,0,7.94,13.79,1,1,0,0,0,1.46.2L45,93.22a1,1,0,0,0,.2-1.42A47.76,47.76,0,0,1,40,82.73a1,1,0,0,0-1.34-.54" style="fill:#009beb"/><path d="M83.45,34.11C65.76,34.11,53,47.71,53,64,53,82.87,66.16,93.6,81.59,93.6c3.16,0,7.23-.4,9.65-1.43a1.5,1.5,0,0,0,.87-1.4V76.57a1,1,0,0,0-1.32-1,23,23,0,0,1-7.09,1c-5.62,0-12.08-4-12.08-13.07a12.12,12.12,0,0,1,12-12.36c8.12,0,13.1,5.66,13.1,13.16V91.18a1,1,0,0,0,1,1h16.61a1,1,0,0,0,1-1V63.49C115.44,45.87,102.82,34.11,83.45,34.11Z" fill="#fff"/></svg></span><span id="ambCutName">No amiibo</span></div></td><td id="ambCutVal"><span style="color:var(--dim)">Not set</span></td><td style="text-align:right"><button id="bAmbCut" disabled>Set</button><button id="bAmbCutClear" class="xbtn" aria-label="Remove the amiibo key" style="display:none">&times;</button></td></tr>
+            </tbody></table>
+            <p class="sub bad" id="ambCutErr"></p>
+          </div>
           <h2 style="margin-top:18px">Grip Buttons</h2>
           <div class="sub">Reconnect on the console for grip buttons to get detected.</div>
           <table class="axes"><tbody id="rowsGrip"></tbody></table>
@@ -581,6 +640,24 @@
             <input type="checkbox" id="mAccel">
             <span>Smart acceleration</span></label>
         </div>
+        <div class="moderow accrow" style="margin-top:10px">
+          <label for="rngALo" style="min-width:118px">Slow sensitivity</label>
+          <input type="range" id="rngALo" min="5" max="100" step="1">
+          <input type="number" id="numALo" min="5" max="100" step="1">
+          <button id="bALoDefault">Default</button>
+        </div>
+        <div class="moderow accrow" style="margin-top:10px">
+          <label for="rngASlow" style="min-width:118px">Slow below</label>
+          <input type="range" id="rngASlow" min="1" max="300" step="1">
+          <input type="number" id="numASlow" min="1" max="2000" step="1">
+          <button id="bASlowDefault">Default</button>
+        </div>
+        <div class="moderow accrow" style="margin-top:10px">
+          <label for="rngAFast" style="min-width:118px">Full speed at</label>
+          <input type="range" id="rngAFast" min="10" max="1000" step="5">
+          <input type="number" id="numAFast" min="2" max="5000" step="1">
+          <button id="bAFastDefault">Default</button>
+        </div>
       </div>
 
       <div class="panel devpanel">
@@ -641,6 +718,70 @@
             <button id="bCurrent">Current firmware</button>
             <button id="bRandom">Random</button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="tabAmb" style="display:none">
+    <div class="grid2">
+      <div>
+        <div class="panel">
+          <h2 id="ambName">Amiibo</h2>
+          <p class="sub" id="ambSeries"></p>
+          <p class="sub" id="ambUid"></p>
+          <div class="ambcard">
+            <img id="ambImg" alt="" style="display:none">
+            <div class="ambnone" id="ambNone">Pick an amiibo</div>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="panel">
+          <h2>Amiibos</h2>
+          <p class="sub" id="ambState">Connect the right board to send an amiibo.</p>
+          <div class="moderow">
+            <div class="ambpick">
+              <button id="ambBtn" class="ambbtn">Pick an amiibo</button>
+              <div class="ambpop" id="ambPop" style="display:none">
+                <input type="text" id="ambFind" placeholder="Search" spellcheck="false" autocomplete="off">
+                <div class="ambrows" id="ambRows"></div>
+              </div>
+              <select id="ambSel"></select>
+            </div>
+            <button id="bAmbForget" disabled>Remove file</button>
+            <label class="ambonly"><input type="checkbox" id="ambOnly"><span>Only loaded</span></label>
+          </div>
+          <div class="moderow ambrow">
+            <button id="bAmbFile">Load .bin files...</button>
+            <button id="bAmbDir">Load folder...</button>
+            <input type="file" id="fAmb" accept=".bin" multiple style="display:none">
+            <input type="file" id="fAmbDir" webkitdirectory multiple style="display:none">
+          </div>
+          <div class="moderow ambrow">
+            <button id="bAmbKey">Load retail key...</button>
+            <button id="bAmbKeyClear" disabled>Forget key</button>
+            <input type="file" id="fAmbKey" accept=".bin,application/octet-stream" style="display:none">
+          </div>
+          <p class="sub" id="ambKeyState">Load your retail key to generate and sign a new Tag ID.</p>
+          <div class="moderow ambrow">
+            <button id="bAmbSend" class="go" disabled>Scan now</button>
+          </div>
+          <div class="moderow ambrow">
+            <button id="bAmbHold" class="stog" disabled>Lifted</button>
+          </div>
+          <div class="moderow ambrow ambtagrow">
+            <button id="bAmbRandom" disabled>Randomize tag ID</button>
+            <button id="bAmbSave" disabled>Download .bin</button>
+          </div>
+          <div class="moderow ambrow" id="ambSavesRow" style="display:none">
+            <select id="ambSaves"></select>
+            <input type="text" id="ambRenameIn" maxlength="40" spellcheck="false" autocomplete="off" style="display:none">
+            <button id="bAmbRename">Rename</button>
+            <button id="bAmbRenameNo" style="display:none">Cancel</button>
+          </div>
+          <p class="sub bad" id="ambErr"></p>
+          <div id="ambChecks" aria-live="polite"></div>
         </div>
       </div>
     </div>
@@ -936,6 +1077,22 @@ var listenSeen={};
 function side(){ return $("selSide").value; }
 
 var sidePicked=false;
+var SIDE_MEM="xd2joySide";
+
+function sideMem(){
+  var s=null;
+  try{ s=localStorage.getItem(SIDE_MEM); }catch(e){}
+  return (s==="L"||s==="R")?s:"";
+}
+
+function sideRecall(){
+  var s=sideMem();
+  if(!s) return;
+  sidePicked=true;
+  if(s===side()) return;
+  $("selSide").value=s;
+  $("selSide").dispatchEvent(new Event("change"));
+}
 
 function halfOf(id){
   return id==="GL" ? "L" : id==="GR" ? "R" : side();
@@ -1208,7 +1365,7 @@ function connDrop(c){
   }
   if(c.side) liveBy[c.side]=null;
   if(c.side==="L") lmouseSeen=false;
-  if(!conns.length) sidePicked=false;
+  if(!conns.length) sidePicked=!!sideMem();
   connNote(); paint(); generate();
 }
 
@@ -1216,7 +1373,7 @@ async function disconnect(){
   userClosed=true;
   var list=conns.slice();
   for(var i=0;i<list.length;i++){ list[i].dropWhy="the Disconnect button"; await closeConn(list[i]); connDrop(list[i]); }
-  conns=[]; sidePicked=false;
+  conns=[]; sidePicked=!!sideMem();
   connNote(); paint(); generate();
 }
 
@@ -1268,11 +1425,12 @@ function connNote(){
   paintMode();
   if(!conns.length) $("cfgOut").textContent="Connect a board.";
   else if(!ready) $("cfgOut").textContent="Connected.";
+  ambPaint();
 }
-var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|GYRO|HID|HIDLNK|HIDMAP|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE|WIRED) *\]/;
-var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors |ptrs? |single |gyrogain )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] (?:shortcut key |\*\*\* PAIR MODE)|JC\] (?:connect failed |\*\*\* CONNECTED from |bonded from now on)|HID\] (?:kbd|mouse)=|HIDLNK\] PASSKEY |WIRED\] input |ADV\] (?:PAIRABLE|BONDED|OFF|WAKE) )/;
+var TAG_WIDE=/\[(?=[A-Z][A-Z ]{5}\])(?:ADDR|ADV|AMIIBO|BATT|BTN|CFG|CLOCK|CMD|CTLRQ|FAULT|GATT|GRIP|GYRO|HID|HIDLNK|HIDMAP|HOGP|JC|KBD|LED|LINK|MAP|MODE|MOUSE|MREC|MSTAT|PEER|PROF|QGATE|QUIET|RATE|RAW|RPT|SCAN|SMOOTH|STICK|STORE|SYNC|USBKBD|WAKE|WIRED) *\]/;
+var TAG_BARE=/\[(?:MAP\] (?:side=|end\b|mode |sync |sens |msens |stickdz |stickvg |grip |prof |colors |ptrs? |single |gyrogain |maccelx )|CFG\] (?:blob |write |delete |stored )|PROF\] (?:now on |active |\d+ (?:saved|empty) )|MODE\] (?:now |already )?[A-Z]+\b|GRIP\] (?:off\b|byte 0x04)|RAW\] h=0x|SCAN\] (?:begin |end\b|dev |[0-9A-Fa-f]{2}:)|PEER\] (?:pin=|attached=|')|MOUSE\] (?:HID advertiser |discovery done|connect to |\*\*\* |security level=)|SYNC\] (?:shortcut key |\*\*\* PAIR MODE)|JC\] (?:connect failed |\*\*\* CONNECTED from |bonded from now on)|HID\] (?:kbd|mouse)=|HIDLNK\] PASSKEY |WIRED\] input |ADV\] (?:PAIRABLE|BONDED|OFF|WAKE) )/;
 var TAG_RE=new RegExp(TAG_WIDE.source+"|"+TAG_BARE.source);
-var HFWD=/^(?:=== gatt_probe|\[RPT   \] (?:buttons|LEFT buttons|streaming|mouse sensor)|\[JC    \] (?:\*\*\*|PARAMS UPDATED)|\[WIRED \]|\[FAULT \]|\[LINK  \] (?:RX|TX|stale|keyboard on the other half)|\[HID   \] (?:kbd|mouse)=|\[MOUSE \]|\[HIDMAP\]|\[RAW   \]|\[CMD   \])/;
+var HFWD=/^(?:=== gatt_probe|\[RPT   \] (?:buttons|LEFT buttons|streaming|mouse sensor)|\[JC    \] (?:\*\*\*|PARAMS UPDATED)|\[WIRED \]|\[FAULT \]|\[LINK  \] (?:RX|TX|stale|keyboard on the other half)|\[HID   \] (?:kbd|mouse)=|\[MOUSE \]|\[HIDMAP\]|\[RAW   \]|\[CMD   \]|\[AMIIBO\])/;
 
 function onLine(ln,c){
   if(!ln) return;
@@ -1294,6 +1452,8 @@ function onLine(ln,c){
   }
   m=ln.match(/\[PROF\s*\]\s*(.*)$/);
   if(m){ onProfLine(m[1].trim(),c.side,c); return; }
+  m=ln.match(/\[AMIIBO\]\s*(.*)$/);
+  if(m){ onAmiiboLine(m[1].trim(),c); return; }
   m=ln.match(/\[SYNC\s*\]\s*shortcut key 0x([0-9A-Fa-f]{2}) mods 0x([0-9A-Fa-f]{2}) (on|off)/);
   if(m){ onSyncLine(parseInt(m[1],16),parseInt(m[2],16),m[3]==="on",c); return; }
   m=ln.match(/\[ADV\s*\]\s*(PAIRABLE|BONDED|OFF|WAKE)\s/);
@@ -1409,6 +1569,7 @@ var modeHeldDone=0;
 
 var syncState={code:0,mods:0,on:false,known:false};
 var syncPending=null, syncFail="";
+var ambCutState={code:0,known:false},ambCutBusy=false;
 
 var modeMods=0, modeBuilding=false, modeFrom="";
 
@@ -1433,6 +1594,12 @@ var mouseSens=MOUSE_SENS_DEFAULT;
 var msensEdited=false;
 
 var msensStored=null;
+
+var ACC_LO_DEFAULT=24, ACC_LO_MIN=5, ACC_LO_MAX=100;
+var ACC_SLOW_DEFAULT=4, ACC_SLOW_MIN=1, ACC_SLOW_MAX=2000;
+var ACC_FAST_DEFAULT=70, ACC_FAST_MIN=2, ACC_FAST_MAX=5000;
+var accLo=ACC_LO_DEFAULT, accSlow=ACC_SLOW_DEFAULT, accFast=ACC_FAST_DEFAULT;
+var accEdited=false;
 
 var GYRO_SENS_DEFAULT=32, GYRO_SENS_MIN=1, GYRO_SENS_MAX=100;
 var gyroSens=GYRO_SENS_DEFAULT, gsensEdited=false;
@@ -1537,7 +1704,8 @@ function pageFromBlob(bytes){
   var s=(c.side===0x67)?"L":(c.side===0x66)?"R":null;
   if(!s) return null;
   var out={side:s,bind:{},modes:{1:null,2:null,3:null},sens:c.sens,
-           msens:c.msens,maccel:c.maccel,dz:c.dz,vg:c.vg,gsens:c.gsens,col:c.col,extras:[]},i,e,ok;
+           msens:c.msens,maccel:c.maccel,alo:c.alo,aslow:c.aslow,afast:c.afast,
+           dz:c.dz,vg:c.vg,gsens:c.gsens,col:c.col,extras:[]},i,e,ok;
 
   function put(slot,rec){
     if(slot&&s==="L"&&(rec.kind==="bit"||rec.kind==="wheel")) slot="@"+slot;
@@ -1583,6 +1751,8 @@ function pageFromBlob(bytes){
     else if(e.kind===K_SET&&e.code===SET_STICK_DZ) ok=true;
     else if(e.kind===K_SET&&e.code===SET_STICK_VG) ok=true;
     else if(e.kind===K_SET&&e.code===SET_GYRO_GAIN) ok=true;
+    else if(e.kind===K_SET&&(e.code===SET_ACCEL_LO||e.code===SET_ACCEL_SLOW||
+                             e.code===SET_ACCEL_FAST)) ok=true;
     if(!ok) out.extras.push({code:e.code,kind:e.kind,mask:e.mask});
   }
   if(s==="R"&&c.sy===SRC_WHEEL){
@@ -1614,11 +1784,14 @@ function loadBoardIntoPage(p,keepCols){
     lmouseSet=(p.msens!==null);
   }
   if(p.side==="R"){
-    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false;
+    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; accEdited=false;
     if(p.sens!==null){ stickSens=p.sens; paintSens(); }
     msensStored=p.msens;
     if(p.msens!==null) mouseSens=p.msens;
     mouseAccel=!!p.maccel;
+    accLo=accOk(p.alo,ACC_LO_MIN,ACC_LO_MAX) ? p.alo : ACC_LO_DEFAULT;
+    accSlow=accOk(p.aslow,ACC_SLOW_MIN,ACC_SLOW_MAX) ? p.aslow : ACC_SLOW_DEFAULT;
+    accFast=accOk(p.afast,ACC_FAST_MIN,ACC_FAST_MAX) ? p.afast : ACC_FAST_DEFAULT;
     paintMSens();
     if(p.dz!==null) stickDz=Math.min(Math.round(p.dz/10),STICK_DZ_MAX);
     if(p.vg!==null) stickVg=Math.min(p.vg,STICK_VG_MAX);
@@ -1649,7 +1822,8 @@ function loadFromBoard(c){
     else if(!bindSrc[p.side]){ loadBoardIntoPage(p,true); markEdited(p.side); }
     else cfgExtras[p.side]=p.extras;
     if($("connErr").textContent===readFail(c.side)||$("connErr").textContent===fwSaid[c.side]) connSay("");
-    c.loaded=true; c.loadTries=0; devSend(c,"mode?"); devSend(c,"input?"); devSend(c,"fault?");
+    c.loaded=true; c.loadTries=0; devSend(c,"mode?"); devSend(c,"input?"); devSend(c,"fault?"); devSend(c,"amiibo key?");
+    if(c.side==="R"){ c.ambAsk=Date.now(); devSend(c,"amiibo"); setTimeout(ambPaint,3000); }
   }).catch(function(e){
     if(!c.keep) return;
     c.loadTries=(c.loadTries||0)+1;
@@ -1798,6 +1972,14 @@ function onMapLine(rest,c){
     }
     return;
   }
+  if((m=rest.match(/^maccelx\s+(\d+)\s+(\d+)\s+(\d+)$/))){
+    var al=parseInt(m[1],10), as=parseInt(m[2],10), af=parseInt(m[3],10);
+    if(sd==="R"&&!accEdited&&accOk(al,ACC_LO_MIN,ACC_LO_MAX)&&
+       accOk(as,ACC_SLOW_MIN,ACC_SLOW_MAX)&&accOk(af,ACC_FAST_MIN,ACC_FAST_MAX)){
+      accLo=al; accSlow=as; accFast=af; paintAccel();
+    }
+    return;
+  }
   if((m=rest.match(/^stickdz\s+(\d+)$/))){
     var dz2=Math.round(parseInt(m[1],10)/10);
     if(sd==="R"&&!dzEdited&&dz2>=STICK_DZ_MIN){
@@ -1898,7 +2080,14 @@ function cutHits(a,b){
 
 function cutClash(kind,n,cut){
   var i,o;
-  if(kind==="sync"){
+  if(kind!=="amb"){
+    o=ambCut();
+    if(cutHits(cut,o)||cutHits(o,cut)) return true;
+  }else{
+    o=syncCut();
+    if(cutHits(cut,o)||cutHits(o,cut)) return true;
+  }
+  if(kind==="sync"||kind==="amb"){
     for(i=1;i<=PROFILES;i++){
       o=profCut(i);
       if(cutHits(cut,o)||cutHits(o,cut)) return true;
@@ -1971,16 +2160,17 @@ async function modeApplyNow(){
 function modeCommit(code,mods,fromBoard){
   var m=modeListening,cut;
   if(!m) return false;
-  cut={code:code,mods:(cutTarget==="sync")?0:(mods&0xFF),mode:m};
+  cut={code:code,mods:(cutTarget==="sync"||cutTarget==="amb")?0:(mods&0xFF),mode:m};
 
   if(cutClash(cutTarget,m,cut)){
-    modeErr(cutTarget==="sync"?"That key is part of another shortcut.":"That shortcut is already in use.");
+    modeErr((cutTarget==="sync"||cutTarget==="amb")?"That key is part of another shortcut.":"That shortcut is already in use.");
     return false;
   }
   modeErr("");
   modeMods=cut.mods; modeBuilding=false; modeFrom="";
 
   if(cutTarget==="sync"){ syncSetKey(cut); paintMode(); return true; }
+  if(cutTarget==="amb"){ ambCutSet(cut.code); modeStopListening(); paintMode(); return true; }
   if(cutTarget==="prof"){ profSetKey(m,cut); paintMode(); return true; }
 
   modeCuts[m]=cut;
@@ -2015,11 +2205,12 @@ function tryModeCapture(r){
     if(!(c>=0x04)) continue;
     if(c===0x29&&!mods&&!modeBuilding){ modeStopListening(); paintMode(); return; }
     if(cutTarget==="sync"&&c>=0xE8){ modeErr("That key can't be the pairing key."); return; }
+    if(cutTarget==="amb"&&c>=0xE8){ modeErr("That key can't be the amiibo key."); return; }
 
     if(modeCommit(c,mods||modeMods,true)) modeHeldDone=c;
     return;
   }
-  if(mods&&cutTarget!=="sync"){
+  if(mods&&cutTarget!=="sync"&&cutTarget!=="amb"){
     if(!modeBuilding||modeFrom!=="board"){ modeBuilding=true; modeFrom="board"; modeErr(""); }
     modeMods=mods; paintMode();
   }else if(modeBuilding&&modeFrom==="board"){
@@ -2034,7 +2225,7 @@ function modeKeyDown(e){
   if(e.stopPropagation) e.stopPropagation();
   var bit=HOTKEY_MODBITS[e.code],code;
   if(bit){
-    if(cutTarget==="sync") return;
+    if(cutTarget==="sync"||cutTarget==="amb") return;
     if(!modeBuilding||modeFrom!=="pc"){ modeMods=bit; modeBuilding=true; modeFrom="pc"; modeErr(""); }
     else modeMods|=bit;
     paintMode(); return;
@@ -2046,7 +2237,7 @@ function modeKeyDown(e){
   }
   code=HOTKEY_CODES[e.code];
   if(!code){
-    modeErr(cutTarget==="sync"?"That key can't be the pairing key.":"That key can't be a shortcut.");
+    modeErr(cutTarget==="sync"?"That key can't be the pairing key.":cutTarget==="amb"?"That key can't be the amiibo key.":"That key can't be a shortcut.");
     return;
   }
   modeSwallowUp=e.code;
@@ -2083,6 +2274,11 @@ function modeKeyUp(e){
 
 function modeErr(msg){
   var a=$("modeErr");
+  if(cutTarget==="amb"){
+    if(a) a.textContent=modeFail;
+    ambCutSay(msg);
+    return;
+  }
   if(cutTarget==="sync"){
     if(a) a.textContent=modeFail;
     a=$("syncErr");
@@ -2158,6 +2354,7 @@ function paintMode(){
   for(var i=0;i<MODE_LIST.length;i++) paintModeRow(MODE_LIST[i][0]);
   paintProf();
   paintSync();
+  paintAmbCut();
 }
 
 function paintProfRow(n){
@@ -2198,7 +2395,7 @@ function syncMouseTake(src){
   var held=((liveBy[src]||{}).btn)|0,nw=held&~(syncBtnWas[src]|0),i;
   if(src!=="L"&&src!=="R") return;
   syncBtnWas[src]=held;
-  if(!nw||cutTarget!=="sync"||modeListening!==1) return;
+  if(!nw||(cutTarget!=="sync"&&cutTarget!=="amb")||modeListening!==1) return;
   for(i=0;i<8;i++) if(nw&(1<<i)){ modeCommit(SYNC_MOUSE+i,0,true); return; }
 }
 
@@ -2333,6 +2530,87 @@ async function syncSetKey(cut){
   }catch(e){ syncSay("Couldn't set the pairing key."); }
 }
 
+function ambCut(){
+  return ambCutState.code?{code:ambCutState.code,mods:0}:null;
+}
+
+function paintAmbCut(){
+  var box=$("ambCutBox"),b=$("bAmbCut"),x=$("bAmbCutClear"),v=$("ambCutVal"),
+      listening=(cutTarget==="amb"&&modeListening===1),
+      L=syncLeft(),
+      live=!!(L&&L.ambCutOk),
+      cut=ambCut(),
+      h;
+  if(!b) return;
+  if(box) box.style.display=(side()==="R")?"":"none";
+  b.textContent=listening?"Cancel":"Set";
+  b.disabled=!live;
+  if(x){ x.style.display=cut?"":"none"; x.disabled=!live; }
+  h=listening?'<span style="color:var(--hot)">Waiting...</span>'
+    :cut?'<span class="axk">'+esc(syncName(cut))+'</span>'
+    :'<span style="color:var(--dim)">Not set</span>';
+  if(v&&v.ambLast!==h){ v.ambLast=h; v.innerHTML=h; }
+}
+
+function ambCutNamePaint(){
+  var e=$("ambCutName"),r=connFor("R"),rb=r&&r.amb,id=amb.putting||(rb?(rb.have?rb.id:""):amb.pick),t;
+  if(!e) return;
+  ambNeed(id);
+  t=id?ambName(id):"No amiibo";
+  if(e.textContent!==t) e.textContent=t;
+}
+
+function ambCutSay(msg){
+  var e=$("ambCutErr");
+  if(e) e.textContent=msg||"";
+}
+
+function onAmbCutLine(code,c){
+  c.ambCutOk=true;
+  c.ambCutCode=code;
+  if(c.side==="L"||!ambCutState.known) ambCutState={code:code,known:true};
+  if(c.ambCutWait) c.ambCutWait();
+  paintAmbCut();
+  ambCutAlign();
+}
+
+function ambCutAlign(){
+  var L=syncLeft(),odd="The right board has another amiibo key. Set it again.",i,c;
+  if(ambCutBusy||!L||!L.ambCutOk) return;
+  for(i=0;i<conns.length;i++){
+    c=conns[i];
+    if(!c.side||!c.ambCutOk||c.ambCutCode===L.ambCutCode||c.ambCutTo===L.ambCutCode) continue;
+    c.ambCutTo=L.ambCutCode;
+    ambCutSendOne(c,L.ambCutCode).then(function(ok){ if(!ok) ambCutSay(odd); },function(){ ambCutSay(odd); });
+  }
+}
+
+function ambCutSendOne(c,code){
+  return cfgLocked(c,async function(){
+    var ack=lineExpect(c,"ambCutWait",2000);
+    await serialSend(c,"amiibo key 0x"+hex2(code));
+    if(await ack&&c.ambCutCode===code) return true;
+    ack=lineExpect(c,"ambCutWait",2000);
+    await serialSend(c,"amiibo key?");
+    return !!(await ack)&&c.ambCutCode===code;
+  });
+}
+
+async function ambCutSet(code){
+  var i,n=0,bad=0;
+  ambCutState={code:code,known:true};
+  ambCutSay("");
+  paintAmbCut();
+  ambCutBusy=true;
+  for(i=0;i<conns.length;i++){
+    if(!conns[i].side) continue;
+    n++;
+    try{ if(!await ambCutSendOne(conns[i],code)) bad++; }catch(e){ bad++; }
+  }
+  ambCutBusy=false;
+  if(bad||!n) ambCutSay(code?"Couldn't set the amiibo key.":"Couldn't remove the amiibo key.");
+}
+
 function paintRange(el){
   if(!el||!el.style||!el.style.setProperty) return;
   var lo=parseFloat(el.min), hi=parseFloat(el.max), v=parseFloat(el.value);
@@ -2372,6 +2650,24 @@ function paintMSens(){
   if(document.activeElement!==$("numMSens")) $("numMSens").value=v;
   $("bMSensDefault").disabled=(v===MOUSE_SENS_DEFAULT);
   if($("mAccel")) $("mAccel").checked=!!mouseAccel;
+  paintAccel();
+}
+
+function paintAccel(){
+  if(!$("rngALo")) return;
+  var on=!!mouseAccel, rows=document.querySelectorAll(".accrow"), i;
+  var ctl=[["rngALo","numALo","bALoDefault",accLo,ACC_LO_DEFAULT],
+           ["rngASlow","numASlow","bASlowDefault",accSlow,ACC_SLOW_DEFAULT],
+           ["rngAFast","numAFast","bAFastDefault",accFast,ACC_FAST_DEFAULT]];
+  for(i=0;i<rows.length;i++) rows[i].classList.toggle("accoff",!on);
+  for(i=0;i<ctl.length;i++){
+    $(ctl[i][0]).value=ctl[i][3];
+    $(ctl[i][0]).disabled=!on;
+    paintRange($(ctl[i][0]));
+    if(document.activeElement!==$(ctl[i][1])) $(ctl[i][1]).value=ctl[i][3];
+    $(ctl[i][1]).disabled=!on;
+    $(ctl[i][2]).disabled=!on||ctl[i][3]===ctl[i][4];
+  }
 }
 
 function paintGSens(){
@@ -2649,6 +2945,7 @@ function paint(){
   showHalf();
   renderAxes();
   renderGrip();
+  paintAmbCut();
   relayout();
 
   heldNow="";
@@ -3181,6 +3478,9 @@ function save(){
      stickVg:Math.round(stickVg),
      mouseSens:Math.round(mouseSens),
      mouseAccel:!!mouseAccel,
+     accelSlowSens:accLo,
+     accelSlowBelow:accSlow,
+     accelFullAt:accFast,
      gyroSens:Math.round(gyroSens),
      sync:(syncPending||syncState.known)?{code:syncCut()?syncCut().code:0,mods:0}:undefined},
     function(k,v){ return k==="mem"?undefined:v; },2)],
@@ -3248,6 +3548,11 @@ function applyPreset(o){
   }
 
   mouseAccel=(o.mouseAccel===true);
+  accLo=accOk(o.accelSlowSens,ACC_LO_MIN,ACC_LO_MAX) ? o.accelSlowSens : ACC_LO_DEFAULT;
+  accSlow=accOk(o.accelSlowBelow,ACC_SLOW_MIN,ACC_SLOW_MAX) ? o.accelSlowBelow : ACC_SLOW_DEFAULT;
+  accFast=accOk(o.accelFullAt,ACC_FAST_MIN,ACC_FAST_MAX) ? o.accelFullAt : ACC_FAST_DEFAULT;
+  if(accFast<=accSlow){ accSlow=ACC_SLOW_DEFAULT; accFast=ACC_FAST_DEFAULT; }
+  accEdited=true;
   paintMSens();
 
   if(typeof o.gyroSens==="number"&&o.gyroSens>=GYRO_SENS_MIN){
@@ -3303,6 +3608,9 @@ var SET_ACCEL=3;
 var SET_STICK_DZ=4;
 var SET_STICK_VG=5;
 var SET_GYRO_GAIN=6;
+var SET_ACCEL_LO=7;
+var SET_ACCEL_SLOW=8;
+var SET_ACCEL_FAST=9;
 
 var LBTN={DOWN:0x0001,RIGHT:0x0002,LEFT:0x0004,UP:0x0008,L:0x0010,ZL:0x0020,
           MINUS:0x0040,LS:0x0080,CAP:0x0100,GL:0x0400,SR:0x4000,SL:0x8000};
@@ -3343,6 +3651,9 @@ function cfgRead(img){
   c.dz=null;
   c.vg=null;
   c.gsens=null;
+  c.alo=null;
+  c.aslow=null;
+  c.afast=null;
   for(i=0;i<c.btn.length;i++)
     if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_STICK_GAIN)
       c.sens=c.btn[i].mask;
@@ -3356,6 +3667,12 @@ function cfgRead(img){
       c.vg=c.btn[i].mask;
     else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_GYRO_GAIN)
       c.gsens=c.btn[i].mask;
+    else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_ACCEL_LO)
+      c.alo=c.btn[i].mask;
+    else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_ACCEL_SLOW)
+      c.aslow=c.btn[i].mask;
+    else if(c.btn[i].kind===K_SET&&c.btn[i].code===SET_ACCEL_FAST)
+      c.afast=c.btn[i].mask;
   return c;
 }
 
@@ -3417,6 +3734,20 @@ function cfgEntry(slot,e,board){
   return null;
 }
 
+function accOk(v,lo,hi){
+  return typeof v==="number"&&v===Math.round(v)&&v>=lo&&v<=hi;
+}
+
+function accList(list){
+  var lo=accOk(accLo,ACC_LO_MIN,ACC_LO_MAX) ? accLo : ACC_LO_DEFAULT;
+  var sl=accOk(accSlow,ACC_SLOW_MIN,ACC_SLOW_MAX) ? accSlow : ACC_SLOW_DEFAULT;
+  var fa=accOk(accFast,ACC_FAST_MIN,ACC_FAST_MAX) ? accFast : ACC_FAST_DEFAULT;
+  if(fa<=sl){ sl=ACC_SLOW_DEFAULT; fa=ACC_FAST_DEFAULT; }
+  if(lo!==ACC_LO_DEFAULT) list.push({code:SET_ACCEL_LO,kind:K_SET,mask:lo});
+  if(sl!==ACC_SLOW_DEFAULT) list.push({code:SET_ACCEL_SLOW,kind:K_SET,mask:sl});
+  if(fa!==ACC_FAST_DEFAULT) list.push({code:SET_ACCEL_FAST,kind:K_SET,mask:fa});
+}
+
 function cfgList(side){
   var own=(side===0x67?"L|":"R|"),list=[],ids=Object.keys(bind).sort(),i,e;
 
@@ -3435,9 +3766,11 @@ function cfgList(side){
     }
     var lg=Math.round(mouseSens);
     if(!(lg>=MOUSE_SENS_MIN&&lg<=MOUSE_SENS_MAX)) lg=MOUSE_SENS_DEFAULT;
-    if(leftMouse()||lg!==MOUSE_SENS_DEFAULT||!mouseAccel){
+    if(leftMouse()||lg!==MOUSE_SENS_DEFAULT||!mouseAccel||accLo!==ACC_LO_DEFAULT||
+       accSlow!==ACC_SLOW_DEFAULT||accFast!==ACC_FAST_DEFAULT){
       list.push({code:SET_MOUSE_GAIN,kind:K_SET,mask:lg});
       list.push({code:SET_ACCEL,kind:K_SET,mask:mouseAccel?1:0});
+      accList(list);
     }
   }
 
@@ -3449,6 +3782,7 @@ function cfgList(side){
     if(!(mg>=MOUSE_SENS_MIN&&mg<=MOUSE_SENS_MAX)) mg=MOUSE_SENS_DEFAULT;
     list.push({code:SET_MOUSE_GAIN,kind:K_SET,mask:mg});
     list.push({code:SET_ACCEL,kind:K_SET,mask:mouseAccel?1:0});
+    accList(list);
     var dzv=Math.round(stickDz);
     if(!(dzv>=STICK_DZ_MIN&&dzv<=STICK_DZ_MAX)) dzv=STICK_DZ_DEFAULT;
     list.push({code:SET_STICK_DZ,kind:K_SET,mask:dzv*10});
@@ -3739,7 +4073,7 @@ async function cfgApplyAll(){
   }
   $("cfgOut").textContent=lines.join("\n");
 
-  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; }
+  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; accEdited=false; }
   userEdited=edited.L||edited.R;
   connNote();
   return bad;
@@ -3761,7 +4095,7 @@ async function cfgRestoreAll(){
       if(!/^stored config deleted/.test(reply)) throw new Error(reply);
 
       var now=pageFromBlob(await cfgAsk(c));
-      if(now&&now.side==="R"){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; }
+      if(now&&now.side==="R"){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; accEdited=false; }
       if(now) loadBoardIntoPage(now);
       lines.push("Restored defaults on the "+sideWord(c.side)+" board.");
     });
@@ -3771,7 +4105,7 @@ async function cfgRestoreAll(){
     }catch(e){ bad++; lines.push("Couldn't restore the "+sideWord(c.side)+" board."); }
   }
   $("cfgOut").textContent=lines.concat(notes).join("\n");
-  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; }
+  if(!bad){ sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; accEdited=false; }
   userEdited=edited.L||edited.R;
   connNote();
 }
@@ -3799,6 +4133,7 @@ if(hasPorts()){
 }
 $("selSide").addEventListener("change",function(){
   sidePicked=true;
+  try{ localStorage.setItem(SIDE_MEM,side()); }catch(e){}
   if(listening) cancelListen();
   colsSwitch(side());
   paint(); applyColors(); generate();
@@ -3812,7 +4147,7 @@ $("bReset").addEventListener("click",function(){
     bind={};
 
     edited={L:false,R:false}; colEdited={L:false,R:false}; userEdited=false; cfgExtras={L:[],R:[]};
-    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false;
+    sensEdited=false; msensEdited=false; dzEdited=false; vgEdited=false; gsensEdited=false; accEdited=false;
     bindSrc={L:null,R:null}; cleared={L:false,R:false};
     syncPending=null; paintSync();
     for(var ci=0;ci<conns.length;ci++){ conns[ci].loaded=false; loadFromBoard(conns[ci]); }
@@ -5424,13 +5759,28 @@ $("devList").addEventListener("click",function(e){
     if(cutTarget==="sync"&&modeListening===1) modeStopListening();
     syncClear();
   });
+  $("bAmbCut").addEventListener("click",function(){
+    if(cutTarget==="amb"&&modeListening===1){ modeStopListening(); paintMode(); return; }
+    if(!mapReady()){ hintBad(loadingWhy()); return; }
+
+    if(listening) cancelListen();
+    cutTarget="amb";
+    modeListening=1; modeMods=0; modeBuilding=false; modeFrom=""; modeSwallowUp="";
+    modeHeldDone=0;
+    modeErr("");
+    paintMode();
+  });
+  $("bAmbCutClear").addEventListener("click",function(){
+    if(cutTarget==="amb"&&modeListening===1) modeStopListening();
+    ambCutSet(0);
+  });
 
   document.addEventListener("keydown",modeKeyDown,true);
   document.addEventListener("keyup",modeKeyUp,true);
 
   window.addEventListener("blur",function(){
     if(modeListening&&modeFrom==="pc"){
-      var c=(cutTarget==="sync")?syncCut():
+      var c=(cutTarget==="sync")?syncCut():(cutTarget==="amb")?ambCut():
             (cutTarget==="prof")?profCut(modeListening):modeCuts[modeListening];
       modeMods=c?c.mods:0; modeBuilding=false; modeFrom="";
       paintMode();
@@ -5439,7 +5789,7 @@ $("devList").addEventListener("click",function(e){
 
   document.addEventListener("mousedown",function(e){
     if(!modeListening) return;
-    var b=(cutTarget==="sync")?$("bSyncKey"):
+    var b=(cutTarget==="sync")?$("bSyncKey"):(cutTarget==="amb")?$("bAmbCut"):
           $((cutTarget==="prof"?"bProfKey":"bModeKey")+modeListening);
     if(b&&(e.target===b||b.contains(e.target))) return;
     modeStopListening(); paintMode();
@@ -5508,6 +5858,32 @@ $("devList").addEventListener("click",function(e){
     markEdited("R"); markEdited("L");
     paintMSens(); generate();
   });
+  function setAcc(which,v,soft){
+    var lim={lo:[ACC_LO_MIN,ACC_LO_MAX],slow:[ACC_SLOW_MIN,ACC_SLOW_MAX],
+             fast:[ACC_FAST_MIN,ACC_FAST_MAX]}[which];
+    v=parseInt(v,10);
+    if(!(v>=lim[0]&&v<=lim[1])) return false;
+    if(soft&&((which==="slow"&&v>=accFast)||(which==="fast"&&v<=accSlow))) return false;
+    if(!mapReady()){ hintBad(loadingWhy()); paintAccel(); return false; }
+    if(which==="lo") accLo=v;
+    else if(which==="slow"){ accSlow=v; if(accFast<=v) accFast=Math.min(ACC_FAST_MAX,v+1); }
+    else{ accFast=v; if(accSlow>=v) accSlow=Math.max(ACC_SLOW_MIN,v-1); }
+    accEdited=true; markEdited("R"); markEdited("L");
+    paintAccel(); generate();
+    return true;
+  }
+  [["lo","rngALo","numALo","bALoDefault",ACC_LO_DEFAULT],
+   ["slow","rngASlow","numASlow","bASlowDefault",ACC_SLOW_DEFAULT],
+   ["fast","rngAFast","numAFast","bAFastDefault",ACC_FAST_DEFAULT]].forEach(function(r){
+    $(r[1]).addEventListener("input",function(){ setAcc(r[0],this.value,false); });
+    $(r[2]).addEventListener("input",function(){ setAcc(r[0],this.value,true); });
+    $(r[2]).addEventListener("change",function(){
+      if(!setAcc(r[0],this.value,false))
+        this.value=(r[0]==="lo") ? accLo : (r[0]==="slow") ? accSlow : accFast;
+      paintAccel();
+    });
+    $(r[3]).addEventListener("click",function(){ setAcc(r[0],r[4],false); });
+  });
   $("rngMSens").addEventListener("input",function(){ setMSens(this.value); });
   $("numMSens").addEventListener("input",function(){ setMSens(this.value); });
   $("numMSens").addEventListener("change",function(){
@@ -5540,6 +5916,862 @@ $("devList").addEventListener("click",function(e){
   },true);
 })();
 
+var AMB_API="https://www.amiiboapi.org/api/amiibo/";
+var AMB_LIST="xd2joyAmiiboList",AMB_DUMPS="xd2joyAmiiboDumps",AMB_PICK="xd2joyAmiiboPick";
+var AMB_SAVES="xd2joyAmiiboSaves",AMB_META="xd2joyAmiiboMeta",AMB_KEYS="xd2joyAmiiboRetailKey";
+var AMB_NAMES="xd2joyAmiiboNames";
+var AMB_PUT_FAIL="Couldn't put the amiibo on the right board. Pick it again.";
+var amb={list:[],byId:{},dumps:{},saves:{},meta:{},names:{},savesKey:"",pick:"",picked:false,req:null,loading:false,tried:0,timer:0,later:null,putting:"",keys:null,ren:null};
+
+function ambGet(k){ try{ return localStorage.getItem(k); }catch(e){ return null; } }
+function ambSet(k,v){ try{ localStorage.setItem(k,v); return true; }catch(e){ return false; } }
+function ambDel(k){ try{ localStorage.removeItem(k); return true; }catch(e){ return false; } }
+function ambHex(u){
+  var s="",i;
+  for(i=0;i<u.length;i++) s+=(u[i]<16?"0":"")+u[i].toString(16);
+  return s.toUpperCase();
+}
+function ambB64(u){
+  var s="",i;
+  for(i=0;i<u.length;i++) s+=String.fromCharCode(u[i]);
+  return btoa(s);
+}
+function ambBytes(t){
+  var s=atob(t),u=new Uint8Array(s.length),i;
+  for(i=0;i<s.length;i++) u[i]=s.charCodeAt(i);
+  return u;
+}
+function ambCrypto(){
+  return typeof crypto!=="undefined"&&!!crypto.subtle&&!!crypto.getRandomValues;
+}
+function ambEqual(a,b){
+  var v=0,i;
+  if(a.length!==b.length) return false;
+  for(i=0;i<a.length;i++) v|=a[i]^b[i];
+  return v===0;
+}
+function ambJoin(parts){
+  var n=0,o=0,i,u;
+  for(i=0;i<parts.length;i++) n+=parts[i].length;
+  u=new Uint8Array(n);
+  for(i=0;i<parts.length;i++){ u.set(parts[i],o); o+=parts[i].length; }
+  return u;
+}
+function ambKeyPart(raw,off){
+  var n=raw[off+31],z=off+16;
+  while(z<off+30&&raw[z]) z++;
+  if(n>16||z===off+30) return null;
+  return {h:raw.slice(off,off+16),t:raw.slice(off+16,z+1),m:raw.slice(off+32,off+32+n),p:raw.slice(off+48,off+80)};
+}
+function ambSetKey(raw){
+  var copy=new Uint8Array(raw),data=ambKeyPart(copy,0),tag=ambKeyPart(copy,80);
+  if(copy.length!==160||!data||!tag) return false;
+  ambForgetKey(false,false);
+  amb.keys={raw:copy,data:data,tag:tag};
+  return true;
+}
+function ambForgetKey(paint,remove){
+  if(amb.keys&&amb.keys.raw) amb.keys.raw.fill(0);
+  amb.keys=null;
+  if(remove) ambDel(AMB_KEYS);
+  if($("fAmbKey")) $("fAmbKey").value="";
+  if(paint) ambPaint();
+}
+async function ambMac(key,data){
+  var k=await crypto.subtle.importKey("raw",key,{name:"HMAC",hash:"SHA-256"},false,["sign"]);
+  return new Uint8Array(await crypto.subtle.sign("HMAC",k,data));
+}
+async function ambDrbg(key,seed,n){
+  var out=new Uint8Array(n),p=new Uint8Array(seed.length+2),at=0,c=0,v;
+  p.set(seed,2);
+  while(at<n){
+    p[0]=c>>>8; p[1]=c++;
+    v=await ambMac(key,p);
+    out.set(v.subarray(0,Math.min(v.length,n-at)),at);
+    at+=v.length;
+  }
+  return out;
+}
+function ambSeed(data){
+  var s=new Uint8Array(64);
+  s.set(data.subarray(0x29,0x2B),0);
+  s.set(data.subarray(0x1D4,0x1DC),0x10);
+  s.set(data.subarray(0x1D4,0x1DC),0x18);
+  s.set(data.subarray(0x1E8,0x208),0x20);
+  return s;
+}
+async function ambDerived(master,data){
+  var s=ambSeed(data),n=16-master.m.length,p=new Uint8Array(master.t.length+n+master.m.length+48),i,at=0;
+  p.set(master.t,at); at+=master.t.length;
+  p.set(s.subarray(0,n),at); at+=n;
+  p.set(master.m,at); at+=master.m.length;
+  p.set(s.subarray(0x10,0x20),at); at+=16;
+  for(i=0;i<32;i++) p[at+i]=s[0x20+i]^master.p[i];
+  return ambDrbg(master.h,p,48);
+}
+async function ambCtr(key,iv,data){
+  var k=await crypto.subtle.importKey("raw",key,{name:"AES-CTR"},false,["encrypt"]);
+  return new Uint8Array(await crypto.subtle.encrypt({name:"AES-CTR",counter:iv,length:128},k,data));
+}
+function ambTagInternal(tag){
+  var d=new Uint8Array(520);
+  d.set(tag.subarray(0x008,0x010),0x000);
+  d.set(tag.subarray(0x080,0x0A0),0x008);
+  d.set(tag.subarray(0x010,0x034),0x028);
+  d.set(tag.subarray(0x0A0,0x208),0x04C);
+  d.set(tag.subarray(0x034,0x054),0x1B4);
+  d.set(tag.subarray(0x000,0x008),0x1D4);
+  d.set(tag.subarray(0x054,0x080),0x1DC);
+  return d;
+}
+function ambInternalTag(data,tail){
+  var tag=tail?new Uint8Array(tail):new Uint8Array(540);
+  tag.set(data.subarray(0x000,0x008),0x008);
+  tag.set(data.subarray(0x008,0x028),0x080);
+  tag.set(data.subarray(0x028,0x04C),0x010);
+  tag.set(data.subarray(0x04C,0x1B4),0x0A0);
+  tag.set(data.subarray(0x1B4,0x1D4),0x034);
+  tag.set(data.subarray(0x1D4,0x1DC),0x000);
+  tag.set(data.subarray(0x1DC,0x208),0x054);
+  return tag;
+}
+async function ambUnpack(tag){
+  var c=ambTagInternal(tag),dataKeys,tagKeys,plain=new Uint8Array(520),tagMac,dataMac,crypt;
+  if(!amb.keys) throw new Error("Load a retail key first");
+  dataKeys=await ambDerived(amb.keys.data,c);
+  tagKeys=await ambDerived(amb.keys.tag,c);
+  crypt=await ambCtr(dataKeys.subarray(0,16),dataKeys.subarray(16,32),c.subarray(0x02C,0x1B4));
+  plain.set(c.subarray(0x000,0x008),0x000);
+  plain.set(c.subarray(0x028,0x02C),0x028);
+  plain.set(crypt,0x02C);
+  plain.set(c.subarray(0x1D4,0x208),0x1D4);
+  tagMac=await ambMac(tagKeys.subarray(32,48),plain.subarray(0x1D4,0x208));
+  plain.set(tagMac,0x1B4);
+  dataMac=await ambMac(dataKeys.subarray(32,48),plain.subarray(0x029,0x208));
+  plain.set(dataMac,0x008);
+  return {plain:plain,valid:ambEqual(dataMac,c.subarray(0x008,0x028))&&ambEqual(tagMac,c.subarray(0x1B4,0x1D4))};
+}
+async function ambPack(plain,tail){
+  var tagKeys,dataKeys,c=new Uint8Array(520),tagMac,dataMac,crypt;
+  if(!amb.keys) throw new Error("Load a retail key first");
+  tagKeys=await ambDerived(amb.keys.tag,plain);
+  dataKeys=await ambDerived(amb.keys.data,plain);
+  tagMac=await ambMac(tagKeys.subarray(32,48),plain.subarray(0x1D4,0x208));
+  c.set(tagMac,0x1B4);
+  dataMac=await ambMac(dataKeys.subarray(32,48),ambJoin([plain.subarray(0x029,0x1B4),tagMac,plain.subarray(0x1D4,0x208)]));
+  c.set(dataMac,0x008);
+  crypt=await ambCtr(dataKeys.subarray(0,16),dataKeys.subarray(16,32),plain.subarray(0x02C,0x1B4));
+  c.set(plain.subarray(0x000,0x008),0x000);
+  c.set(plain.subarray(0x028,0x02C),0x028);
+  c.set(crypt,0x02C);
+  c.set(plain.subarray(0x1D4,0x208),0x1D4);
+  return ambInternalTag(c,tail);
+}
+function ambRandomUid(plain){
+  var u=new Uint8Array(7);
+  crypto.getRandomValues(u);
+  u[0]=0x04;
+  plain[0x1D4]=u[0]; plain[0x1D5]=u[1]; plain[0x1D6]=u[2];
+  plain[0x1D7]=0x88^u[0]^u[1]^u[2];
+  plain[0x1D8]=u[3]; plain[0x1D9]=u[4]; plain[0x1DA]=u[5]; plain[0x1DB]=u[6];
+  plain[0]=u[3]^u[4]^u[5]^u[6];
+}
+
+function ambParse(buf){
+  var u=new Uint8Array(buf),d=new Uint8Array(540),checks=ambCheckBytes(u),failed=checks.filter(function(c){ return !c.ok; });
+  if(failed.length) return {err:failed.map(function(c){ return c.name+": "+c.detail; }).join("; "),checks:checks};
+  d.set(u.subarray(0,Math.min(540,u.length)));
+  d.fill(0,532,540);
+  return {id:ambHex(d.subarray(84,92)),data:d,checks:checks};
+}
+function ambCheckBytes(u){
+  var size=u.length===532||u.length===540||u.length===572;
+  var uid=u.length>=9&&u[3]===(0x88^u[0]^u[1]^u[2])&&u[8]===(u[4]^u[5]^u[6]^u[7]);
+  var header=u.length>=16&&ambHex(u.subarray(12,16))==="F110FFEE";
+  var marker=u.length>=17&&u[16]===0xA5;
+  return [
+    {name:"File size",ok:size,detail:u.length+" bytes"+(size?"":"; expected 532, 540, or 572")},
+    {name:"UID check bytes",ok:uid,detail:u.length<9?"Missing bytes":uid?"Both check bytes match":"Found "+ambHex(u.subarray(3,4))+" / "+ambHex(u.subarray(8,9))+"; expected "+ambHex(new Uint8Array([0x88^u[0]^u[1]^u[2],u[4]^u[5]^u[6]^u[7]]))},
+    {name:"Tag header (0x0C)",ok:header,detail:u.length<16?"Missing bytes":ambHex(u.subarray(12,16))+(header?"":"; expected F110FFEE")},
+    {name:"Amiibo marker (0x10)",ok:marker,detail:u.length<17?"Missing byte":ambHex(u.subarray(16,17))+(marker?"":"; expected A5")}
+  ];
+}
+function ambCheckReport(name,r){
+  if(!r.err) return;
+  var box=document.createElement("details"),title=document.createElement("summary"),table=document.createElement("table"),head=document.createElement("thead"),body=document.createElement("tbody"),row=document.createElement("tr");
+  box.className="ambcheck";
+  box.open=!!r.err;
+  title.textContent=name+": "+(r.err?"Not imported":"Accepted for import");
+  box.appendChild(title);
+  ["Check","Result","Details"].forEach(function(s){ var th=document.createElement("th"); th.textContent=s; row.appendChild(th); });
+  head.appendChild(row); table.appendChild(head);
+  (r.checks||[]).forEach(function(c){
+    var tr=document.createElement("tr");
+    [c.name,c.ok===null?"Not checked":c.ok?"Pass":"Fail",c.detail].forEach(function(s,i){ var td=document.createElement("td"); td.textContent=s; if(i===1&&c.ok===false) td.className="bad"; tr.appendChild(td); });
+    body.appendChild(tr);
+  });
+  table.appendChild(body); box.appendChild(table);
+  var note=document.createElement("p"); note.className="sub";
+  note.textContent="These checks identify the dump format. Encrypted data and signatures are not verified here, so passing does not guarantee console acceptance.";
+  box.appendChild(note); $("ambChecks").appendChild(box);
+}
+function ambCount(u){ return u[17]*256+u[18]; }
+function ambUid(u){
+  return [u[0],u[1],u[2],u[4],u[5],u[6],u[7]].map(function(x){ return (x<16?"0":"")+x.toString(16); }).join(":").toUpperCase();
+}
+function ambSameTag(a,b){
+  for(var i=0;i<9;i++) if(a[i]!==b[i]) return false;
+  return true;
+}
+function ambKeep(id,b64,nm){
+  var cur=amb.dumps[id],m=amb.meta[id]||{t:0,src:"old"},h,i,e,move;
+  if(cur===b64) return false;
+  move=!!cur&&!!m.n&&typeof nm!=="object"&&ambSameTag(ambBytes(cur),ambBytes(b64));
+  if(cur){
+    h=amb.saves[id]||(amb.saves[id]=[]);
+    for(i=0;i<h.length&&h[i].d!==cur;i++);
+    e={t:m.t,src:m.src,o:!!m.o,d:cur};
+    if(m.n&&!move) e.n=m.n;
+    if(i===h.length) h.push(e);
+    ambTrim(h);
+  }
+  amb.dumps[id]=b64;
+  amb.meta[id]=typeof nm==="object"?nm:{t:Date.now(),src:nm,o:!cur&&nm==="file"};
+  if(move) amb.meta[id].n=m.n;
+  return true;
+}
+function ambAddOld(id,b64){
+  var h=amb.saves[id]||(amb.saves[id]=[]),i;
+  for(i=0;i<h.length&&h[i].d!==b64;i++);
+  if(i===h.length&&amb.dumps[id]!==b64) h.push({t:Date.now(),src:"file",o:false,d:b64});
+  ambTrim(h);
+}
+function ambTrim(h){
+  for(var i=1;h.length>10&&i<h.length;) if(h[i].n) i++; else h.splice(i,1);
+}
+function ambStore(){
+  return ambSet(AMB_DUMPS,JSON.stringify(amb.dumps))&&ambSet(AMB_SAVES,JSON.stringify(amb.saves))&&ambSet(AMB_META,JSON.stringify(amb.meta))&&ambSet(AMB_NAMES,JSON.stringify(amb.names));
+}
+function ambWhen(t){
+  return t?new Date(t).toLocaleString(undefined,{month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}):"";
+}
+function ambTagLabel(v){
+  return v.o||v.src==="file"?"Original Tag ID":v.src==="tag"?"Random Tag ID":"Saved Tag ID";
+}
+function ambVer(v,d){
+  return (v.n||ambTagLabel(v))+": "+(d?ambUid(ambBytes(d)):"Unavailable");
+}
+function ambSum(u){
+  var h=0x811C9DC5,i;
+  for(i=0;i<u.length;i++) h=Math.imul(h^u[i],16777619)>>>0;
+  return h;
+}
+
+function ambKnown(id){
+  var a=amb.byId[id];
+  return a?a.name:amb.names[id]||"";
+}
+
+function ambName(id){
+  return ambKnown(id)||(amb.loading?"Loading...":"Unknown amiibo");
+}
+
+function ambUseList(list){
+  amb.list=list; amb.byId={};
+  for(var i=0;i<list.length;i++) amb.byId[list[i].id]=list[i];
+}
+
+function ambSetList(list){
+  ambUseList(list);
+  ambFill();
+}
+
+function ambCached(){
+  var c=null,s=ambGet(AMB_LIST);
+  try{ c=s?JSON.parse(s):null; }catch(e){ c=null; }
+  if(!c||!Array.isArray(c.list)||amb.list.length) return false;
+  ambUseList(c.list);
+  return true;
+}
+
+function ambNeed(id){
+  if(id&&!amb.byId[id]&&Date.now()-amb.tried>=60000) ambFetch();
+}
+
+function ambFetch(){
+  if(amb.req) return;
+  amb.loading=true; amb.tried=Date.now();
+  if(ambCached()) ambFill();
+  amb.req=fetch(AMB_API,{cache:"no-cache"}).then(function(r){
+    if(!r.ok) throw new Error(String(r.status));
+    return r.json();
+  }).then(function(j){
+    var list=(j.amiibo||[]).map(function(a){
+      return {id:(a.head+a.tail).toUpperCase(),name:a.name,series:a.amiiboSeries,
+              type:a.type,img:a.imgwebp||a.image};
+    });
+    amb.loading=false;
+    ambSet(AMB_LIST,JSON.stringify({at:Date.now(),list:list}));
+    ambSetList(list);
+  }).catch(function(){
+    amb.req=null; amb.loading=false;
+    if(!amb.list.length) $("ambErr").textContent="Couldn't load the amiibo list. Loaded files still work.";
+    ambFill();
+  });
+}
+
+function ambFill(){
+  var sel=$("ambSel"),only=$("ambOnly").checked,groups={},order=[],ids=Object.keys(amb.dumps),i,a,g,o,k,other;
+  sel.textContent="";
+  o=document.createElement("option");
+  o.value=""; o.textContent=(amb.list.length||ids.length)?"Pick an amiibo":"Load .bin files to start";
+  sel.appendChild(o);
+  other=ids.filter(function(id){ return !amb.byId[id]; });
+  if(other.length){
+    g=document.createElement("optgroup"); g.label="Loaded files";
+    other.forEach(function(id){
+      var op=document.createElement("option");
+      op.value=id; op.textContent=ambName(id); op.className="ambon"; g.appendChild(op);
+    });
+    sel.appendChild(g);
+  }
+  for(i=0;i<amb.list.length;i++){
+    a=amb.list[i];
+    if(only&&!amb.dumps[a.id]) continue;
+    k=a.type==="Card"?a.series+" cards":a.series;
+    if(!groups[k]){ groups[k]=[]; order.push({k:k,card:a.type==="Card"?1:0}); }
+    groups[k].push(a);
+  }
+  order.sort(function(x,y){ return (x.card-y.card)||x.k.localeCompare(y.k); });
+  for(i=0;i<order.length;i++){
+    k=order[i].k;
+    g=document.createElement("optgroup"); g.label=k;
+    groups[k].sort(function(x,y){ return x.name.localeCompare(y.name); });
+    groups[k].forEach(function(a){
+      var op=document.createElement("option");
+      op.value=a.id; op.textContent=a.name; if(amb.dumps[a.id]) op.className="ambon"; g.appendChild(op);
+    });
+    sel.appendChild(g);
+  }
+  sel.value=amb.pick;
+  if(sel.value!==amb.pick) sel.value="";
+  if(ambOpen) ambDraw();
+  ambPaint();
+}
+
+var ambOpen=false;
+
+function ambTerms(){
+  var v=$("ambFind")?$("ambFind").value.trim().toLowerCase():"";
+  return v?v.split(/\s+/):[];
+}
+function ambHit(terms,s){
+  var i;
+  s=s.toLowerCase();
+  for(i=0;i<terms.length;i++) if(s.indexOf(terms[i])<0) return false;
+  return true;
+}
+function ambRowsHtml(){
+  var terms=ambTerms(),kids=$("ambSel").children,html="",rows,g,o,i,j,n=0;
+  for(i=0;i<kids.length;i++){
+    g=kids[i];
+    if(g.tagName!=="OPTGROUP") continue;
+    rows="";
+    for(j=0;j<g.children.length;j++){
+      o=g.children[j];
+      if(!ambHit(terms,o.textContent+" "+g.label)) continue;
+      rows+='<div class="ambr'+(o.className?" "+o.className:"")+'" data-id="'+o.value+'">'+esc(o.textContent)+"</div>";
+      n++;
+    }
+    if(rows) html+='<div class="ambg">'+esc(g.label)+"</div>"+rows;
+  }
+  if(!n) html='<div class="ambnorow">'+(terms.length?"No match":esc($("ambSel").options.length?$("ambSel").options[0].textContent:"Pick an amiibo"))+"</div>";
+  return html;
+}
+function ambAt(row,keep){
+  var box=$("ambRows"),was=box.querySelector(".ambr.at"),t,h;
+  if(was) was.classList.remove("at");
+  if(!row) return;
+  row.classList.add("at");
+  if(keep) return;
+  t=row.offsetTop; h=row.offsetHeight;
+  if(t<box.scrollTop) box.scrollTop=t;
+  else if(t+h>box.scrollTop+box.clientHeight) box.scrollTop=t+h-box.clientHeight;
+}
+function ambDraw(){
+  var box=$("ambRows");
+  box.innerHTML=ambRowsHtml();
+  ambAt(box.querySelector('.ambr[data-id="'+amb.pick+'"]')||box.querySelector(".ambr"));
+}
+function ambShow(){
+  if(ambOpen) return;
+  ambOpen=true;
+  $("ambPop").style.display="";
+  $("ambFind").value="";
+  ambDraw();
+  $("ambFind").focus();
+}
+function ambShut(back){
+  if(!ambOpen) return;
+  ambOpen=false;
+  $("ambPop").style.display="none";
+  $("ambFind").value="";
+  if(back) $("ambBtn").focus();
+}
+function ambTake(row){
+  if(!row) return;
+  $("ambSel").value=row.getAttribute("data-id");
+  ambShut(true);
+  ambPick();
+}
+
+var ambImages=new Map(),ambImageUrl="";
+function ambImageShow(img,url){
+  if(ambImageUrl!==url) return;
+  img.style.display="";
+  img.style.visibility="visible";
+  var current=$("ambImg");
+  if(current!==img) current.replaceWith(img);
+  $("ambNone").style.display="none";
+}
+function ambImage(a,loaded){
+  var current=$("ambImg"),none=$("ambNone"),img,url=a&&a.img;
+  ambImageUrl=url||"";
+  if(!url){
+    current.style.display="none";
+    none.style.display="";
+    none.textContent=$("ambSel").value?"No picture":"Pick an amiibo";
+    return;
+  }
+  img=ambImages.get(url);
+  if(!img){
+    img=new Image();
+    img.id="ambImg";
+    img.onload=function(){
+      ambImageShow(img,url);
+    };
+    img.onerror=function(){
+      ambImages.delete(url);
+      if(ambImageUrl!==url) return;
+      $("ambImg").style.display="none";
+      none.style.display="";
+      none.textContent="Couldn't load picture";
+    };
+    img.src=url;
+  }
+  ambImages.delete(url);
+  ambImages.set(url,img);
+  if(ambImages.size>32) ambImages.delete(ambImages.keys().next().value);
+  img.alt=a.name;
+  img.classList.toggle("ambdim",!loaded);
+  if(img.complete&&img.naturalWidth) ambImageShow(img,url);
+}
+
+function ambPaint(){
+  if(!amb||!$("ambSel")) return;
+  var c=connFor("R"),b=c&&c.amb,id=$("ambSel").value,a=amb.byId[id],on=!!(b&&b.held),shown,key=!!amb.keys,ready=ambCrypto();
+  $("ambSel").classList.toggle("ambdim",!amb.dumps[id]);
+  $("ambBtn").classList.toggle("ambdim",!amb.dumps[id]);
+  ambImage(a,!!amb.dumps[id]);
+  $("ambBtn").textContent=id?ambName(id):($("ambSel").options.length?$("ambSel").options[0].textContent:"Pick an amiibo");
+  $("ambName").textContent=id?ambName(id):"Amiibo";
+  $("ambSeries").textContent=a?a.series+(a.type&&a.type!=="Figure"?", "+a.type.toLowerCase():""):"";
+  ambSavesPaint(id,c,b);
+  $("bAmbForget").disabled=!amb.dumps[id];
+  $("bAmbKeyClear").disabled=!key;
+  $("bAmbRandom").disabled=!(key&&ready&&amb.dumps[id]);
+  $("bAmbSave").disabled=!amb.dumps[id];
+  $("ambKeyState").textContent=!ready?"This browser can't make signed Tag ID changes."
+    :key?""
+    :"Load your retail key to save it in this browser and generate a new Tag ID.";
+  $("bAmbHold").disabled=!(c&&b);
+  $("bAmbHold").textContent=on?"Held":"Lifted";
+  $("bAmbHold").classList.toggle("on",on);
+  shown=amb.putting||(b&&b.have?b.id:"");
+  $("bAmbSend").disabled=!(c&&b&&shown)||on;
+  $("ambState").textContent=!c?"Connect the right board to send an amiibo."
+    :b?(shown?"":"Nothing on the right Joy-Con yet.")
+    :(c.ambAsk&&Date.now()-c.ambAsk>2500)?"The right board's firmware has no amiibo support. Update it."
+    :"Reading the right board...";
+  ambCutNamePaint();
+}
+
+function ambSavesPaint(id,c,b){
+  var h=amb.saves[id]||[],m=amb.meta[id]||{t:0,src:"old"},sel=$("ambSaves"),rows=[{v:"",n:m.n,t:ambVer(m,amb.dumps[id])}],i,key,ren;
+  for(i=h.length-1;i>=0;i--) rows.push({v:String(i),n:h[i].n,t:ambVer(h[i],h[i].d)});
+  rows=rows.filter(function(r){ return r.n; }).sort(function(x,y){ return x.n.localeCompare(y.n,undefined,{numeric:true,sensitivity:"base"}); })
+    .concat(rows.filter(function(r){ return !r.n; }));
+  key=id+"|"+rows.map(function(r){ return r.v+"="+r.t; }).join("|");
+  $("ambSavesRow").style.display=amb.dumps[id]&&h.length?"":"none";
+  if(key!==amb.savesKey){
+    amb.savesKey=key;
+    sel.textContent="";
+    rows.forEach(function(r){ var o=document.createElement("option"); o.value=r.v; o.textContent=r.t; sel.appendChild(o); });
+    sel.value="";
+  }
+  var selected=sel.value!==""&&h[+sel.value],dump=amb.dumps[id]&&(selected?selected.d:amb.dumps[id]);
+  $("ambUid").textContent=dump?"Tag ID "+ambUid(ambBytes(dump)):"";
+  sel.disabled=!(c&&b);
+  ren=!!amb.ren&&amb.ren.id===id&&amb.ren.d===amb.dumps[id];
+  if(!ren) amb.ren=null;
+  sel.style.display=ren?"none":"";
+  $("ambRenameIn").style.display=ren?"":"none";
+  $("bAmbRenameNo").style.display=ren?"":"none";
+  $("bAmbRename").textContent=ren?"Save":"Rename";
+}
+
+function ambRestore(){
+  var id=$("ambSel").value,i=$("ambSaves").value,h=amb.saves[id],c=connFor("R"),v;
+  if(i===""||!h||!h[+i]||!c||!c.amb){ $("ambSaves").value=""; ambPaint(); return; }
+  v=h.splice(+i,1)[0];
+  ambKeep(id,v.d,v.n?{t:v.t,src:v.src,o:v.o,n:v.n}:{t:v.t,src:v.src,o:v.o});
+  $("ambErr").textContent="";
+  if(!ambStore()) $("ambErr").textContent="The browser wouldn't keep it.";
+  amb.pick=id; amb.picked=true; ambSet(AMB_PICK,id);
+  ambSoon(null);
+  amb.savesKey="";
+  ambFill();
+  ambPut(true);
+}
+
+function ambSoon(fn,id){
+  clearTimeout(amb.timer); amb.timer=0; amb.later=fn;
+  amb.putting=fn?id:"";
+  if(fn) amb.timer=setTimeout(function(){ amb.timer=0; amb.later=null; fn(); },150);
+}
+function ambFlush(){
+  var fn=amb.later;
+  if(amb.timer&&fn){ clearTimeout(amb.timer); amb.timer=0; amb.later=null; fn(); }
+}
+
+function ambPick(){
+  amb.pick=$("ambSel").value; amb.picked=true; ambSet(AMB_PICK,amb.pick);
+  $("ambErr").textContent="";
+  ambSoon(amb.pick&&amb.dumps[amb.pick]?function(){ ambPut(); }:null,amb.pick);
+  ambPaint();
+}
+
+function ambPut(force){
+  var c=connFor("R"),id=amb.pick,d=amb.dumps[id],h;
+  if(!c||!c.amb||!d||(!force&&c.amb.have&&c.amb.id===id)){
+    if(amb.putting===id) amb.putting="";
+    ambPaint();
+    return;
+  }
+  amb.putting=id;
+  h=ambHex(ambBytes(d));
+  cfgLocked(c,async function(){
+    var off,ack,tries;
+    for(off=0;off<540;off+=270){
+      for(tries=0;;tries++){
+        ack=lineExpect(c,"ambWait",2500);
+        await serialSend(c,"amiibo load "+off+" "+h.slice(off*2,(off+270)*2));
+        if(!await ack) throw new Error("no answer");
+        if(c.ambGot===270+"@"+off) break;
+        if(tries) throw new Error("short");
+      }
+    }
+    ack=lineExpect(c,"ambDone",2500);
+    await serialSend(c,"amiibo use");
+    if(!await ack) throw new Error("no answer");
+  }).then(function(){
+    if(amb.putting===id) amb.putting="";
+    if($("ambErr").textContent===AMB_PUT_FAIL) $("ambErr").textContent="";
+    ambPaint();
+  }).catch(function(){
+    if(amb.putting===id) amb.putting="";
+    $("ambErr").textContent=AMB_PUT_FAIL;
+    ambPaint();
+  });
+}
+
+function ambCopy(c){
+  if(c.ambCp) return;
+  c.ambCp={tries:0};
+  ambCopyAsk(c);
+}
+function ambCopyAsk(c){
+  var cp=c.ambCp;
+  cp.buf=new Uint8Array(540); cp.got=0; cp.tries++;
+  clearTimeout(cp.t);
+  cp.t=setTimeout(function(){ ambCopyDone(c,null); },4000);
+  devSend(c,"amiibo dump");
+}
+function ambCopyDone(c,sum){
+  var cp=c.ambCp,r=null;
+  if(!cp) return;
+  clearTimeout(cp.t);
+  if(sum!==null&&cp.got===15&&ambSum(cp.buf)===sum) r=ambParse(cp.buf);
+  if(!r||r.err){
+    if(cp.tries<3&&c.keep){ ambCopyAsk(c); return; }
+    c.ambCp=null;
+    $("ambErr").textContent="Couldn't copy the console's save from the right board. Reconnect it to retry.";
+    return;
+  }
+  c.ambCp=null;
+  ambKeep(r.id,ambB64(r.data),"console");
+  if(!ambStore()) $("ambErr").textContent="The browser wouldn't keep the console's save.";
+  ambFill();
+}
+
+function onAmiiboLine(rest,c){
+  var m,cp,off,k,d;
+  m=rest.match(/^key 0x([0-9A-Fa-f]{2})$/);
+  if(m){ onAmbCutLine(parseInt(m[1],16),c); return; }
+  m=rest.match(/^got (\d+) bytes at (\d+)/);
+  if(m){ c.ambGot=m[1]+"@"+m[2]; if(c.ambWait) c.ambWait(); return; }
+  m=rest.match(/^loaded id=([0-9A-F]{16}) held=(yes|no)/)||rest.match(/^none held=(yes|no)/);
+  if(m){
+    c.amb=m.length>2?{have:true,id:m[1],held:m[2]==="yes"}:{have:false,id:"",held:m[1]==="yes"};
+    c.amb.n=+((/ n=(\d+)/.exec(rest)||[0,-1])[1]);
+    if(c.ambDone) c.ambDone();
+    if(c.amb.have&&!amb.picked&&c.side==="R"&&(!amb.list.length||amb.byId[c.amb.id]||amb.dumps[c.amb.id])){ amb.pick=c.amb.id; $("ambSel").value=amb.pick; }
+    d=c.amb.have&&amb.dumps[c.amb.id];
+    if(d&&c.amb.n>ambCount(ambBytes(d))) ambCopy(c);
+    ambPaint();
+    return;
+  }
+  m=rest.match(/^written id=([0-9A-F]{16}) n=(\d+)/);
+  if(m){
+    c.amb={have:true,id:m[1],held:!!(c.amb&&c.amb.held),n:+m[2]};
+    $("ambErr").textContent="";
+    ambCopy(c);
+    ambPaint();
+    return;
+  }
+  m=rest.match(/^write refused: (.*)$/);
+  if(m){ $("ambErr").textContent="The right board refused the console's save: "+m[1]+"."; return; }
+  m=rest.match(/^data (\d+) ([0-9A-F]{270})$/);
+  if(m){
+    cp=c.ambCp; off=+m[1];
+    if(cp&&off%135===0&&off<540){
+      for(k=0;k<135;k++) cp.buf[off+k]=parseInt(m[2].substr(k*2,2),16);
+      cp.got|=1<<(off/135);
+    }
+    return;
+  }
+  m=rest.match(/^data end sum=([0-9A-F]{8})$/);
+  if(m){ if(c.ambCp) ambCopyDone(c,parseInt(m[1],16)); return; }
+  m=rest.match(/^rejected: (.*)$/);
+  if(m){
+    $("ambErr").textContent="The right board refused it: "+m[1]+".";
+    if(c.ambDone) c.ambDone();
+    return;
+  }
+  m=rest.match(/^tap: (.*)$/);
+  if(m&&!/nothing/.test(m[1])){
+    $("bAmbSend").textContent="Scanned";
+    clearTimeout(amb.scanT);
+    amb.scanT=setTimeout(function(){ $("bAmbSend").textContent="Scan now"; },2000);
+  }
+}
+
+function ambLoad(list){
+  var files=[].slice.call(list||[]).filter(function(f){ return /\.bin$/i.test(f.name); }),bad=[],ok=[],changed={},one;
+  files.sort(function(x,y){
+    return (x.webkitRelativePath||x.name).localeCompare(y.webkitRelativePath||y.name,undefined,{numeric:true,sensitivity:"base"});
+  });
+  $("ambErr").textContent="";
+  if(!files.length){ $("ambErr").textContent="No .bin files there."; return; }
+  $("ambChecks").textContent="";
+  return Promise.allSettled(files.map(function(f){ return f.arrayBuffer(); })).then(function(bufs){
+    bufs.forEach(function(result,i){
+      var r,old;
+      if(result.status!=="fulfilled"){
+        r={err:"Couldn't read this file",checks:[{name:"File read",ok:false,detail:"Couldn't read this file. Try selecting it again."}]};
+      }else r=ambParse(result.value);
+      if(!r.err){
+        var known=!!amb.byId[r.id];
+        r.checks.push({name:"Amiibo catalog",ok:known?true:null,detail:r.id+(known?"; recognized":"; using the filename until catalog details are available")});
+      }
+      ambCheckReport(files[i].webkitRelativePath||files[i].name,r);
+      if(r.err){ bad.push(files[i].name+": "+r.err); return; }
+      amb.names[r.id]=files[i].name.replace(/\.bin$/i,"");
+      old=amb.dumps[r.id]&&ambBytes(amb.dumps[r.id]);
+      if(old&&ambSameTag(old,r.data)&&ambCount(old)>ambCount(r.data)) ambAddOld(r.id,ambB64(r.data));
+      else if(ambKeep(r.id,ambB64(r.data),"file")) changed[r.id]=1;
+      ok.push(r.id);
+    });
+    if(bad.length) $("ambErr").textContent=ok.length+" accepted, "+bad.length+" not imported. See the file checks below.";
+    if(ok.length&&!ambStore()) $("ambErr").textContent+=" The browser wouldn't keep the imported files.";
+    one=ok.length===1?ok[0]:(amb.pick&&ok.indexOf(amb.pick)>=0?amb.pick:"");
+    if(one){ amb.pick=one; amb.picked=true; ambSet(AMB_PICK,one); }
+    ambFill();
+    if(one) ambSoon(function(){ ambPut(!!changed[one]); },one);
+  }).catch(function(){
+    $("ambErr").textContent="Couldn't read those files. Try again.";
+  });
+}
+
+function ambLoadKey(file){
+  if(!file) return;
+  file.arrayBuffer().then(function(buf){
+    var raw=new Uint8Array(buf);
+    if(raw.length!==160) throw new Error("A retail key file must be 160 bytes.");
+    if(!ambSetKey(raw)) throw new Error("That file doesn't have a usable retail-key layout.");
+    if(!ambSet(AMB_KEYS,ambB64(raw))) $("ambErr").textContent="The browser loaded the retail key but wouldn't save it.";
+    else $("ambErr").textContent="";
+    ambPaint();
+  }).catch(function(e){
+    $("ambErr").textContent=e&&e.message?e.message:"Couldn't read that retail key.";
+  });
+}
+
+function ambRandomize(){
+  var id=$("ambSel").value,d=amb.dumps[id];
+  if(!id||!d||!amb.keys||!ambCrypto()) return;
+  $("ambErr").textContent="";
+  $("bAmbRandom").disabled=true;
+  ambUnpack(ambBytes(d)).then(function(r){
+    if(!r.valid) throw new Error("That retail key does not authenticate this amiibo file.");
+    ambRandomUid(r.plain);
+    return ambPack(r.plain,ambBytes(d));
+  }).then(function(tag){
+    ambKeep(id,ambB64(tag),"tag");
+    if(!ambStore()) $("ambErr").textContent="The browser wouldn't keep the new Tag ID.";
+    amb.pick=id; amb.picked=true; ambSet(AMB_PICK,id);
+    ambFill();
+    ambSoon(function(){ ambPut(true); },id);
+  }).catch(function(e){
+    $("ambErr").textContent=e&&e.message?e.message:"Couldn't randomize that Tag ID.";
+    ambPaint();
+  });
+}
+
+function ambFileName(id,d){
+  var t=(ambKnown(id)||"amiibo "+id.slice(0,8)+"-"+id.slice(8)).replace(/ \([^()]* [0-9A-F]{14}\)$/,"")+" ("+ambVer(amb.meta[id]||{t:0,src:"old"},d).replace(/:/g,"")+")";
+  return t.replace(/[\\\/:*?"<>|\x00-\x1f]+/g," ").replace(/\s+/g," ").trim()+".bin";
+}
+function ambDownload(){
+  var id=$("ambSel").value,d=amb.dumps[id],a;
+  if(!id||!d) return;
+  $("ambErr").textContent="";
+  try{
+    a=document.createElement("a");
+    a.href=URL.createObjectURL(new Blob([ambBytes(d)],{type:"application/octet-stream"}));
+    a.download=ambFileName(id,d);
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+  }catch(e){
+    $("ambErr").textContent="Couldn't download the .bin file.";
+  }
+}
+function ambRenameOpen(){
+  var id=$("ambSel").value,d=amb.dumps[id],m=amb.meta[id]||{t:0,src:"old"},i=$("ambRenameIn");
+  if(!id||!d) return;
+  amb.ren={id:id,d:d};
+  i.placeholder=ambTagLabel(m);
+  i.value=m.n||ambTagLabel(m);
+  ambPaint();
+  i.focus();
+  i.select();
+}
+function ambRenameEnd(save){
+  var r=amb.ren,id=$("ambSel").value,t=$("ambRenameIn").value.trim(),m;
+  amb.ren=null;
+  if(save&&r&&r.id===id&&r.d===amb.dumps[id]){
+    m=amb.meta[id]||(amb.meta[id]={t:0,src:"old"});
+    if(!t||t===ambTagLabel(m)) delete m.n;
+    else m.n=t;
+    $("ambErr").textContent="";
+    if(!ambStore()) $("ambErr").textContent="The browser wouldn't keep the name.";
+  }
+  ambPaint();
+}
+
+function ambInit(){
+  ambCached();
+  try{ amb.names=JSON.parse(ambGet(AMB_NAMES)||"{}"); }catch(e){ amb.names={}; }
+  if(!amb.names||typeof amb.names!=="object"||Array.isArray(amb.names)) amb.names={};
+  var s=ambGet(AMB_DUMPS);
+  try{ amb.dumps=s?JSON.parse(s):{}; }catch(e){ amb.dumps={}; }
+  s=ambGet(AMB_SAVES);
+  try{ amb.saves=s?JSON.parse(s):{}; }catch(e){ amb.saves={}; }
+  s=ambGet(AMB_META);
+  try{ amb.meta=s?JSON.parse(s):{}; }catch(e){ amb.meta={}; }
+  s=ambGet(AMB_KEYS);
+  if(s){
+    try{
+      if(!ambSetKey(ambBytes(s))) throw new Error();
+    }catch(e){
+      ambDel(AMB_KEYS);
+      $("ambErr").textContent="The saved retail key was invalid and was removed.";
+    }
+  }
+  amb.pick=ambGet(AMB_PICK)||"";
+  $("ambSel").addEventListener("change",ambPick);
+  $("ambSaves").addEventListener("change",ambRestore);
+  $("ambOnly").addEventListener("change",ambFill);
+  $("ambBtn").addEventListener("click",function(){ if(ambOpen) ambShut(true); else ambShow(); });
+  $("ambBtn").addEventListener("keydown",function(e){
+    if(e.key==="ArrowDown"){ e.preventDefault(); ambShow(); return; }
+    if(e.key.length!==1||e.ctrlKey||e.altKey||e.metaKey) return;
+    e.preventDefault(); ambShow(); $("ambFind").value=e.key; ambDraw();
+  });
+  $("ambFind").addEventListener("input",ambDraw);
+  $("ambFind").addEventListener("keydown",function(e){
+    var box=$("ambRows"),at=box.querySelector(".ambr.at"),rows,i;
+    if(e.key==="Escape"){ e.preventDefault(); ambShut(true); return; }
+    if(e.key==="Enter"){ e.preventDefault(); ambTake(at); return; }
+    if(e.key!=="ArrowDown"&&e.key!=="ArrowUp") return;
+    e.preventDefault();
+    rows=[].slice.call(box.querySelectorAll(".ambr"));
+    i=rows.indexOf(at);
+    ambAt(rows[e.key==="ArrowDown"?Math.min(i+1,rows.length-1):Math.max(i-1,0)]);
+  });
+  $("ambRows").addEventListener("mousedown",function(e){
+    var r=e.target.closest&&e.target.closest(".ambr");
+    if(r){ e.preventDefault(); ambTake(r); }
+  });
+  $("ambRows").addEventListener("mousemove",function(e){
+    var r=e.target.closest&&e.target.closest(".ambr");
+    if(r&&!r.classList.contains("at")) ambAt(r,true);
+  });
+  document.addEventListener("mousedown",function(e){
+    if(ambOpen&&!$("ambPop").contains(e.target)&&e.target!==$("ambBtn")) ambShut();
+  },true);
+  $("bAmbFile").addEventListener("click",function(){ $("fAmb").value=""; $("fAmb").click(); });
+  $("bAmbDir").addEventListener("click",function(){ $("fAmbDir").value=""; $("fAmbDir").click(); });
+  $("bAmbKey").addEventListener("click",function(){ $("fAmbKey").value=""; $("fAmbKey").click(); });
+  $("fAmbKey").addEventListener("change",function(e){ ambLoadKey(e.target.files[0]); });
+  $("bAmbKeyClear").addEventListener("click",function(){ ambForgetKey(true,true); });
+  $("bAmbRandom").addEventListener("click",ambRandomize);
+  $("bAmbSave").addEventListener("click",ambDownload);
+  $("bAmbRename").addEventListener("click",function(){ if(amb.ren) ambRenameEnd(true); else ambRenameOpen(); });
+  $("bAmbRenameNo").addEventListener("click",function(){ ambRenameEnd(false); });
+  $("ambRenameIn").addEventListener("keydown",function(e){
+    if(e.key==="Enter"){ e.preventDefault(); ambRenameEnd(true); }
+    else if(e.key==="Escape"){ e.preventDefault(); ambRenameEnd(false); }
+  });
+  $("fAmb").addEventListener("change",function(e){ ambLoad(e.target.files); });
+  $("fAmbDir").addEventListener("change",function(e){ ambLoad(e.target.files); });
+  $("bAmbForget").addEventListener("click",function(){
+    var id=$("ambSel").value;
+    if(!amb.dumps[id]) return;
+    delete amb.dumps[id];
+    delete amb.saves[id];
+    delete amb.meta[id];
+    delete amb.names[id];
+    ambStore();
+    ambFill();
+  });
+  $("bAmbHold").addEventListener("click",function(){
+    var c=connFor("R");
+    if(!c||!c.amb) return;
+    $("ambErr").textContent="";
+    ambFlush();
+    devSend(c,"amiibo "+(c.amb.held?"lift":"hold"));
+  });
+  $("bAmbSend").addEventListener("click",function(){
+    var c=connFor("R");
+    if(!c||!c.amb) return;
+    $("ambErr").textContent="";
+    ambFlush();
+    devSend(c,"amiibo tap");
+  });
+  ambFill();
+}
+
 var tabs=document.querySelectorAll(".tab");
 function showTab(want){
   if(want!=="map"&&listening) cancelListen();
@@ -5547,8 +6779,10 @@ function showTab(want){
     tabs[i].getAttribute("data-tab")===want);
   $("tabMap").style.display = want==="map" ? "" : "none";
   $("tabCol").style.display = want==="col" ? "" : "none";
+  $("tabAmb").style.display = want==="amb" ? "" : "none";
   $("tabAdv").style.display = want==="adv" ? "" : "none";
 
+  if(want==="amb"){ ambFetch(); ambPaint(); }
   if(want==="map"){ paint(); devPaint(); devAskAll(); }
   devPoll(want==="map");
   if(location.hash.slice(1)!==want) location.hash=want;
@@ -5558,7 +6792,7 @@ for(var t=0;t<tabs.length;t++) tabs[t].addEventListener("click",function(e){
 });
 window.addEventListener("hashchange",function(){
   var h=location.hash.slice(1);
-  if(h==="map"||h==="col"||h==="adv") showTab(h);
+  if(h==="map"||h==="col"||h==="amb"||h==="adv") showTab(h);
 });
 
 $("bStock").addEventListener("click",function(){
@@ -5586,15 +6820,17 @@ document.addEventListener("keydown",function(e){
 
 try{
   renderRaw(); paint(); renderColRows(); applyColors();
+  ambInit();
 
   colsSide=side();
+  sideRecall();
 
   $("jcImg").addEventListener("load",relayout);
   window.addEventListener("load",relayout);
   window.addEventListener("load",imgWarm);
 
   var h0=location.hash.slice(1);
-  if(h0==="col"||h0==="adv") showTab(h0);
+  if(h0==="col"||h0==="amb"||h0==="adv") showTab(h0);
   else devPoll(true);
 }catch(e){
   fail(e.message+"\n"+(e.stack||"").split("\n").slice(0,4).join("\n"));
